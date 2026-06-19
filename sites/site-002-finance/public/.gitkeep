@@ -1,0 +1,2 @@
+# Keeps this folder in version control so the Docker build's
+# `COPY /app/public ./public` step succeeds. Put favicon/robots/images here.

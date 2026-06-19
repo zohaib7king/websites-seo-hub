@@ -1,0 +1,190 @@
+version: "3.9"
+
+services:
+  # ── PostgreSQL Database ──────────────────────────────────
+  db:
+    image: postgres:16-alpine
+    container_name: zoyzoy_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: zoyzoy
+      POSTGRES_PASSWORD: zoyzoy_secret
+      POSTGRES_DB: zoyzoy_hub
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./api/src/db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      # Host 5433 -> container 5432 to avoid clashing with other local Postgres
+      # containers (n8n, ingress, etc.). Internal access stays db:5432.
+      - "5433:5432"
+    networks:
+      - zoyzoy_net
+
+  # ── Backend API ──────────────────────────────────────────
+  api:
+    build: ./api
+    container_name: zoyzoy_api
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://zoyzoy:zoyzoy_secret@db:5432/zoyzoy_hub
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+      JWT_SECRET: ${JWT_SECRET:-supersecretjwt}
+      NODE_ENV: production
+      # Repo is bind-mounted below so the site-scaffolder can write sites/<id>/,
+      # docker-compose.yml and nginx.conf. The scaffolder reads/writes under here.
+      REPO_ROOT: /workspace
+    volumes:
+      # Read-write mount of the whole repo for dashboard-triggered site scaffolding
+      # ("Provision files" button). The container build still uses /app; this is separate.
+      - ./:/workspace
+    depends_on:
+      - db
+    ports:
+      - "4000:4000"
+    networks:
+      - zoyzoy_net
+
+  # ── CRM Admin Dashboard ──────────────────────────────────
+  crm:
+    build:
+      # Repo root context so the local file: dependency packages/ui is in scope.
+      context: .
+      dockerfile: crm/Dockerfile
+    container_name: zoyzoy_crm
+    restart: unless-stopped
+    environment:
+      VITE_API_URL: http://localhost:4000
+    depends_on:
+      - api
+    ports:
+      - "3000:3000"
+    networks:
+      - zoyzoy_net
+
+  # ── Site 001: AI Insider ─────────────────────────────────
+  site-001-ai:
+    build:
+      # Repo-root context so the local packages/ui dependency is in scope.
+      context: .
+      dockerfile: sites/site-001-ai/Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: http://api:4000
+        NEXT_PUBLIC_SITE_ID: site-001-ai
+    container_name: zoyzoy_site_001
+    restart: unless-stopped
+    environment:
+      NEXT_PUBLIC_API_URL: http://api:4000
+      NEXT_PUBLIC_SITE_ID: site-001-ai
+    depends_on:
+      - api
+    ports:
+      - "3001:3000"
+    networks:
+      - zoyzoy_net
+
+  # ── Site 002: Finance Daily ──────────────────────────────
+  site-002-finance:
+    build:
+      context: .
+      dockerfile: sites/site-002-finance/Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: http://api:4000
+        NEXT_PUBLIC_SITE_ID: site-002
+    container_name: zoyzoy_site_002
+    restart: unless-stopped
+    environment:
+      NEXT_PUBLIC_API_URL: http://api:4000
+      NEXT_PUBLIC_SITE_ID: site-002
+    depends_on:
+      - api
+    ports:
+      - "3002:3000"
+    networks:
+      - zoyzoy_net
+
+  # ── Site: site-003-pets (auto-provisioned) ──────────────────────
+  site-003-pets:
+    build:
+      context: .
+      dockerfile: sites/site-003-pets/Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: http://api:4000
+        NEXT_PUBLIC_SITE_ID: site-003-pets
+    container_name: zoyzoy_site-003-pets
+    restart: unless-stopped
+    environment:
+      NEXT_PUBLIC_API_URL: http://api:4000
+      NEXT_PUBLIC_SITE_ID: site-003-pets
+    depends_on:
+      - api
+    ports:
+      - "3003:3000"
+    networks:
+      - zoyzoy_net
+
+  # ── Site: site-002 (auto-provisioned) ──────────────────────
+  site-002:
+    build:
+      context: .
+      dockerfile: sites/site-002/Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: http://api:4000
+        NEXT_PUBLIC_SITE_ID: site-002
+    container_name: zoyzoy_site-002
+    restart: unless-stopped
+    environment:
+      NEXT_PUBLIC_API_URL: http://api:4000
+      NEXT_PUBLIC_SITE_ID: site-002
+    depends_on:
+      - api
+    ports:
+      - "3004:3000"
+    networks:
+      - zoyzoy_net
+
+  # ── Site: site-004 (auto-provisioned) ──────────────────────
+  site-004:
+    build:
+      context: .
+      dockerfile: sites/site-004/Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: http://api:4000
+        NEXT_PUBLIC_SITE_ID: site-004
+    container_name: zoyzoy_site-004
+    restart: unless-stopped
+    environment:
+      NEXT_PUBLIC_API_URL: http://api:4000
+      NEXT_PUBLIC_SITE_ID: site-004
+    depends_on:
+      - api
+    ports:
+      - "3005:3000"
+    networks:
+      - zoyzoy_net
+
+  # ── Nginx Reverse Proxy ──────────────────────────────────
+  nginx:
+    image: nginx:alpine
+    container_name: zoyzoy_nginx
+    restart: unless-stopped
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - "80:80"
+    depends_on:
+      - crm
+      - site-004
+      - site-002
+      - site-003-pets
+      - site-001-ai
+      - site-002-finance
+      - api
+    networks:
+      - zoyzoy_net
+
+volumes:
+  db_data:
+
+networks:
+  zoyzoy_net:
+    driver: bridge

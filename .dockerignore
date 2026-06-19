@@ -1,0 +1,11 @@
+# Used by the crm image (build context = repo root). Keep the context small;
+# the image installs deps and builds packages/ui itself.
+**/node_modules
+**/dist
+**/.next
+db_data
+.ds-sync
+ds-bundle
+.design-sync/.cache
+.git
+**/*.log

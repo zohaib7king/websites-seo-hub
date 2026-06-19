@@ -1,0 +1,17 @@
+{
+  "projectId": "8e5a1b4c-11d5-42c9-98ba-d832d4a4a979",
+  "pkg": "@zoyzoy/ui",
+  "globalName": "ZwaiUI",
+  "shape": "package",
+  "buildCmd": "npm --prefix packages/ui run build",
+  "cssEntry": "src/tokens.css",
+  "readmeHeader": ".design-sync/conventions.md",
+  "overrides": {
+    "ArticleCard": { "cardMode": "column" },
+    "Card": { "cardMode": "column" },
+    "CodeBlock": { "cardMode": "column" },
+    "Field": { "cardMode": "column" },
+    "Input": { "cardMode": "column" },
+    "StatCard": { "cardMode": "column" }
+  }
+}
