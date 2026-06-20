@@ -1,11 +1,108 @@
-// Per-site identity. This is the ONLY file that differs between sites — every
-// other page/component is shared and reads from here, so the design stays in sync.
+// Per-site identity + seed content. This is the ONLY file that differs between
+// sites — every other page/component is shared and reads from here.
+import { makeArticle } from "./lib/seed";
+
 export const SITE = {
   name: "AI Insider Daily",
-  // Hero headline is `${lead} <gradient>${accent}</gradient>`
   lead: "Stay ahead of",
   accent: "Artificial Intelligence",
-  tagline: "Daily news, tool reviews, and practical tutorials for AI beginners and professionals.",
+  tagline: "Daily news, tool reviews, and practical tutorials for AI builders and professionals.",
   eyebrow: "AI · Updated daily",
   nav: ["AI Tools", "News", "Tutorials", "Business AI"],
+  defaultTheme: "midnight",
+  domain: "aiinsider.com",
+
+  seedArticles: [
+    makeArticle({
+      slug: "reasoning-models-what-changed-2026",
+      title: "The New Wave of Reasoning Models: What Actually Changed in 2026",
+      category: "AI Tools", date: "2026-06-19", author: "Alex Morgan",
+      excerpt: "Reasoning-first models moved from demo to default this year. Here's what's genuinely new — and what's still hype.",
+      tags: ["llm", "reasoning", "models"],
+      data: { value: "40%", label: "avg. drop in tool-use errors vs 2025 models" },
+      lead: "A year ago, 'reasoning' was a benchmark talking point. In 2026 it's the default mode most teams ship with — and the difference shows up in real workloads, not just leaderboards.",
+      takeaway: "The biggest unlock isn't raw IQ — it's reliability. Models that plan before they answer fail far less often on multi-step, tool-using tasks.",
+      sections: [
+        { h: "What's driving the shift", p: ["Longer, cheaper context windows let models keep entire codebases and document sets in view.", "Native tool-calling means the model decides when to search, run code, or call an API instead of guessing."],
+          list: ["Plan-then-act loops cut hallucinated steps", "Cheaper inference makes multi-pass reasoning affordable", "Better evals expose regressions before users do"] },
+        { h: "Where it still falls short", p: ["Long-horizon autonomy remains brittle — agents drift on tasks that span dozens of steps.", "Cost and latency of heavy reasoning still rule it out for high-volume, low-margin features."] },
+      ],
+      conclusion: "Adopt reasoning models where correctness beats speed — code, analysis, support triage — and keep a cheaper model in front for everything else.",
+    }),
+    makeArticle({
+      slug: "ship-ai-features-without-ml-team",
+      title: "How Small Teams Ship AI Features Without an ML Team",
+      category: "Business AI", date: "2026-06-16", author: "Priya Nair",
+      excerpt: "You don't need researchers to build useful AI. You need a tight feedback loop and a few good defaults.",
+      tags: ["product", "startups", "rag"],
+      lead: "The teams shipping the best AI features in 2026 mostly aren't ML teams. They're product teams with a clear use case and a fast loop from idea to user feedback.",
+      takeaway: "Start with the narrowest valuable task, wrap a strong general model, and only get fancy when the data tells you to.",
+      sections: [
+        { h: "A pragmatic starting stack", p: ["Pick one task, one model, and one evaluation you can run on every change."],
+          list: ["A frontier model behind a thin API layer", "Retrieval over your own docs for grounding", "A handful of golden test cases you grade on each deploy"] },
+        { h: "Avoid the common traps", p: ["Don't fine-tune first — prompt and retrieval get you 80% there.", "Don't ship without an eval; vibes don't survive contact with real users."] },
+      ],
+      conclusion: "Treat AI features like any product bet: smallest useful slice, measured, then expanded.",
+    }),
+    makeArticle({
+      slug: "rag-vs-fine-tuning-2026",
+      title: "RAG vs Fine-Tuning in 2026: A Practical Decision Guide",
+      category: "Tutorials", date: "2026-06-11", author: "Daniel Cho",
+      excerpt: "Both have their place. Use this checklist to pick the right one without burning a quarter on the wrong path.",
+      tags: ["rag", "fine-tuning", "guide"],
+      lead: "The RAG-vs-fine-tuning debate is mostly a false binary, but the wrong default still wastes real time and money. Here's how to choose deliberately.",
+      takeaway: "Reach for retrieval when the problem is knowledge; reach for fine-tuning when the problem is behavior.",
+      sections: [
+        { h: "Choose retrieval when", p: ["Your knowledge changes often or is too large to bake into weights."],
+          list: ["Facts update weekly or faster", "You need citations and traceability", "Coverage matters more than tone"] },
+        { h: "Choose fine-tuning when", p: ["You need a consistent format, style, or narrow skill the base model won't reliably follow."] },
+      ],
+      conclusion: "Most production systems end up using both — retrieval for freshness, a light fine-tune for format and tone.",
+    }),
+    makeArticle({
+      slug: "on-device-ai-eating-the-cloud",
+      title: "On-Device AI Is Quietly Eating the Cloud",
+      category: "News", date: "2026-06-05", author: "Alex Morgan",
+      excerpt: "Capable small models now run on laptops and phones — reshaping cost, privacy, and product design.",
+      tags: ["edge", "privacy", "hardware"],
+      data: { value: "3B–8B", label: "param models now viable on consumer laptops" },
+      lead: "The story of 2026 isn't only bigger frontier models — it's how good the small ones got. A capable assistant now runs locally, offline, for free.",
+      takeaway: "When inference is local, privacy and latency stop being trade-offs and start being features.",
+      sections: [
+        { h: "Why it matters", p: ["No per-token bill changes which features are economically possible.", "Sensitive data never leaving the device unlocks regulated industries."] },
+        { h: "The catch", p: ["Local models still trail the frontier on hard reasoning, so hybrid routing — local first, cloud for the hard cases — is winning."] },
+      ],
+      conclusion: "Design for a hybrid world: default to on-device, escalate to the cloud only when the task demands it.",
+    }),
+    makeArticle({
+      slug: "the-2026-agent-stack",
+      title: "The Agent Stack: Tools Every AI Builder Should Know",
+      category: "AI Tools", date: "2026-05-28", author: "Priya Nair",
+      excerpt: "A field guide to the layers that turn a chat model into a dependable agent.",
+      tags: ["agents", "tooling", "stack"],
+      lead: "Agents went from party trick to production in a year. The teams succeeding aren't using magic — they're using a clear, layered stack.",
+      takeaway: "An agent is only as good as its tools, its memory, and its guardrails. Model choice is the easy part.",
+      sections: [
+        { h: "The core layers", p: ["Each layer is independently swappable, which is what keeps agents maintainable."],
+          list: ["Model + tool-calling for the reasoning core", "Retrieval + memory for grounding and continuity", "Orchestration for multi-step control", "Evals + tracing so you can debug failures"] },
+        { h: "Start simple", p: ["A single tool-using model with good logging beats an elaborate multi-agent graph you can't debug."] },
+      ],
+      conclusion: "Add complexity only when a real failure forces it — observability first, cleverness later.",
+    }),
+    makeArticle({
+      slug: "prompt-to-context-engineering",
+      title: "Prompt Engineering Is Becoming Context Engineering",
+      category: "Tutorials", date: "2026-05-20", author: "Daniel Cho",
+      excerpt: "The highest-leverage skill in 2026 isn't clever wording — it's deciding what the model sees.",
+      tags: ["prompting", "context", "skills"],
+      lead: "Clever phrasing still helps at the margins, but the real wins now come from controlling the model's context window: what goes in, in what order, and what gets left out.",
+      takeaway: "Garbage in, garbage out has never been more literal. Curate context like you'd curate a brief for a smart new hire.",
+      sections: [
+        { h: "What good context looks like", p: ["Relevant, recent, and ranked — not a firehose of everything you have."],
+          list: ["Retrieve, then re-rank for relevance", "Put the most important facts last", "Strip boilerplate that wastes the window"] },
+        { h: "Measure it", p: ["Track answer quality against context changes the same way you'd track a code change — with tests."] },
+      ],
+      conclusion: "Spend your time on what the model sees, not just how you ask. That's where the leverage moved.",
+    }),
+  ],
 };

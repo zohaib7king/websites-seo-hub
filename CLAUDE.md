@@ -341,6 +341,35 @@ The queue is drained by the worker in `api/src/services/queueWorker.js` (`proces
 
 ## Changelog
 
+### 2026-06-19 — Shared UI library (`@zoyzoy/ui`) + modernized CRM dashboard & sites
+
+- **New package `packages/ui` (`@zoyzoy/ui`)** — a buildable React component library extracted
+  from the CRM/sites inline-styled patterns (Button, Badge, Card, StatCard, Input, Field,
+  NavItem, CodeBlock, ThemeSwatch, ArticleCard). TypeScript + **tsup** build → `dist/index.js`
+  (ESM) + `dist/index.d.ts`. Tokens live in `packages/ui/src/tokens.css`. Full reference:
+  `docs/design-system.md`. (Also synced to claude.ai/design — see `.design-sync/`.)
+- **CRM adopts `@zoyzoy/ui`** (`crm/package.json` → `"@zoyzoy/ui": "file:../packages/ui"`) and
+  was redesigned into a modern admin panel:
+  - **Rich Dashboard** (`crm/src/pages/Dashboard.jsx`): KPI cards with trend deltas + sparklines,
+    a revenue **area chart** + articles/day **bar chart** (`crm/src/components/Charts.jsx` —
+    inline SVG, **no external chart libs**), recent-activity feed, sites overview.
+  - **App shell**: refined sidebar + sticky **Topbar** (`crm/src/components/Topbar.jsx`) with a
+    working global search that filters Articles via `?q=`. Version badge → **v1.3**.
+- **All 6 sites adopt `@zoyzoy/ui` + modernized** (sticky blurred header, gradient hero with
+  eyebrow + CTA, library `ArticleCard` wrapped in `next/link` for SEO, modern footer). Per-site
+  identity (name/nav/hero) extracted to **`sites/<id>/src/site.config.js`** — the ONLY file that
+  differs per site; every other page/component is shared, so the design stays in sync.
+- **Docker — build contexts widened to the repo root** so the local `file:` dependency resolves:
+  - **CRM** (`docker-compose.yml` `crm.build`): `context: .` + `dockerfile: crm/Dockerfile`
+    (builds `packages/ui` first, then the CRM).
+  - **Each site**: `context: .` + `dockerfile: sites/<id>/Dockerfile`. Site `next.config.js` sets
+    `transpilePackages: ["@zoyzoy/ui"]` + `experimental.outputFileTracingRoot` (repo root) so the
+    component compiles into the standalone output; `server.js` now lives at
+    `.next/standalone/sites/<id>/server.js` (CMD updated accordingly).
+  - New root **`.dockerignore`** keeps the widened context small.
+  - Verified: `crm` (`vite build`), `site-001-ai` + `site-003-pets` (`next build` + standalone
+    boot) all pass.
+
 ### 2026-06-18 — Dashboard-triggered site scaffolding ("Provision files")
 
 - **New `api/src/services/scaffolder.js` (`scaffoldSite()`)** + route
