@@ -1,5 +1,6 @@
-// Per-site identity. This is the ONLY file that differs between sites — every
-// other page/component is shared and reads from here, so the design stays in sync.
+// Per-site identity + seed content. The ONLY file that differs between sites.
+import { makeArticle } from "./lib/seed";
+
 export const SITE = {
   name: "Pet Lovers Daily",
   lead: "Stay ahead of",
@@ -7,4 +8,86 @@ export const SITE = {
   tagline: "Vet-informed tips and guides for dogs, cats, nutrition, and everyday pet health.",
   eyebrow: "Pets · Updated daily",
   nav: ["Dogs", "Cats", "Nutrition", "Health"],
+  defaultTheme: "sunset",
+  domain: "petlovers.com",
+
+  seedArticles: [
+    makeArticle({
+      slug: "reading-your-dogs-body-language",
+      title: "Vet-Approved: How to Read Your Dog's Body Language",
+      category: "Dogs", date: "2026-06-19", author: "Dr. Sara Lin",
+      excerpt: "Your dog is always talking. Learn the signals that prevent stress, bites, and miscommunication.",
+      tags: ["dogs", "behavior", "training"],
+      lead: "Dogs communicate constantly — just not in words. Learning their signals is the single best thing you can do for a calmer, safer household.",
+      takeaway: "A wagging tail isn't always 'happy.' Read the whole body — ears, eyes, posture — not just one part.",
+      sections: [
+        { h: "Signs of a relaxed dog", p: ["A loose, wiggly body usually means your dog feels safe."],
+          list: ["Soft eyes and a slightly open mouth", "Loose, sweeping tail wag", "Weight evenly balanced, ears neutral"] },
+        { h: "Signs of stress", p: ["Catch these early to avoid escalation."],
+          list: ["Lip licking, yawning when not tired", "Whale eye (whites showing)", "Tucked tail or frozen posture"] },
+      ],
+      conclusion: "When in doubt, give your dog space. Respecting their signals builds trust faster than any treat.",
+    }),
+    makeArticle({
+      slug: "cat-nutrition-myths-that-wont-die",
+      title: "Cat Nutrition Myths That Won't Die",
+      category: "Nutrition", date: "2026-06-16", author: "Dr. Omar Reyes",
+      excerpt: "Milk, vegetarian diets, and 'grain-free' — separating marketing from what cats actually need.",
+      tags: ["cats", "nutrition", "diet"],
+      lead: "Cats are obligate carnivores, yet the pet aisle is full of products that ignore that simple fact. Let's clear up the big myths.",
+      takeaway: "Cats need meat-based protein and plenty of water. Most 'trends' are for owners, not cats.",
+      sections: [
+        { h: "Three persistent myths", p: ["Each one sounds caring but can harm your cat."],
+          list: ["Cats need milk — most are lactose intolerant", "Cats can be vegetarian — they can't, safely", "'Grain-free' is automatically healthier — not necessarily"] },
+        { h: "What actually matters", p: ["Prioritize animal protein, moisture, and portion control over buzzwords."] },
+      ],
+      conclusion: "Read the ingredient list, not the front of the bag — and ask your vet before any big diet change.",
+    }),
+    makeArticle({
+      slug: "how-much-exercise-does-your-dog-need",
+      title: "How Much Exercise Does Your Dog Really Need?",
+      category: "Health", date: "2026-06-11", author: "Dr. Sara Lin",
+      excerpt: "Breed, age, and energy level change the answer a lot. Here's a practical guide.",
+      tags: ["dogs", "exercise", "health"],
+      data: { value: "30–120 min", label: "daily activity, depending on breed and age" },
+      lead: "A bored dog is a destructive dog. But 'enough exercise' looks very different for a bulldog than a border collie.",
+      takeaway: "Match the activity to the dog. Mental work counts as much as physical for high-energy breeds.",
+      sections: [
+        { h: "Rough daily targets", p: ["Use these as a starting point, then adjust to your dog."],
+          list: ["Low-energy / brachycephalic: 30 min, gentle", "Most family dogs: 60 min mixed activity", "Working breeds: 90–120 min + training games"] },
+        { h: "Don't forget the brain", p: ["Sniff walks, puzzle feeders, and training tire a dog out faster than a flat walk."] },
+      ],
+      conclusion: "Consistency beats intensity. A tired dog is a happy, well-behaved companion.",
+    }),
+    makeArticle({
+      slug: "senior-pet-care-checklist",
+      title: "Senior Pet Care: A Practical Checklist",
+      category: "Health", date: "2026-06-05", author: "Dr. Omar Reyes",
+      excerpt: "Older pets need small changes that make a big difference to comfort and lifespan.",
+      tags: ["senior", "health", "care"],
+      lead: "Pets age faster than we do, and the senior years arrive quietly. A few proactive changes keep them comfortable far longer.",
+      takeaway: "Twice-yearly vet visits catch age-related issues while they're still easy to manage.",
+      sections: [
+        { h: "The senior checklist", p: ["Small adjustments, big impact."],
+          list: ["Vet check-ups every 6 months", "Joint support and softer bedding", "Adjusted diet for slower metabolism", "Watch for changes in thirst, weight, or mobility"] },
+        { h: "Comfort first", p: ["Ramps, non-slip rugs, and shorter walks keep aging pets mobile and confident."] },
+      ],
+      conclusion: "Aging isn't a disease. With small tweaks, your senior pet's best years can also be their most comfortable.",
+    }),
+    makeArticle({
+      slug: "choosing-food-for-a-picky-cat",
+      title: "Choosing the Right Food for a Picky Cat",
+      category: "Cats", date: "2026-05-28", author: "Dr. Omar Reyes",
+      excerpt: "Fussy eaters aren't being difficult on purpose. Here's how to win them over the healthy way.",
+      tags: ["cats", "nutrition", "feeding"],
+      lead: "If your cat turns up its nose at every bowl, you're not alone — and the fix is usually about texture and routine, not stubbornness.",
+      takeaway: "Change food gradually over 7–10 days. Sudden switches cause both refusal and upset stomachs.",
+      sections: [
+        { h: "Win over a picky eater", p: ["Cats care about smell, temperature, and texture as much as taste."],
+          list: ["Warm wet food slightly to boost aroma", "Transition new food slowly, mixing in", "Keep feeding times consistent"] },
+        { h: "When to worry", p: ["A cat that stops eating for more than 24 hours needs a vet — fasting is genuinely dangerous for cats."] },
+      ],
+      conclusion: "Patience and a steady routine beat constant switching. When in doubt, call your vet.",
+    }),
+  ],
 };

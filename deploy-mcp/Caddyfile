@@ -1,0 +1,3 @@
+mcp.skool.cloud {
+	reverse_proxy mcp:8787
+}

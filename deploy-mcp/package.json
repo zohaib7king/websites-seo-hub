@@ -1,0 +1,17 @@
+{
+  "name": "zoyzoy-deploy-mcp",
+  "version": "1.0.0",
+  "description": "MCP server for deploying the ZoyZoy Hub (websites-seo-hub) stack via SSH",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.2",
+    "ssh2": "^1.16.0"
+  }
+}

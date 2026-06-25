@@ -1,0 +1,49 @@
+# ZoyZoy Hub vhosts — append to /etc/caddy/Caddyfile (the same file serving
+# skoolai.cloud + mcp.skoolai.cloud). Reuses the existing (common) snippet.
+# After saving:  caddy validate --config /etc/caddy/Caddyfile && systemctl reload caddy
+#
+# Each block points at a service bound to 127.0.0.1 by docker-compose.yml.
+# DNS: add A records (or a wildcard *.skoolai.cloud) -> 167.86.100.217 for every
+# hostname below, or Caddy can't issue its cert.
+
+# CRM admin dashboard  (container zoyzoy_crm, :3000)
+admin.skoolai.cloud {
+	import common
+	reverse_proxy 127.0.0.1:3000
+}
+
+# Backend API  (container zoyzoy_api, :4000)
+api.skoolai.cloud {
+	import common
+	reverse_proxy 127.0.0.1:4000
+}
+
+# Site 001 — AI Insider Daily  (:3001)
+ai.skoolai.cloud {
+	import common
+	reverse_proxy 127.0.0.1:3001
+}
+
+# Site 002 — Finance Daily  (:3002)
+finance.skoolai.cloud {
+	import common
+	reverse_proxy 127.0.0.1:3002
+}
+
+# Site 003 — Pets  (:3003)
+pets.skoolai.cloud {
+	import common
+	reverse_proxy 127.0.0.1:3003
+}
+
+# Site (auto-provisioned site-002)  (:3004)
+site002.skoolai.cloud {
+	import common
+	reverse_proxy 127.0.0.1:3004
+}
+
+# Site 004 — Health Awareness  (:3005)
+health.skoolai.cloud {
+	import common
+	reverse_proxy 127.0.0.1:3005
+}

@@ -1,5 +1,6 @@
-// Per-site identity. This is the ONLY file that differs between sites — every
-// other page/component is shared and reads from here, so the design stays in sync.
+// Per-site identity + seed content. The ONLY file that differs between sites.
+import { makeArticle } from "./lib/seed";
+
 export const SITE = {
   name: "Health & Wellness Daily",
   lead: "Stay ahead of",
@@ -7,4 +8,85 @@ export const SITE = {
   tagline: "Evidence-based guides on fitness, nutrition, mental health, and everyday wellness.",
   eyebrow: "Wellness · Updated daily",
   nav: ["Fitness", "Nutrition", "Mental Health", "Wellness"],
+  defaultTheme: "ocean",
+  domain: "healthwellness.com",
+
+  seedArticles: [
+    makeArticle({
+      slug: "strength-training-for-beginners-2026",
+      title: "The 2026 Guide to Strength Training for Beginners",
+      category: "Fitness", date: "2026-06-19", author: "Coach Nina Park",
+      excerpt: "Two sessions a week is enough to change how you look, feel, and age. Here's how to start safely.",
+      tags: ["fitness", "strength", "beginners"],
+      data: { value: "2×/week", label: "minimum to build and keep strength" },
+      lead: "Strength training is the closest thing we have to an anti-aging pill — and you need far less of it than the internet implies.",
+      takeaway: "Consistency and progressive overload matter more than the perfect program. Show up, add a little, repeat.",
+      sections: [
+        { h: "A simple starting plan", p: ["Cover the basic movement patterns and let recovery do its job."],
+          list: ["Push, pull, squat, hinge, carry", "2–3 sets of 8–12 reps", "Add a little weight or a rep each week"] },
+        { h: "Avoid beginner traps", p: ["Don't ego-lift, don't skip warm-ups, and don't train the same sore muscle daily."] },
+      ],
+      conclusion: "Start lighter than you think, focus on form, and let small weekly gains compound.",
+    }),
+    makeArticle({
+      slug: "protein-how-much-do-you-need",
+      title: "Protein, Simplified: How Much Do You Actually Need?",
+      category: "Nutrition", date: "2026-06-16", author: "Dr. Elena Voss",
+      excerpt: "Cutting through the supplement hype with the numbers that actually matter.",
+      tags: ["nutrition", "protein", "diet"],
+      lead: "Protein is having a moment, and most of the advice is either too vague or trying to sell you powder. The real target is refreshingly simple.",
+      takeaway: "Most active adults do well around 1.6 g of protein per kg of body weight per day — food first, supplements optional.",
+      sections: [
+        { h: "Hit the target with food", p: ["Whole foods cover the vast majority of needs."],
+          list: ["Spread protein across meals, not one big hit", "Lean meat, eggs, dairy, legumes, tofu", "A shake is convenience, not magic"] },
+        { h: "Who needs more", p: ["Older adults and those building muscle benefit from the higher end of the range."] },
+      ],
+      conclusion: "Aim for a palm of protein each meal and you'll rarely fall short. Skip the hype.",
+    }),
+    makeArticle({
+      slug: "sleep-the-original-performance-enhancer",
+      title: "Sleep Is the Original Performance Enhancer",
+      category: "Wellness", date: "2026-06-11", author: "Dr. Elena Voss",
+      excerpt: "No supplement comes close to what consistent sleep does for your body and mind.",
+      tags: ["sleep", "recovery", "wellness"],
+      lead: "We optimize diet and training while quietly sabotaging the one thing that powers both. Sleep isn't lazy — it's where the gains happen.",
+      takeaway: "Consistency of sleep timing matters as much as duration. Same bedtime, same wake time — even weekends.",
+      sections: [
+        { h: "The fundamentals", p: ["Most adults need 7–9 hours, and the quality is set by your routine."],
+          list: ["Keep a consistent sleep/wake schedule", "Cool, dark, screen-free bedroom", "Cut caffeine after early afternoon"] },
+        { h: "The payoff", p: ["Better sleep improves mood, focus, appetite control, and recovery — for free."] },
+      ],
+      conclusion: "Protect your sleep like an appointment. It's the highest-return health habit there is.",
+    }),
+    makeArticle({
+      slug: "managing-stress-when-everything-feels-urgent",
+      title: "Managing Stress When Everything Feels Urgent",
+      category: "Mental Health", date: "2026-06-05", author: "Dr. Marcus Hale",
+      excerpt: "Practical, evidence-based tools to lower the baseline when life won't slow down.",
+      tags: ["mental-health", "stress", "habits"],
+      lead: "Chronic low-grade stress is the default setting for a lot of us. You can't eliminate it, but you can lower the volume.",
+      takeaway: "You can't think your way out of a stress response — you regulate the body first, then the mind follows.",
+      sections: [
+        { h: "Tools that work", p: ["Small, repeatable practices beat occasional grand gestures."],
+          list: ["Slow exhales — longer out than in", "A short daily walk outside", "One worry, written down, becomes a task not a loop"] },
+        { h: "When to get help", p: ["If stress disrupts sleep, appetite, or relationships for weeks, talk to a professional. That's strength, not weakness."] },
+      ],
+      conclusion: "Lower the baseline with small daily habits, and don't hesitate to ask for support.",
+    }),
+    makeArticle({
+      slug: "walking-your-way-to-better-health",
+      title: "Walking Your Way to Better Health",
+      category: "Fitness", date: "2026-05-28", author: "Coach Nina Park",
+      excerpt: "The most underrated exercise is the one you'll actually keep doing.",
+      tags: ["walking", "fitness", "habits"],
+      lead: "Walking gets dismissed because it's easy. That's exactly why it works — it's the rare healthy habit people sustain for decades.",
+      takeaway: "The best step count is the one you'll hit consistently. More movement beats perfect movement.",
+      sections: [
+        { h: "Make it stick", p: ["Attach walking to things you already do."],
+          list: ["Walk during calls or after meals", "Aim for movement, not a magic 10,000", "A brisk pace adds cardiovascular benefit"] },
+        { h: "Why it adds up", p: ["Regular walking improves heart health, mood, blood sugar, and sleep — with almost no downside."] },
+      ],
+      conclusion: "Don't overthink it. Put on your shoes and go — consistency is the whole secret.",
+    }),
+  ],
 };

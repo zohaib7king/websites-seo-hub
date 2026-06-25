@@ -16,7 +16,8 @@ services:
     ports:
       # Host 5433 -> container 5432 to avoid clashing with other local Postgres
       # containers (n8n, ingress, etc.). Internal access stays db:5432.
-      - "5433:5432"
+      # Bound to localhost so Postgres is never exposed publicly.
+      - "127.0.0.1:5433:5432"
     networks:
       - zoyzoy_net
 
@@ -40,7 +41,8 @@ services:
     depends_on:
       - db
     ports:
-      - "4000:4000"
+      # Localhost-only; the host Caddy fronts it as api.skoolai.cloud.
+      - "127.0.0.1:4000:4000"
     networks:
       - zoyzoy_net
 
@@ -50,14 +52,19 @@ services:
       # Repo root context so the local file: dependency packages/ui is in scope.
       context: .
       dockerfile: crm/Dockerfile
+      args:
+        # VITE_* is inlined at BUILD time; must be the public API URL the browser
+        # will call (rebuild the image if this changes).
+        VITE_API_URL: https://api.skoolai.cloud
     container_name: zoyzoy_crm
     restart: unless-stopped
     environment:
-      VITE_API_URL: http://localhost:4000
+      VITE_API_URL: https://api.skoolai.cloud
     depends_on:
       - api
     ports:
-      - "3000:3000"
+      # Localhost-only; the host Caddy fronts it as admin.skoolai.cloud.
+      - "127.0.0.1:3000:3000"
     networks:
       - zoyzoy_net
 
@@ -78,7 +85,7 @@ services:
     depends_on:
       - api
     ports:
-      - "3001:3000"
+      - "127.0.0.1:3001:3000"
     networks:
       - zoyzoy_net
 
@@ -98,7 +105,7 @@ services:
     depends_on:
       - api
     ports:
-      - "3002:3000"
+      - "127.0.0.1:3002:3000"
     networks:
       - zoyzoy_net
 
@@ -118,7 +125,7 @@ services:
     depends_on:
       - api
     ports:
-      - "3003:3000"
+      - "127.0.0.1:3003:3000"
     networks:
       - zoyzoy_net
 
@@ -138,7 +145,7 @@ services:
     depends_on:
       - api
     ports:
-      - "3004:3000"
+      - "127.0.0.1:3004:3000"
     networks:
       - zoyzoy_net
 
@@ -158,29 +165,14 @@ services:
     depends_on:
       - api
     ports:
-      - "3005:3000"
+      - "127.0.0.1:3005:3000"
     networks:
       - zoyzoy_net
 
-  # ── Nginx Reverse Proxy ──────────────────────────────────
-  nginx:
-    image: nginx:alpine
-    container_name: zoyzoy_nginx
-    restart: unless-stopped
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-    ports:
-      - "80:80"
-    depends_on:
-      - crm
-      - site-004
-      - site-002
-      - site-003-pets
-      - site-001-ai
-      - site-002-finance
-      - api
-    networks:
-      - zoyzoy_net
+  # ── Reverse proxy ────────────────────────────────────────
+  # The in-stack nginx service was removed: the server's host-level Caddy is the
+  # single public entrypoint (TLS + routing). Each service above is bound to
+  # 127.0.0.1 and fronted by a Caddy vhost (see deploy-mcp/caddy-zoyzoy.txt).
 
 volumes:
   db_data:

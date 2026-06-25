@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "zoyzoy-deploy": {
+      "command": "node",
+      "args": ["D:\\n8n\\websites\\deploy-mcp\\index.js"]
+    }
+  }
+}

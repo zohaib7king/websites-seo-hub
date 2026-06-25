@@ -11,7 +11,10 @@ RUN cd packages/ui && npm install && npm run build
 COPY crm/package*.json ./crm/
 RUN cd crm && npm install
 
-# Build the CRM.
+# Build the CRM. VITE_* must be present at build time (Vite inlines it into the
+# static bundle). Passed as a build arg from docker-compose.yml (crm.build.args).
+ARG VITE_API_URL
+ENV VITE_API_URL=$VITE_API_URL
 COPY crm ./crm
 RUN cd crm && npm run build
 

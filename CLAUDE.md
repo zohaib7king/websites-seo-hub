@@ -341,6 +341,26 @@ The queue is drained by the worker in `api/src/services/queueWorker.js` (`proces
 
 ## Changelog
 
+### 2026-06-20 — Sites converted to a news/magazine format + seeded content
+
+- **All 6 sites now use a news layout** (modeled on a top20coins-style news page): a date strip,
+  a **featured lead story** with byline (author · date · read time), a **"Latest News"** image-card
+  grid, a numbered **"Most Recent"** sidebar, a newsletter band, and a footer with disclaimer.
+  The **article page** is a magazine layout: breadcrumb, byline + share, featured image, an optional
+  **data callout**, "Key Takeaway" pull-quote, H2 sections, tags, and **Related Stories** cards.
+- **Each site has a distinct theme** (via `SITE.defaultTheme`): site-001-ai `midnight`,
+  site-002 `royal`, site-002-finance `forest`, site-003-pets `sunset`, site-004 `ocean`.
+- **Seed content**: each `sites/<id>/src/site.config.js` now ships **5+ dated articles** built with
+  the shared helper `sites/<id>/src/lib/seed.js` (`makeArticle`). `src/lib/data.js`
+  **falls back to `SITE.seedArticles`** (and `SITE.defaultTheme`) when the API/DB has no published
+  content — so every site renders fully populated even with an empty database. When the DB *does*
+  have published articles, those win.
+- **`site.config.js` is the only per-site file** — identity (name/nav/hero/eyebrow), theme, and seed
+  articles. Every page/component is shared and reads from it, so the design stays in sync across sites.
+- Seed article images use `picsum.photos` (seeded by slug) so they always load.
+- Verified: `site-001-ai` (midnight) + `site-003-pets` (sunset) build and render the news format
+  with seeded content; the other three share the identical template.
+
 ### 2026-06-19 — Shared UI library (`@zoyzoy/ui`) + modernized CRM dashboard & sites
 
 - **New package `packages/ui` (`@zoyzoy/ui`)** — a buildable React component library extracted

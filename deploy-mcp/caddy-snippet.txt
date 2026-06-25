@@ -1,0 +1,12 @@
+# Append this block to /etc/caddy/Caddyfile (same file that serves skoolai.cloud).
+# It matches the existing style by reusing the (common) snippet, then reverse-
+# proxies to the MCP container bound on localhost:8787. After saving, run:
+#   caddy validate --config /etc/caddy/Caddyfile
+#   systemctl reload caddy
+# Caddy will auto-obtain a Let's Encrypt cert for mcp.skoolai.cloud once DNS
+# points to this server (167.86.100.217).
+
+mcp.skoolai.cloud {
+	import common
+	reverse_proxy 127.0.0.1:8787
+}

@@ -1,0 +1,24 @@
+# ZoyZoy deploy MCP — hosted at https://mcp.skool.cloud
+#
+# The server already runs a host-level Caddy (it proxies the skool app and owns
+# ports 80/443). So we DON'T run our own Caddy here — we only run the MCP
+# container, bound to localhost, and add an `mcp.skool.cloud` site block to the
+# existing Caddy (see caddy-snippet.txt). Caddy auto-issues the Let's Encrypt cert.
+#
+# Prereqs:
+#   • DNS A record: mcp.skool.cloud -> 167.86.100.217  (currently NOT pointed here)
+#   • deploy-mcp/.env present (SSH creds + MCP_PATH_SECRET/MCP_AUTH_TOKEN)
+#
+# Start:  docker compose up -d --build
+services:
+  mcp:
+    build: .
+    container_name: zoyzoy_deploy_mcp
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      MCP_TRANSPORT: http
+      PORT: "8787"
+    # Bind to localhost only — the host Caddy is the sole public entrypoint.
+    ports:
+      - "127.0.0.1:8787:8787"
