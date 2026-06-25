@@ -6,15 +6,26 @@
 # DNS: add A records (or a wildcard *.skoolai.cloud) -> 167.86.100.217 for every
 # hostname below, or Caddy can't issue its cert.
 
-# CRM admin dashboard  (container zoyzoy_crm, :3000)
+# CRM admin dashboard + same-origin API  (basic-auth protected)
+# /api/* -> api container, everything else -> CRM. The CRM bundle calls
+# https://admin.skoolai.cloud/api/* (same origin) so the browser auto-sends creds.
+# Replace BCRYPT_HASH_HERE with: caddy hash-password --plaintext '<password>'
 admin.skoolai.cloud {
 	import common
+	basic_auth {
+		admin BCRYPT_HASH_HERE
+	}
+	@api path /api/*
+	reverse_proxy @api 127.0.0.1:4000
 	reverse_proxy 127.0.0.1:3000
 }
 
-# Backend API  (container zoyzoy_api, :4000)
+# Backend API direct host  (basic-auth protected; sites use internal api:4000)
 api.skoolai.cloud {
 	import common
+	basic_auth {
+		admin BCRYPT_HASH_HERE
+	}
 	reverse_proxy 127.0.0.1:4000
 }
 
@@ -36,11 +47,7 @@ pets.skoolai.cloud {
 	reverse_proxy 127.0.0.1:3003
 }
 
-# Site (auto-provisioned site-002)  (:3004)
-site002.skoolai.cloud {
-	import common
-	reverse_proxy 127.0.0.1:3004
-}
+# (site-002 / :3004 intentionally not exposed via Caddy)
 
 # Site 004 — Health Awareness  (:3005)
 health.skoolai.cloud {

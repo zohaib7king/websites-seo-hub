@@ -53,13 +53,14 @@ services:
       context: .
       dockerfile: crm/Dockerfile
       args:
-        # VITE_* is inlined at BUILD time; must be the public API URL the browser
-        # will call (rebuild the image if this changes).
-        VITE_API_URL: https://api.skoolai.cloud
+        # VITE_* is inlined at BUILD time; rebuild the image if this changes.
+        # Same-origin as the CRM page so the browser auto-sends the Caddy
+        # basic-auth credentials; /api/* is routed to the api container by Caddy.
+        VITE_API_URL: https://admin.skoolai.cloud
     container_name: zoyzoy_crm
     restart: unless-stopped
     environment:
-      VITE_API_URL: https://api.skoolai.cloud
+      VITE_API_URL: https://admin.skoolai.cloud
     depends_on:
       - api
     ports:
@@ -166,17 +167,4 @@ services:
       - api
     ports:
       - "127.0.0.1:3005:3000"
-    networks:
-      - zoyzoy_net
-
-  # ── Reverse proxy ────────────────────────────────────────
-  # The in-stack nginx service was removed: the server's host-level Caddy is the
-  # single public entrypoint (TLS + routing). Each service above is bound to
-  # 127.0.0.1 and fronted by a Caddy vhost (see deploy-mcp/caddy-zoyzoy.txt).
-
-volumes:
-  db_data:
-
-networks:
-  zoyzoy_net:
-    driver: bridge
+ 
