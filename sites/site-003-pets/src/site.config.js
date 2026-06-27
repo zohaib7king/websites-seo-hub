@@ -5,7 +5,7 @@ export const SITE = {
   name: "Pet Lovers Daily",
   lead: "Stay ahead of",
   accent: "Happy, Healthy Pets",
-  tagline: "Vet-informed tips and guides for dogs, cats, nutrition, and everyday pet health.",
+  tagline: "Vet-informed daily tips for happier dogs, cats, nutrition, and everyday pet health.",
   eyebrow: "Pets · Updated daily",
   nav: ["Dogs", "Cats", "Nutrition", "Health"],
   defaultTheme: "sunset",
