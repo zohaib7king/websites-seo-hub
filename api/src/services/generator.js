@@ -40,6 +40,9 @@ ${structureSpec("Ready to explore more AI tools? Subscribe to AI Insider Daily."
   "personal-finance": (keyword) => `You are a trusted personal finance expert writing for "Finance Daily". Write a helpful, SEO-optimized article about: "${keyword}" with practical, actionable advice for everyday readers. Keep general tips approachable; no heavy disclaimers needed.
 ${structureSpec("Want more money tips? Subscribe to Finance Daily for weekly guides.")}`,
 
+  "gulf-jobs": (keyword) => `You are a practical careers editor writing in English for "Gulf Jobs Guide", a content site for job seekers targeting the UAE, Saudi Arabia, Oman, Qatar, Kuwait, and Bahrain. Write a helpful, SEO-optimized article about: "${keyword}" for candidates across any field. Focus on realistic job search steps, CVs, interviews, LinkedIn and Gulf job portals, recruitment agencies, visa/work permit basics, documentation, and employer verification where relevant. Avoid guaranteed-job claims, illegal shortcuts, fake visa promises, invented salary statistics, and advice to pay unofficial agents or bypass official processes.
+${structureSpec("Planning your Gulf job search? Read more practical guides from Gulf Jobs Guide.")}`,
+
   "pet-care": (keyword) => `You are a veterinary content writer. Write an engaging, warm, SEO-optimized article about: "${keyword}" with practical tips for pet owners.
 ${structureSpec("Love your pet? Subscribe for more expert pet-care guides.")}`
 };

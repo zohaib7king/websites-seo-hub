@@ -170,6 +170,26 @@ services:
     networks:
       - zoyzoy_net
 
+  # ── Site: site-005-gulf-jobs ──────────────────────────────
+  site-005-gulf-jobs:
+    build:
+      context: .
+      dockerfile: sites/site-005-gulf-jobs/Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: http://api:4000
+        NEXT_PUBLIC_SITE_ID: site-005-gulf-jobs
+    container_name: zoyzoy_site-005-gulf-jobs
+    restart: unless-stopped
+    environment:
+      NEXT_PUBLIC_API_URL: http://api:4000
+      NEXT_PUBLIC_SITE_ID: site-005-gulf-jobs
+    depends_on:
+      - api
+    ports:
+      - "127.0.0.1:3006:3000"
+    networks:
+      - zoyzoy_net
+
   # ── Reverse proxy ────────────────────────────────────────
   # The in-stack nginx service was removed: the server's host-level Caddy is the
   # single public entrypoint (TLS + routing). Each service above is bound to

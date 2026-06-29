@@ -54,3 +54,9 @@ health.skoolai.cloud {
 	import common
 	reverse_proxy 127.0.0.1:3005
 }
+
+# Site 005 — Gulf Jobs Guide  (:3006)
+jobs.skoolai.cloud {
+	import common
+	reverse_proxy 127.0.0.1:3006
+}

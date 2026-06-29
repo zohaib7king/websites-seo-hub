@@ -54,3 +54,7 @@ CREATE TABLE IF NOT EXISTS revenue (
 INSERT INTO sites (id, name, niche, domain) VALUES
   ('site-001-ai', 'AI Insider Daily', 'artificial-intelligence', 'aiinsiderdaily.com')
 ON CONFLICT DO NOTHING;
+
+INSERT INTO sites (id, name, niche, domain, theme) VALUES
+  ('site-005-gulf-jobs', 'Gulf Jobs Guide', 'gulf-jobs', 'jobs.skoolai.cloud', 'royal')
+ON CONFLICT DO NOTHING;

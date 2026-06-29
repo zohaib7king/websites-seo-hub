@@ -1,0 +1,4 @@
+# Keeps this folder in version control.
+# Next.js serves static assets (favicon, robots.txt, images) from here, and the
+# Dockerfile copies it into the standalone runtime image (COPY .../public ./public).
+# Without at least one tracked file the folder vanishes and the Docker build fails.
