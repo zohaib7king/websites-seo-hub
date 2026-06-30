@@ -1,15 +1,16 @@
 import Layout from "../components/Layout.jsx";
 import { getSite } from "../lib/data";
+import { SITE } from "../site.config";
 
 export async function getServerSideProps() {
   const site = await getSite();
-  return { props: { theme: site?.theme || "midnight", domain: site?.domain || "" } };
+  return { props: { theme: site?.theme || SITE.defaultTheme || "royal", domain: site?.domain || SITE.domain || "" } };
 }
 
 export default function Contact({ theme, domain }) {
   const email = domain ? `hello@${domain}` : "hello@example.com";
   return (
-    <Layout title="Contact" theme={theme}>
+    <Layout title="Contact" description={`Contact ${SITE.name} for Gulf jobs, CV maker and career guide questions.`} theme={theme} canonical={`https://${SITE.domain}/contact`}>
       <div style={{ maxWidth: 640, margin: "0 auto" }}>
         <h1 className="hero-title" style={{ fontSize: 34, fontWeight: 800, marginBottom: 10 }}>Get in touch</h1>
         <p style={{ color: "var(--muted)", fontSize: 16, lineHeight: 1.8, marginBottom: 28 }}>

@@ -4,15 +4,48 @@ import { getTheme } from "../themes";
 import { catSlug } from "../lib/data";
 import { SITE } from "../site.config";
 
-export default function Layout({ children, title, description, theme = "midnight" }) {
+export default function Layout({ children, title, description, theme = "midnight", canonical, image, schema }) {
   const t = getTheme(theme);
   const year = new Date().getFullYear();
+  const pageTitle = title ? `${title} | ${SITE.name}` : `${SITE.name} - Gulf Jobs, CV Maker and Career Guides`;
+  const pageDescription = description || SITE.tagline;
+  const canonicalUrl = canonical || `https://${SITE.domain}`;
+  const socialImage = image;
+  const defaultSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: SITE.name,
+    url: `https://${SITE.domain}`,
+    description: SITE.tagline,
+    potentialAction: {
+      "@type": "SearchAction",
+      target: `https://${SITE.domain}/?q={search_term_string}`,
+      "query-input": "required name=search_term_string",
+    },
+  };
+
   return (
     <>
       <Head>
-        <title>{title ? `${title} | ${SITE.name}` : SITE.name}</title>
-        <meta name="description" content={description || SITE.tagline} />
+        <title>{pageTitle}</title>
+        <meta name="description" content={pageDescription} />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
+        <link rel="canonical" href={canonicalUrl} />
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content={SITE.name} />
+        <meta property="og:title" content={pageTitle} />
+        <meta property="og:description" content={pageDescription} />
+        <meta property="og:url" content={canonicalUrl} />
+        {socialImage && <meta property="og:image" content={socialImage} />}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={pageTitle} />
+        <meta name="twitter:description" content={pageDescription} />
+        <meta name="theme-color" content={t.accent} />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(schema || defaultSchema) }}
+        />
         {/* AdSense — replace with your publisher ID */}
         {/* <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXX" crossOrigin="anonymous"></script> */}
       </Head>
@@ -23,88 +56,93 @@ export default function Layout({ children, title, description, theme = "midnight
         :root{
           --bg:${t.bg};--surface:${t.surface};--border:${t.border};
           --accent:${t.accent};--accent2:${t.accent2};--text:${t.text};--muted:${t.muted};
-          --hero:${t.hero};--grad-accent:${t.hero};--glow:0 10px 30px color-mix(in srgb,${t.accent} 28%,transparent);
-          --radius:12px;--font:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;--max:1180px;
+          --hero:${t.hero};--grad-accent:${t.hero};--glow:0 18px 45px color-mix(in srgb,${t.accent} 22%,transparent);
+          --radius:18px;--font:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;--max:1180px;
         }
         html{scroll-behavior:smooth;}
         html,body{background:${t.body};color:var(--text);font-family:var(--font);line-height:1.6;min-height:100vh;-webkit-font-smoothing:antialiased;}
         body{background-attachment:fixed;}
         a{color:inherit;text-decoration:none;}
         ::selection{background:var(--accent);color:#fff;}
-        .nav-link{color:var(--muted);font-size:14px;font-weight:600;transition:color .15s;}
-        .nav-link:hover{color:var(--text);}
-        .ad-slot{background:color-mix(in srgb,var(--surface) 70%,transparent);border:1px dashed var(--border);border-radius:12px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:12px;letter-spacing:.04em;}
-        .card-hover{transition:border-color .2s,transform .2s;}
-        .card-hover:hover{border-color:var(--accent) !important;transform:translateY(-2px);}
+        .nav-link{color:var(--muted);font-size:14px;font-weight:700;transition:color .15s,background .15s;padding:8px 10px;border-radius:999px;}
+        .nav-link:hover{color:var(--accent);background:color-mix(in srgb,var(--accent) 9%,transparent);}
+        .ad-slot{background:color-mix(in srgb,var(--accent) 5%,#fff);border:1px dashed var(--border);border-radius:16px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:12px;letter-spacing:.04em;}
+        .card-hover{transition:border-color .2s,transform .2s,box-shadow .2s;}
+        .card-hover:hover{border-color:color-mix(in srgb,var(--accent) 40%,var(--border)) !important;transform:translateY(-3px);box-shadow:0 18px 40px rgba(91,33,182,.11);}
+        .career-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:999px;font-weight:800;font-size:14px;padding:12px 18px;border:1px solid transparent;cursor:pointer;}
+        .career-btn-primary{background:var(--hero);color:#fff;box-shadow:var(--glow);}
+        .career-btn-soft{background:#fff;color:var(--accent);border-color:var(--border);}
+        .glass-panel{background:rgba(255,255,255,.82);border:1px solid rgba(226,232,240,.9);box-shadow:0 24px 70px rgba(79,70,229,.10);backdrop-filter:blur(14px);}
         @media(max-width:880px){
           .news-grid{grid-template-columns:1fr !important;}
+          .hero-portal{grid-template-columns:1fr !important;padding:34px 22px !important;}
+          .stats-grid{grid-template-columns:1fr !important;}
           .feature-split{grid-template-columns:1fr !important;}
           .hide-mobile{display:none !important;}
           .hero-title{font-size:30px !important;}
+          main{padding-inline:18px !important;}
+        }
+        @media print{
+          header,.top-strip,.site-newsletter,footer,.ad-slot,.no-print{display:none !important;}
+          main{max-width:none !important;padding:0 !important;}
+          body{background:#fff !important;}
         }
       `}} />
 
       {/* Top strip */}
-      <div style={{ background: "var(--surface)", borderBottom: "1px solid var(--border)" }}>
+      <div className="top-strip" style={{ background: "linear-gradient(90deg,#4c1d95,#7c3aed,#0ea5e9)", color: "#fff" }}>
         <div style={{ maxWidth: "var(--max)", margin: "0 auto", padding: "6px 24px", display: "flex", justifyContent: "space-between", color: "var(--muted)", fontSize: 12 }}>
-          <span>{new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })}</span>
-          <span className="hide-mobile">{SITE.eyebrow}</span>
+          <span style={{ color: "#fff", fontWeight: 700 }}>{SITE.eyebrow}</span>
+          <span className="hide-mobile" style={{ color: "rgba(255,255,255,.88)" }}>Free CV maker and practical Gulf job search guides</span>
         </div>
       </div>
 
       {/* Header — sticky, blurred */}
       <header style={{
         position: "sticky", top: 0, zIndex: 50,
-        borderBottom: "1px solid var(--border)",
-        background: "color-mix(in srgb, var(--surface) 82%, transparent)",
+        borderBottom: "1px solid rgba(226,232,240,.85)",
+        background: "rgba(255,255,255,.86)",
         backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)",
       }}>
-        <div style={{ height: 3, background: "var(--hero)" }} />
         <div style={{ maxWidth: "var(--max)", margin: "0 auto", padding: "0 24px", display: "flex", justifyContent: "space-between", alignItems: "center", height: 66 }}>
           <Link href="/" style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <span style={{ width: 30, height: 30, borderRadius: 8, background: "var(--hero)", display: "inline-flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 800, fontSize: 15, boxShadow: "var(--glow)" }}>
-              {SITE.name.charAt(0)}
+            <span style={{ width: 36, height: 36, borderRadius: 12, background: "var(--hero)", display: "inline-flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 900, fontSize: 15, boxShadow: "var(--glow)" }}>
+              GJ
             </span>
-            <span style={{ fontWeight: 800, fontSize: 19, background: "var(--hero)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
+            <span style={{ fontWeight: 900, fontSize: 20, color: "var(--text)", letterSpacing: "-0.03em" }}>
               {SITE.name}
             </span>
           </Link>
-          <nav className="hide-mobile" style={{ display: "flex", gap: 26, alignItems: "center" }}>
+          <nav className="hide-mobile" style={{ display: "flex", gap: 8, alignItems: "center" }}>
             {SITE.nav.map(cat => (
               <Link key={cat} href={`/category/${catSlug(cat)}`} className="nav-link">{cat}</Link>
             ))}
-            <a href="#newsletter" style={{ background: "var(--hero)", color: "#fff", fontWeight: 700, fontSize: 13, padding: "8px 16px", borderRadius: 999, boxShadow: "var(--glow)" }}>Subscribe</a>
+            <Link href="/cv-maker" className="career-btn career-btn-primary" style={{ padding: "9px 15px", fontSize: 13 }}>CV Maker</Link>
           </nav>
         </div>
       </header>
 
-      {/* Top ad banner */}
-      <div style={{ maxWidth: "var(--max)", margin: "0 auto", padding: "16px 24px 0" }}>
-        {/* AdSense unit goes here */}
-        <div className="ad-slot" style={{ height: 90 }}>[ Advertisement ]</div>
-      </div>
-
-      <main style={{ maxWidth: "var(--max)", margin: "0 auto", padding: "28px 24px 56px" }}>
+      <main style={{ maxWidth: "var(--max)", margin: "0 auto", padding: "34px 24px 64px" }}>
         {children}
       </main>
 
       {/* Newsletter band */}
-      <div id="newsletter" style={{ background: "var(--surface)", borderTop: "1px solid var(--border)" }}>
+      <div id="newsletter" className="site-newsletter" style={{ background: "linear-gradient(135deg,#4c1d95 0%,#7c3aed 55%,#0ea5e9 100%)" }}>
         <div style={{ maxWidth: 720, margin: "0 auto", padding: "44px 24px", textAlign: "center" }}>
-          <h3 style={{ fontSize: 22, fontWeight: 800, marginBottom: 8 }}>Get {SITE.name} in your inbox</h3>
-          <p style={{ color: "var(--muted)", fontSize: 14, marginBottom: 18 }}>{SITE.tagline}</p>
+          <h3 style={{ fontSize: 26, fontWeight: 900, marginBottom: 8, color: "#fff", letterSpacing: "-0.03em" }}>Get Gulf career tips in your inbox</h3>
+          <p style={{ color: "rgba(255,255,255,.85)", fontSize: 15, marginBottom: 20 }}>{SITE.tagline}</p>
           <div style={{ display: "flex", gap: 8, justifyContent: "center", flexWrap: "wrap" }}>
-            <input className="zz-input" placeholder="you@email.com" style={{ background: "var(--bg)", border: "1px solid var(--border)", borderRadius: 999, padding: "11px 18px", color: "var(--text)", fontSize: 14, minWidth: 260 }} />
-            <button style={{ background: "var(--hero)", color: "#fff", fontWeight: 700, fontSize: 14, padding: "11px 22px", borderRadius: 999, border: "none", cursor: "pointer", boxShadow: "var(--glow)" }}>Subscribe</button>
+            <input className="zz-input" placeholder="you@email.com" style={{ background: "#fff", border: "1px solid rgba(255,255,255,.35)", borderRadius: 999, padding: "12px 18px", color: "var(--text)", fontSize: 14, minWidth: 280 }} />
+            <button className="career-btn" style={{ background: "#111827", color: "#fff", border: "none" }}>Subscribe</button>
           </div>
         </div>
       </div>
 
       {/* Footer */}
-      <footer style={{ borderTop: "1px solid var(--border)", background: "var(--surface)" }}>
+      <footer style={{ borderTop: "1px solid var(--border)", background: "#fff" }}>
         <div style={{ maxWidth: "var(--max)", margin: "0 auto", padding: "40px 24px 28px", display: "flex", flexWrap: "wrap", gap: 24, justifyContent: "space-between" }}>
           <div style={{ maxWidth: 340 }}>
-            <div style={{ fontWeight: 800, fontSize: 17, background: "var(--hero)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", marginBottom: 8 }}>
+            <div style={{ fontWeight: 900, fontSize: 18, color: "var(--text)", marginBottom: 8 }}>
               {SITE.name}
             </div>
             <p style={{ color: "var(--muted)", fontSize: 13, lineHeight: 1.7 }}>{SITE.tagline}</p>
@@ -120,6 +158,7 @@ export default function Layout({ children, title, description, theme = "midnight
               <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--muted)", marginBottom: 12 }}>Company</div>
               <Link href="/privacy" style={{ display: "block", color: "var(--text)", fontSize: 13, marginBottom: 8 }}>Privacy</Link>
               <Link href="/contact" style={{ display: "block", color: "var(--text)", fontSize: 13, marginBottom: 8 }}>Contact</Link>
+              <Link href="/cv-maker" style={{ display: "block", color: "var(--text)", fontSize: 13, marginBottom: 8 }}>CV Maker</Link>
             </div>
           </div>
         </div>

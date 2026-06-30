@@ -2,6 +2,7 @@ import Layout from "../../components/Layout.jsx";
 import Link from "next/link";
 import { getSite, getPublishedArticles, catSlug } from "../../lib/data";
 import { readingTime, fmtDate } from "../../lib/seed";
+import { SITE } from "../../site.config";
 
 export async function getServerSideProps({ params }) {
   const [site, articles] = await Promise.all([getSite(), getPublishedArticles()]);
@@ -28,7 +29,7 @@ const ARTICLE_CSS = `
   border-radius:0 12px 12px 0;font-size:1.05em;
 }
 .article-body blockquote::before{
-  content:"💡 Key Takeaway";display:block;font-size:.72em;font-weight:800;
+  content:"Key Takeaway";display:block;font-size:.72em;font-weight:800;
   letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:6px;
 }
 .article-body blockquote p:last-child{margin-bottom:0;}
@@ -50,9 +51,22 @@ function RelatedCard({ a }) {
 
 export default function ArticlePage({ article, related, theme }) {
   const mins = readingTime(article.content);
+  const articleUrl = `https://${SITE.domain}/article/${article.slug}`;
+  const schema = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: article.title,
+    description: article.meta_desc,
+    image: article.image_url ? [article.image_url] : undefined,
+    datePublished: article.published_at,
+    dateModified: article.published_at,
+    author: { "@type": "Organization", name: article.author || SITE.name },
+    publisher: { "@type": "Organization", name: SITE.name },
+    mainEntityOfPage: { "@type": "WebPage", "@id": articleUrl },
+  };
 
   return (
-    <Layout title={article.title} description={article.meta_desc} theme={theme}>
+    <Layout title={article.title} description={article.meta_desc} theme={theme} canonical={articleUrl} image={article.image_url} schema={schema}>
       <style dangerouslySetInnerHTML={{ __html: ARTICLE_CSS }} />
 
       <article style={{ maxWidth: 760, margin: "0 auto" }}>

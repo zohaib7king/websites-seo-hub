@@ -5,9 +5,9 @@ export const SITE = {
   name: "Gulf Jobs Guide",
   lead: "Plan your next",
   accent: "Gulf Career Move",
-  tagline: "Practical English guides for job seekers targeting the UAE, Saudi Arabia, Oman, Qatar, Kuwait, and Bahrain.",
-  eyebrow: "Gulf careers · Practical job search guides",
-  nav: ["CV", "Visas", "Interviews", "Job Portals"],
+  tagline: "Professional Gulf job guides, CV templates, and safer application tips for UAE, Saudi Arabia, Oman, Qatar, Kuwait, and Bahrain.",
+  eyebrow: "Gulf careers · CV maker · Job search guides",
+  nav: ["CV", "Visas", "Interviews", "Job Portals", "Recruitment"],
   defaultTheme: "royal",
   domain: "jobs.skoolai.cloud",
 

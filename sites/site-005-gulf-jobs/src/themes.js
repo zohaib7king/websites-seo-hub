@@ -37,11 +37,11 @@ export const THEMES = {
     hero: "linear-gradient(135deg,#10b981 0%,#84cc16 100%)",
   },
   royal: {
-    label: "Royal",
-    bg: "#140a24", surface: "#1f0f38", border: "#33205a",
-    accent: "#a855f7", accent2: "#ec4899", text: "#f5f3ff", muted: "#b9a8d8",
-    body: "linear-gradient(160deg,#140a24 0%,#241046 100%)",
-    hero: "linear-gradient(135deg,#8b5cf6 0%,#ec4899 100%)",
+    label: "Career Pro",
+    bg: "#ffffff", surface: "#ffffff", border: "#e9d5ff",
+    accent: "#6d28d9", accent2: "#0ea5e9", text: "#1e1b4b", muted: "#64748b",
+    body: "linear-gradient(180deg,#ffffff 0%,#f8f5ff 45%,#eef7ff 100%)",
+    hero: "linear-gradient(135deg,#6d28d9 0%,#9333ea 48%,#0ea5e9 100%)",
   },
 };
 

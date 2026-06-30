@@ -1,6 +1,7 @@
 import Layout from "../../components/Layout.jsx";
 import ArticleCard from "../../components/ArticleCard.jsx";
 import { getSite, getPublishedArticles, catSlug } from "../../lib/data";
+import { SITE } from "../../site.config";
 
 export async function getServerSideProps({ params }) {
   const [site, articles] = await Promise.all([getSite(), getPublishedArticles()]);
@@ -10,8 +11,17 @@ export async function getServerSideProps({ params }) {
 }
 
 export default function Category({ articles, label, theme }) {
+  const description = `Read practical ${label} guides for Gulf job seekers targeting the UAE, Saudi Arabia, Oman, Qatar, Kuwait and Bahrain.`;
+  const schema = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: `${label} guides`,
+    description,
+    url: `https://${SITE.domain}/category/${catSlug(label)}`,
+  };
+
   return (
-    <Layout title={label} theme={theme}>
+    <Layout title={`${label} Guides`} description={description} theme={theme} canonical={`https://${SITE.domain}/category/${catSlug(label)}`} schema={schema}>
       <section style={{ marginBottom: 32 }}>
         <span style={{
           display: "inline-block", padding: "4px 12px", borderRadius: 999,

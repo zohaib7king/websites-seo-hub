@@ -1,9 +1,10 @@
 import Layout from "../components/Layout.jsx";
 import { getSite } from "../lib/data";
+import { SITE } from "../site.config";
 
 export async function getServerSideProps() {
   const site = await getSite();
-  return { props: { theme: site?.theme || "midnight" } };
+  return { props: { theme: site?.theme || SITE.defaultTheme || "royal" } };
 }
 
 const SECTIONS = [
@@ -17,7 +18,7 @@ const SECTIONS = [
 
 export default function Privacy({ theme }) {
   return (
-    <Layout title="Privacy Policy" theme={theme}>
+    <Layout title="Privacy Policy" description={`Privacy policy for ${SITE.name}.`} theme={theme} canonical={`https://${SITE.domain}/privacy`}>
       <div style={{ maxWidth: 720, margin: "0 auto" }}>
         <h1 className="hero-title" style={{ fontSize: 34, fontWeight: 800, marginBottom: 8 }}>Privacy Policy</h1>
         <p style={{ color: "var(--muted)", marginBottom: 28 }}>Last updated: {new Date().toLocaleDateString("en-US", { month: "long", year: "numeric" })}</p>
