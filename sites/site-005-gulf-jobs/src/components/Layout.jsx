@@ -4,6 +4,14 @@ import { getTheme } from "../themes";
 import { catSlug } from "../lib/data";
 import { SITE } from "../site.config";
 
+const mainNav = [
+  { label: "Home", href: "/" },
+  { label: "About Us", href: "/about" },
+  { label: "CV Maker", href: "/cv-maker" },
+  { label: "Articles", href: "/articles" },
+  { label: "Contact Us", href: "/contact" },
+];
+
 export default function Layout({ children, title, description, theme = "midnight", canonical, image, schema }) {
   const t = getTheme(theme);
   const year = new Date().getFullYear();
@@ -128,10 +136,9 @@ export default function Layout({ children, title, description, theme = "midnight
             </span>
           </Link>
           <nav className="hide-mobile" style={{ display: "flex", gap: 8, alignItems: "center" }}>
-            {SITE.nav.map(cat => (
-              <Link key={cat} href={`/category/${catSlug(cat)}`} className="nav-link">{cat}</Link>
+            {mainNav.map(item => (
+              <Link key={item.href} href={item.href} className={item.href === "/cv-maker" ? "career-btn career-btn-primary" : "nav-link"} style={item.href === "/cv-maker" ? { padding: "9px 15px", fontSize: 13 } : undefined}>{item.label}</Link>
             ))}
-            <Link href="/cv-maker" className="career-btn career-btn-primary" style={{ padding: "9px 15px", fontSize: 13 }}>CV Maker</Link>
           </nav>
         </div>
       </header>
@@ -170,8 +177,10 @@ export default function Layout({ children, title, description, theme = "midnight
             </div>
             <div>
               <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--muted)", marginBottom: 12 }}>Company</div>
+              <Link href="/about" style={{ display: "block", color: "var(--text)", fontSize: 13, marginBottom: 8 }}>About Us</Link>
+              <Link href="/articles" style={{ display: "block", color: "var(--text)", fontSize: 13, marginBottom: 8 }}>Articles</Link>
               <Link href="/privacy" style={{ display: "block", color: "var(--text)", fontSize: 13, marginBottom: 8 }}>Privacy</Link>
-              <Link href="/contact" style={{ display: "block", color: "var(--text)", fontSize: 13, marginBottom: 8 }}>Contact</Link>
+              <Link href="/contact" style={{ display: "block", color: "var(--text)", fontSize: 13, marginBottom: 8 }}>Contact Us</Link>
               <Link href="/cv-maker" style={{ display: "block", color: "var(--text)", fontSize: 13, marginBottom: 8 }}>CV Maker</Link>
             </div>
           </div>

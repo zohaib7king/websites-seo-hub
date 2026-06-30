@@ -1,5 +1,6 @@
 import Layout from "../../components/Layout.jsx";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { getSite, getPublishedArticles, catSlug } from "../../lib/data";
 import { readingTime, fmtDate } from "../../lib/seed";
 import { SITE } from "../../site.config";
@@ -46,6 +47,54 @@ function RelatedCard({ a }) {
         <div style={{ color: "var(--muted)", fontSize: 12 }}>{fmtDate(a.published_at)} · {readingTime(a.content)} min read</div>
       </div>
     </Link>
+  );
+}
+
+function formatCount(value) {
+  const number = Number(value || 0);
+  if (number >= 1000000) return `${(number / 1000000).toFixed(1)}M`;
+  if (number >= 1000) return `${(number / 1000).toFixed(1)}K`;
+  return String(number);
+}
+
+function ArticleStats({ article }) {
+  const [views, setViews] = useState(Number(article.view_count || 0));
+  const [likes, setLikes] = useState(Number(article.like_count || 0));
+  const [liked, setLiked] = useState(false);
+
+  useEffect(() => {
+    setViews(current => current + 1);
+  }, [article.slug]);
+
+  const toggleLike = () => {
+    setLiked(current => {
+      setLikes(total => total + (current ? -1 : 1));
+      return !current;
+    });
+  };
+
+  return (
+    <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
+      <span style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 999, padding: "8px 12px", color: "var(--muted)", fontSize: 13, fontWeight: 800 }}>
+        {formatCount(views)} views
+      </span>
+      <button
+        type="button"
+        onClick={toggleLike}
+        style={{
+          border: `1px solid ${liked ? "var(--accent)" : "var(--border)"}`,
+          background: liked ? "color-mix(in srgb,var(--accent) 12%,#fff)" : "#fff",
+          color: liked ? "var(--accent)" : "var(--muted)",
+          borderRadius: 999,
+          padding: "8px 12px",
+          fontSize: 13,
+          fontWeight: 900,
+          cursor: "pointer",
+        }}
+      >
+        {liked ? "Liked" : "Like"} · {formatCount(likes)}
+      </button>
+    </div>
   );
 }
 
@@ -118,6 +167,7 @@ export default function ArticlePage({ article, related, theme }) {
             <div style={{ fontWeight: 700, fontSize: 14 }}>{article.author || "Editorial Team"}</div>
             <div style={{ color: "var(--muted)", fontSize: 12.5 }}>{fmtDate(article.published_at)} · {mins} min read</div>
           </div>
+          <ArticleStats article={article} />
           <div style={{ display: "flex", gap: 8 }}>
             {["𝕏", "in", "f"].map(s => (
               <span key={s} style={{ width: 32, height: 32, borderRadius: 8, background: "var(--surface)", border: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--muted)", fontSize: 13 }}>{s}</span>

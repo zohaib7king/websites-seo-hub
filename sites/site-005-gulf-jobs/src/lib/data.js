@@ -1,7 +1,7 @@
 // Server-side data helpers used by getServerSideProps.
 // NEXT_PUBLIC_* are inlined at build time via docker-compose build.args.
 import { SITE } from "../site.config";
-import { byDateDesc } from "./seed";
+import { byDateDesc, withArticleStats } from "./seed";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://api:4000";
 const SITE_ID = process.env.NEXT_PUBLIC_SITE_ID;
@@ -23,11 +23,11 @@ export async function getPublishedArticles() {
     const res = await fetch(`${API}/api/articles?site_id=${SITE_ID}&status=published`);
     if (res.ok) {
       const list = await res.json();
-      if (Array.isArray(list) && list.length > 0) return list.sort(byDateDesc);
+      if (Array.isArray(list) && list.length > 0) return list.map(withArticleStats).sort(byDateDesc);
     }
   } catch { /* fall through */ }
   // Fallback to the per-site seed articles (>=5, dated) when the API has none.
-  return [...(SITE.seedArticles || [])].sort(byDateDesc);
+  return [...(SITE.seedArticles || [])].map(withArticleStats).sort(byDateDesc);
 }
 
 // Slug helper so nav labels and article categories map to the same URL.

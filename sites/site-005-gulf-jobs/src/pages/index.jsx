@@ -36,7 +36,8 @@ function Pill({ children }) {
 
 export default function Home({ articles, theme }) {
   const featured = articles[0];
-  const latest = articles.slice(0, 6);
+  const latest = articles.slice(0, 4);
+  const mostViewed = [...articles].sort((a, b) => Number(b.view_count || 0) - Number(a.view_count || 0)).slice(0, 4);
   const schema = {
     "@context": "https://schema.org",
     "@type": "WebSite",
@@ -129,12 +130,22 @@ export default function Home({ articles, theme }) {
 
       <section className="news-grid" style={{ display: "grid", gridTemplateColumns: "1fr 330px", gap: 26 }}>
         <div>
-          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 18 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 18, flexWrap: "wrap" }}>
             <h2 style={{ fontSize: 28, fontWeight: 950, letterSpacing: "-0.04em" }}>Latest Gulf career articles</h2>
             <div style={{ flex: 1, height: 1, background: "var(--border)" }} />
+            <Link href="/articles" className="career-btn career-btn-soft" style={{ padding: "9px 14px", fontSize: 13 }}>View All</Link>
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(250px,1fr))", gap: 20 }}>
             {latest.map(article => <ArticleCard key={article.id} article={article} />)}
+          </div>
+
+          <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "36px 0 18px", flexWrap: "wrap" }}>
+            <h2 style={{ fontSize: 28, fontWeight: 950, letterSpacing: "-0.04em" }}>Most viewed guides</h2>
+            <div style={{ flex: 1, height: 1, background: "var(--border)" }} />
+            <Link href="/articles" className="career-btn career-btn-soft" style={{ padding: "9px 14px", fontSize: 13 }}>View All</Link>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(250px,1fr))", gap: 20 }}>
+            {mostViewed.map(article => <ArticleCard key={`popular-${article.id || article.slug}`} article={article} />)}
           </div>
         </div>
 

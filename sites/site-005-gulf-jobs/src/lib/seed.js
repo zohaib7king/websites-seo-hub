@@ -36,6 +36,26 @@ export function makeArticle({
     ai_generated: false,
     published_at: date,
     content: parts.join(""),
+    view_count: statCount(slug, 1200, 18900),
+    like_count: statCount(`${slug}-likes`, 32, 760),
+  };
+}
+
+export function statCount(seed, min = 0, max = 1000) {
+  const text = String(seed || "article");
+  let hash = 0;
+  for (let index = 0; index < text.length; index += 1) {
+    hash = (hash * 31 + text.charCodeAt(index)) >>> 0;
+  }
+  return min + (hash % (max - min + 1));
+}
+
+export function withArticleStats(article) {
+  const slug = article?.slug || article?.id || "article";
+  return {
+    ...article,
+    view_count: Number(article?.view_count ?? article?.views ?? statCount(slug, 1200, 18900)),
+    like_count: Number(article?.like_count ?? article?.likes ?? statCount(`${slug}-likes`, 32, 760)),
   };
 }
 
