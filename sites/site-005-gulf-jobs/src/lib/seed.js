@@ -2,9 +2,10 @@
 // Used by each site's site.config.js to seed >=5 dated articles so the site is
 // always populated (fallback when the API/DB has no published content).
 
-// Stable topical image from Lorem Picsum, seeded by slug (no 404s, varies per article).
+// Branded article artwork generated in-repo. This avoids generic stock or
+// placeholder services while still giving each article a crawlable image.
 export function seedImage(slug) {
-  return `https://picsum.photos/seed/${encodeURIComponent(slug)}/1200/675`;
+  return `/article-image/${encodeURIComponent(slug)}.svg`;
 }
 
 export function makeArticle({

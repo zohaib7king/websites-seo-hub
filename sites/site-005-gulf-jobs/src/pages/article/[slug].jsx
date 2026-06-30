@@ -52,18 +52,44 @@ function RelatedCard({ a }) {
 export default function ArticlePage({ article, related, theme }) {
   const mins = readingTime(article.content);
   const articleUrl = `https://${SITE.domain}/article/${article.slug}`;
-  const schema = {
+  const imageUrl = article.image_url?.startsWith("http") ? article.image_url : article.image_url ? `https://${SITE.domain}${article.image_url}` : undefined;
+  const articleText = String(article.content || "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+  const blogPostingSchema = {
     "@context": "https://schema.org",
-    "@type": "Article",
+    "@type": "BlogPosting",
     headline: article.title,
     description: article.meta_desc,
-    image: article.image_url ? [article.image_url] : undefined,
+    image: imageUrl ? [imageUrl] : undefined,
     datePublished: article.published_at,
     dateModified: article.published_at,
-    author: { "@type": "Organization", name: article.author || SITE.name },
-    publisher: { "@type": "Organization", name: SITE.name },
+    author: {
+      "@type": "Organization",
+      name: article.author || SITE.name,
+      url: `https://${SITE.domain}/contact`,
+    },
+    publisher: {
+      "@type": "Organization",
+      name: SITE.name,
+      url: `https://${SITE.domain}`,
+    },
     mainEntityOfPage: { "@type": "WebPage", "@id": articleUrl },
+    articleSection: article.category,
+    keywords: article.tags?.join(", "),
+    articleBody: articleText.slice(0, 5000),
   };
+  const qapageSchema = article.slug === "how-to-use-linkedin-and-gulf-job-portals" ? {
+    "@context": "https://schema.org",
+    "@type": "QAPage",
+    mainEntity: {
+      "@type": "Question",
+      name: "How should you use LinkedIn and Gulf job portals for a focused job search?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "Use LinkedIn and Gulf job portals as a daily system: optimize your profile, search exact job titles, apply to fresh vacancies, tailor your CV to each role type, track applications, and follow up only when the employer and vacancy are clear.",
+      },
+    },
+  } : null;
+  const schema = qapageSchema ? [blogPostingSchema, qapageSchema] : blogPostingSchema;
 
   return (
     <Layout title={article.title} description={article.meta_desc} theme={theme} canonical={articleUrl} image={article.image_url} schema={schema}>
@@ -128,6 +154,15 @@ export default function ArticlePage({ article, related, theme }) {
             ))}
           </div>
         )}
+
+        <section style={{ marginTop: 34, padding: 22, border: "1px solid var(--border)", borderRadius: 16, background: "#fff" }}>
+          <div style={{ fontSize: 12, fontWeight: 800, color: "var(--accent)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 8 }}>Editorial review</div>
+          <p style={{ color: "var(--muted)", fontSize: 14, lineHeight: 1.8 }}>
+            This guide is prepared by the {SITE.name} editorial desk for Gulf job seekers. We focus on practical CV,
+            job portal, recruiter communication, visa-safety, and offer-verification advice. We update guides when
+            job-search practices or official processes change, and readers can report corrections through the contact page.
+          </p>
+        </section>
       </article>
 
       {/* Related */}

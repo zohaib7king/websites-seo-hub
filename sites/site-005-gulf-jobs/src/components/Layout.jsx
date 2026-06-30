@@ -10,19 +10,33 @@ export default function Layout({ children, title, description, theme = "midnight
   const pageTitle = title ? `${title} | ${SITE.name}` : `${SITE.name} - Gulf Jobs, CV Maker and Career Guides`;
   const pageDescription = description || SITE.tagline;
   const canonicalUrl = canonical || `https://${SITE.domain}`;
-  const socialImage = image;
-  const defaultSchema = {
-    "@context": "https://schema.org",
-    "@type": "WebSite",
-    name: SITE.name,
-    url: `https://${SITE.domain}`,
-    description: SITE.tagline,
-    potentialAction: {
-      "@type": "SearchAction",
-      target: `https://${SITE.domain}/?q={search_term_string}`,
-      "query-input": "required name=search_term_string",
+  const socialImage = image?.startsWith("http") ? image : image ? `https://${SITE.domain}${image}` : null;
+  const defaultSchema = [
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      name: SITE.name,
+      url: `https://${SITE.domain}`,
+      description: SITE.tagline,
+      potentialAction: {
+        "@type": "SearchAction",
+        target: `https://${SITE.domain}/?q={search_term_string}`,
+        "query-input": "required name=search_term_string",
+      },
     },
-  };
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      name: SITE.name,
+      url: `https://${SITE.domain}`,
+      description: SITE.tagline,
+      contactPoint: {
+        "@type": "ContactPoint",
+        contactType: "Editorial corrections",
+        email: `hello@${SITE.domain}`,
+      },
+    },
+  ];
 
   return (
     <>
