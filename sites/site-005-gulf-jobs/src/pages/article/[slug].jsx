@@ -1,6 +1,7 @@
 import Layout from "../../components/Layout.jsx";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { authHeaders, getAuth, requireLogin } from "../../lib/authClient";
 import { getSite, getPublishedArticles, catSlug } from "../../lib/data";
 import { readingTime, fmtDate } from "../../lib/seed";
 import { SITE } from "../../site.config";
@@ -14,8 +15,9 @@ export async function getServerSideProps({ params }) {
 }
 
 const ARTICLE_CSS = `
-.article-h1{font-size:40px;font-weight:800;line-height:1.15;letter-spacing:-0.02em;margin-bottom:14px;}
-.article-body{font-size:17px;line-height:1.8;color:var(--text);}
+.article-shell{width:100%;max-width:760px;margin:0 auto;overflow:hidden;}
+.article-h1{font-size:40px;font-weight:800;line-height:1.15;letter-spacing:-0.02em;margin-bottom:14px;overflow-wrap:anywhere;}
+.article-body{font-size:17px;line-height:1.8;color:var(--text);overflow-wrap:anywhere;word-break:break-word;}
 .article-body > p:first-of-type{font-size:1.15em;line-height:1.7;font-weight:500;}
 .article-body h2{font-size:1.5em;font-weight:800;line-height:1.3;margin:1.9em 0 .6em;}
 .article-body h3{font-size:1.2em;font-weight:700;margin:1.5em 0 .5em;}
@@ -24,6 +26,7 @@ const ARTICLE_CSS = `
 .article-body li{margin:.45em 0;}
 .article-body strong{font-weight:700;}
 .article-body a{color:var(--accent);text-decoration:underline;}
+.article-body img,.article-body iframe,.article-body video{max-width:100%;height:auto;border-radius:14px;}
 .article-body blockquote{
   margin:1.7em 0;padding:18px 22px;border-left:4px solid var(--accent);
   background:color-mix(in srgb, var(--accent) 13%, transparent);
@@ -34,7 +37,24 @@ const ARTICLE_CSS = `
   letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:6px;
 }
 .article-body blockquote p:last-child{margin-bottom:0;}
-@media(max-width:768px){.article-h1{font-size:28px;}.article-body{font-size:16px;}}
+.article-stat-row{max-width:100%;min-width:0;}
+.article-stat-row span,.article-stat-row button{white-space:nowrap;}
+.article-share{display:flex;gap:8px;flex-wrap:wrap;}
+.article-featured-image{display:block;max-width:100%;}
+@media(max-width:768px){
+  .article-h1{font-size:28px;}
+  .article-body{font-size:16px;}
+  .article-byline{align-items:flex-start !important;}
+  .article-author{flex:1 1 calc(100% - 56px) !important;min-width:0 !important;}
+  .article-stat-row{flex:1 1 100%;}
+  .article-share{flex:1 1 100%;}
+  .article-featured-image{height:230px !important;}
+  .article-data-callout{align-items:flex-start !important;flex-direction:column;}
+}
+@media(max-width:420px){
+  .article-featured-image{height:190px !important;}
+  .article-body blockquote{padding:16px 18px;}
+}
 `;
 
 function RelatedCard({ a }) {
@@ -61,26 +81,93 @@ function ArticleStats({ article }) {
   const [views, setViews] = useState(Number(article.view_count || 0));
   const [likes, setLikes] = useState(Number(article.like_count || 0));
   const [liked, setLiked] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const trackedView = useRef(false);
 
   useEffect(() => {
-    setViews(current => current + 1);
+    if (trackedView.current) return;
+    trackedView.current = true;
+
+    const recordView = async () => {
+      try {
+        const res = await fetch("/api/article-stats/view", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ slug: article.slug }),
+        });
+        const payload = await res.json();
+        if (res.ok) {
+          setViews(Number(payload.view_count || 0));
+          setLikes(Number(payload.like_count || 0));
+        }
+      } catch {
+        // Keep the server-rendered count if the tracker is unavailable.
+      }
+    };
+
+    recordView();
   }, [article.slug]);
 
-  const toggleLike = () => {
-    setLiked(current => {
-      setLikes(total => total + (current ? -1 : 1));
-      return !current;
-    });
+  useEffect(() => {
+    const fetchLikeStatus = async () => {
+      if (!getAuth()?.token) {
+        setLiked(false);
+        return;
+      }
+      try {
+        const res = await fetch(`/api/article-stats/like-status?slug=${encodeURIComponent(article.slug)}`, {
+          headers: authHeaders(),
+        });
+        const payload = await res.json();
+        if (res.ok) setLiked(Boolean(payload.liked));
+      } catch {
+        setLiked(false);
+      }
+    };
+
+    fetchLikeStatus();
+    window.addEventListener("gulf-auth-changed", fetchLikeStatus);
+    return () => window.removeEventListener("gulf-auth-changed", fetchLikeStatus);
+  }, [article.slug]);
+
+  const toggleLike = async () => {
+    if (!getAuth()?.token) {
+      requireLogin();
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const res = await fetch("/api/article-stats/like", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...authHeaders() },
+        body: JSON.stringify({ slug: article.slug }),
+      });
+      const payload = await res.json();
+      if (res.status === 401) {
+        requireLogin();
+        return;
+      }
+      if (!res.ok) throw new Error(payload.error || "Could not update like");
+      setLiked(Boolean(payload.liked));
+      setLikes(Number(payload.like_count || 0));
+      setViews(Number(payload.view_count || views));
+    } catch {
+      // Leave the UI unchanged if the backend rejects the update.
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
+    <div className="article-stat-row" style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
       <span style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 999, padding: "8px 12px", color: "var(--muted)", fontSize: 13, fontWeight: 800 }}>
         {formatCount(views)} views
       </span>
       <button
         type="button"
         onClick={toggleLike}
+        disabled={loading}
         style={{
           border: `1px solid ${liked ? "var(--accent)" : "var(--border)"}`,
           background: liked ? "color-mix(in srgb,var(--accent) 12%,#fff)" : "#fff",
@@ -89,7 +176,8 @@ function ArticleStats({ article }) {
           padding: "8px 12px",
           fontSize: 13,
           fontWeight: 900,
-          cursor: "pointer",
+          cursor: loading ? "not-allowed" : "pointer",
+          opacity: loading ? .72 : 1,
         }}
       >
         {liked ? "Liked" : "Like"} · {formatCount(likes)}
@@ -144,7 +232,7 @@ export default function ArticlePage({ article, related, theme }) {
     <Layout title={article.title} description={article.meta_desc} theme={theme} canonical={articleUrl} image={article.image_url} schema={schema}>
       <style dangerouslySetInnerHTML={{ __html: ARTICLE_CSS }} />
 
-      <article style={{ maxWidth: 760, margin: "0 auto" }}>
+      <article className="article-shell">
         {/* Breadcrumb */}
         <div style={{ fontSize: 12.5, color: "var(--muted)", marginBottom: 18 }}>
           <Link href="/" style={{ color: "var(--muted)" }}>Home</Link>
@@ -159,16 +247,16 @@ export default function ArticlePage({ article, related, theme }) {
         )}
 
         {/* Byline */}
-        <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "16px 0", borderTop: "1px solid var(--border)", borderBottom: "1px solid var(--border)", marginBottom: 28, flexWrap: "wrap" }}>
+        <div className="article-byline" style={{ display: "flex", alignItems: "center", gap: 12, padding: "16px 0", borderTop: "1px solid var(--border)", borderBottom: "1px solid var(--border)", marginBottom: 28, flexWrap: "wrap" }}>
           <div style={{ width: 40, height: 40, borderRadius: "50%", background: "var(--hero)", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 800 }}>
             {(article.author || "E").charAt(0)}
           </div>
-          <div style={{ flex: 1, minWidth: 160 }}>
+          <div className="article-author" style={{ flex: 1, minWidth: 160 }}>
             <div style={{ fontWeight: 700, fontSize: 14 }}>{article.author || "Editorial Team"}</div>
             <div style={{ color: "var(--muted)", fontSize: 12.5 }}>{fmtDate(article.published_at)} · {mins} min read</div>
           </div>
           <ArticleStats article={article} />
-          <div style={{ display: "flex", gap: 8 }}>
+          <div className="article-share">
             {["𝕏", "in", "f"].map(s => (
               <span key={s} style={{ width: 32, height: 32, borderRadius: 8, background: "var(--surface)", border: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--muted)", fontSize: 13 }}>{s}</span>
             ))}
@@ -177,14 +265,14 @@ export default function ArticlePage({ article, related, theme }) {
 
         {/* Featured image */}
         {article.image_url ? (
-          <img src={article.image_url} alt={article.title} style={{ width: "100%", height: 380, objectFit: "cover", borderRadius: 16, marginBottom: 28 }} />
+          <img className="article-featured-image" src={article.image_url} alt={article.title} style={{ width: "100%", height: 380, objectFit: "cover", borderRadius: 16, marginBottom: 28 }} />
         ) : (
-          <div style={{ height: 240, borderRadius: 16, marginBottom: 28, background: "var(--hero)" }} />
+          <div className="article-featured-image" style={{ height: 240, borderRadius: 16, marginBottom: 28, background: "var(--hero)" }} />
         )}
 
         {/* Optional data callout */}
         {article.data && (
-          <div style={{ display: "flex", alignItems: "baseline", gap: 14, padding: "20px 24px", background: "color-mix(in srgb, var(--accent) 12%, transparent)", border: "1px solid color-mix(in srgb, var(--accent) 30%, transparent)", borderRadius: 14, marginBottom: 28 }}>
+          <div className="article-data-callout" style={{ display: "flex", alignItems: "baseline", gap: 14, padding: "20px 24px", background: "color-mix(in srgb, var(--accent) 12%, transparent)", border: "1px solid color-mix(in srgb, var(--accent) 30%, transparent)", borderRadius: 14, marginBottom: 28 }}>
             <span style={{ fontSize: 34, fontWeight: 800, color: "var(--accent)" }}>{article.data.value}</span>
             <span style={{ color: "var(--muted)", fontSize: 14 }}>{article.data.label}</span>
           </div>

@@ -11,6 +11,7 @@ app.use(express.json());
 // ── Routes ───────────────────────────────────────────────
 app.use("/api/sites",    require("./routes/sites"));
 app.use("/api/articles", require("./routes/articles"));
+app.use("/api/auth",     require("./routes/auth"));
 app.use("/api/ai",       require("./routes/ai"));
 app.use("/api/revenue",  require("./routes/revenue"));
 app.use("/api/queue",    require("./routes/queue"));

@@ -22,11 +22,39 @@ CREATE TABLE IF NOT EXISTS articles (
   category     TEXT,
   tags         TEXT[],
   image_url    TEXT,                      -- featured image; NULL → gradient placeholder
+  view_count   INT DEFAULT 0,
+  like_count   INT DEFAULT 0,
   status       TEXT DEFAULT 'draft',      -- draft | scheduled | published
   ai_generated BOOLEAN DEFAULT FALSE,
   published_at TIMESTAMPTZ,
   created_at   TIMESTAMPTZ DEFAULT NOW(),
   UNIQUE(site_id, slug)
+);
+
+CREATE TABLE IF NOT EXISTS site_users (
+  id            SERIAL PRIMARY KEY,
+  site_id       TEXT REFERENCES sites(id) ON DELETE CASCADE,
+  email         TEXT NOT NULL,
+  password_hash TEXT NOT NULL,
+  created_at    TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(site_id, email)
+);
+
+CREATE TABLE IF NOT EXISTS article_stats (
+  site_id     TEXT REFERENCES sites(id) ON DELETE CASCADE,
+  slug        TEXT NOT NULL,
+  view_count  INT DEFAULT 0,
+  like_count  INT DEFAULT 0,
+  updated_at  TIMESTAMPTZ DEFAULT NOW(),
+  PRIMARY KEY (site_id, slug)
+);
+
+CREATE TABLE IF NOT EXISTS article_likes (
+  site_id    TEXT REFERENCES sites(id) ON DELETE CASCADE,
+  slug       TEXT NOT NULL,
+  user_id    INT REFERENCES site_users(id) ON DELETE CASCADE,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  PRIMARY KEY (site_id, slug, user_id)
 );
 
 CREATE TABLE IF NOT EXISTS content_queue (

@@ -1,7 +1,9 @@
 import Head from "next/head";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { getTheme } from "../themes";
 import { catSlug } from "../lib/data";
+import { clearAuth, getAuth, saveAuth } from "../lib/authClient";
 import { SITE } from "../site.config";
 
 const mainNav = [
@@ -12,9 +14,71 @@ const mainNav = [
   { label: "Contact Us", href: "/contact" },
 ];
 
+function LoginModal({ open, onClose }) {
+  const [mode, setMode] = useState("login");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  if (!open) return null;
+
+  const submit = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const res = await fetch(`/api/auth/${mode}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      const payload = await res.json();
+      if (!res.ok) throw new Error(payload.error || "Login failed");
+      saveAuth(payload);
+      onClose();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="no-print" style={{ position: "fixed", inset: 0, zIndex: 200, background: "rgba(15,23,42,.55)", display: "flex", alignItems: "center", justifyContent: "center", padding: 18 }}>
+      <div style={{ width: "100%", maxWidth: 420, background: "#fff", borderRadius: 24, padding: 24, boxShadow: "0 30px 90px rgba(15,23,42,.28)" }}>
+        <button type="button" onClick={onClose} style={{ float: "right", border: "1px solid var(--border)", background: "#fff", borderRadius: 999, width: 32, height: 32, cursor: "pointer", color: "var(--muted)", fontWeight: 900 }}>x</button>
+        <span style={{ color: "var(--accent)", fontWeight: 900, fontSize: 12, letterSpacing: ".08em", textTransform: "uppercase" }}>
+          {mode === "login" ? "Login" : "Sign up"}
+        </span>
+        <h2 style={{ fontSize: 28, fontWeight: 950, letterSpacing: "-0.04em", margin: "8px 0 10px" }}>
+          {mode === "login" ? "Login to like articles" : "Create your free account"}
+        </h2>
+        <p style={{ color: "var(--muted)", lineHeight: 1.7, marginBottom: 16 }}>
+          You need an account before liking articles or downloading gated CV templates.
+        </p>
+        <div style={{ display: "grid", gap: 10, marginBottom: 12 }}>
+          <input value={email} onChange={event => setEmail(event.target.value)} placeholder="Email address" style={{ border: "1px solid var(--border)", borderRadius: 14, padding: "12px 14px", font: "inherit" }} />
+          <input value={password} onChange={event => setPassword(event.target.value)} placeholder="Password" type="password" style={{ border: "1px solid var(--border)", borderRadius: 14, padding: "12px 14px", font: "inherit" }} />
+        </div>
+        {error && <p style={{ color: "#dc2626", fontSize: 13, marginBottom: 12 }}>{error}</p>}
+        <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
+          <button type="button" onClick={submit} disabled={loading} className="career-btn career-btn-primary">
+            {loading ? "Please wait..." : mode === "login" ? "Login" : "Sign Up"}
+          </button>
+          <button type="button" onClick={() => setMode(mode === "login" ? "signup" : "login")} className="career-btn career-btn-soft">
+            {mode === "login" ? "Create account" : "Already have account"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function Layout({ children, title, description, theme = "midnight", canonical, image, schema }) {
   const t = getTheme(theme);
   const year = new Date().getFullYear();
+  const [auth, setAuth] = useState(null);
+  const [loginOpen, setLoginOpen] = useState(false);
   const pageTitle = title ? `${title} | ${SITE.name}` : `${SITE.name} - Gulf Jobs, CV Maker and Career Guides`;
   const pageDescription = description || SITE.tagline;
   const canonicalUrl = canonical || `https://${SITE.domain}`;
@@ -45,6 +109,18 @@ export default function Layout({ children, title, description, theme = "midnight
       },
     },
   ];
+
+  useEffect(() => {
+    const refresh = () => setAuth(getAuth());
+    const openLogin = () => setLoginOpen(true);
+    refresh();
+    window.addEventListener("gulf-auth-changed", refresh);
+    window.addEventListener("gulf-auth-required", openLogin);
+    return () => {
+      window.removeEventListener("gulf-auth-changed", refresh);
+      window.removeEventListener("gulf-auth-required", openLogin);
+    };
+  }, []);
 
   return (
     <>
@@ -85,6 +161,8 @@ export default function Layout({ children, title, description, theme = "midnight
         html,body{background:${t.body};color:var(--text);font-family:var(--font);line-height:1.6;min-height:100vh;-webkit-font-smoothing:antialiased;}
         body{background-attachment:fixed;}
         a{color:inherit;text-decoration:none;}
+        img,svg,video,canvas{max-width:100%;}
+        button,input,textarea,select{max-width:100%;}
         ::selection{background:var(--accent);color:#fff;}
         .nav-link{color:var(--muted);font-size:14px;font-weight:700;transition:color .15s,background .15s;padding:8px 10px;border-radius:999px;}
         .nav-link:hover{color:var(--accent);background:color-mix(in srgb,var(--accent) 9%,transparent);}
@@ -139,6 +217,11 @@ export default function Layout({ children, title, description, theme = "midnight
             {mainNav.map(item => (
               <Link key={item.href} href={item.href} className={item.href === "/cv-maker" ? "career-btn career-btn-primary" : "nav-link"} style={item.href === "/cv-maker" ? { padding: "9px 15px", fontSize: 13 } : undefined}>{item.label}</Link>
             ))}
+            {auth?.user ? (
+              <button type="button" onClick={clearAuth} className="nav-link" style={{ border: "none", background: "transparent", cursor: "pointer" }}>Logout</button>
+            ) : (
+              <button type="button" onClick={() => setLoginOpen(true)} className="nav-link" style={{ border: "none", background: "transparent", cursor: "pointer" }}>Login</button>
+            )}
           </nav>
         </div>
       </header>
@@ -193,6 +276,7 @@ export default function Layout({ children, title, description, theme = "midnight
           <p style={{ color: "var(--muted)", fontSize: 12.5, textAlign: "center" }}>© {year} {SITE.name}. All rights reserved.</p>
         </div>
       </footer>
+      <LoginModal open={loginOpen} onClose={() => setLoginOpen(false)} />
     </>
   );
 }

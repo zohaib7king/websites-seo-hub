@@ -98,7 +98,16 @@ export default function Home({ articles, theme }) {
         </div>
       </section>
 
-      <section className="stats-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 16, margin: "22px 0 34px" }}>
+      <section className="stats-grid" style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(3,1fr)",
+        gap: 16,
+        margin: "22px 0 34px",
+        padding: 18,
+        borderRadius: 26,
+        background: "linear-gradient(135deg,rgba(255,255,255,.7),rgba(239,246,255,.9))",
+        border: "1px solid rgba(226,232,240,.9)",
+      }}>
         {stats.map(([value, label]) => (
           <div key={label} className="glass-panel" style={{ borderRadius: 20, padding: 22 }}>
             <div style={{ fontSize: 32, lineHeight: 1, fontWeight: 950, color: "var(--accent)", marginBottom: 4 }}>{value}</div>
@@ -107,7 +116,14 @@ export default function Home({ articles, theme }) {
         ))}
       </section>
 
-      <section style={{ marginBottom: 42 }}>
+      <section style={{
+        marginBottom: 42,
+        borderRadius: 30,
+        padding: 26,
+        background: "linear-gradient(135deg,#fff 0%,rgba(250,245,255,.92) 100%)",
+        border: "1px solid rgba(226,232,240,.9)",
+        boxShadow: "0 18px 50px rgba(91,33,182,.06)",
+      }}>
         <div style={{ display: "flex", alignItems: "end", justifyContent: "space-between", gap: 20, marginBottom: 18 }}>
           <div>
             <span style={{ color: "var(--accent)", fontSize: 12, fontWeight: 900, letterSpacing: ".08em", textTransform: "uppercase" }}>Start here</span>
@@ -117,7 +133,7 @@ export default function Home({ articles, theme }) {
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(230px,1fr))", gap: 18 }}>
           {clusters.map(item => (
-            <Link key={item.title} href={item.href} className="card-hover" style={{ background: "#fff", border: "1px solid var(--border)", borderRadius: 22, padding: 24 }}>
+            <Link key={item.title} href={item.href} className="card-hover" style={{ background: "rgba(255,255,255,.92)", border: "1px solid var(--border)", borderRadius: 22, padding: 24 }}>
               <div style={{ width: 42, height: 42, borderRadius: 14, background: "color-mix(in srgb,var(--accent) 11%,#fff)", color: "var(--accent)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 950, marginBottom: 16 }}>
                 {item.title.charAt(0)}
               </div>
@@ -130,27 +146,42 @@ export default function Home({ articles, theme }) {
 
       <section className="news-grid" style={{ display: "grid", gridTemplateColumns: "1fr 330px", gap: 26 }}>
         <div>
-          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 18, flexWrap: "wrap" }}>
-            <h2 style={{ fontSize: 28, fontWeight: 950, letterSpacing: "-0.04em" }}>Latest Gulf career articles</h2>
-            <div style={{ flex: 1, height: 1, background: "var(--border)" }} />
-            <Link href="/articles" className="career-btn career-btn-soft" style={{ padding: "9px 14px", fontSize: 13 }}>View All</Link>
-          </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(250px,1fr))", gap: 20 }}>
-            {latest.map(article => <ArticleCard key={article.id} article={article} />)}
+          <div style={{
+            borderRadius: 30,
+            padding: 24,
+            background: "linear-gradient(135deg,rgba(255,255,255,.96),rgba(236,253,245,.9))",
+            border: "1px solid rgba(209,250,229,.9)",
+            marginBottom: 26,
+          }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 18, flexWrap: "wrap" }}>
+              <h2 style={{ fontSize: 28, fontWeight: 950, letterSpacing: "-0.04em" }}>Latest Gulf career articles</h2>
+              <div style={{ flex: 1, height: 1, background: "var(--border)" }} />
+              <Link href="/articles" className="career-btn career-btn-soft" style={{ padding: "9px 14px", fontSize: 13 }}>View All</Link>
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(250px,1fr))", gap: 20 }}>
+              {latest.map(article => <ArticleCard key={article.id} article={article} />)}
+            </div>
           </div>
 
-          <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "36px 0 18px", flexWrap: "wrap" }}>
-            <h2 style={{ fontSize: 28, fontWeight: 950, letterSpacing: "-0.04em" }}>Most viewed guides</h2>
-            <div style={{ flex: 1, height: 1, background: "var(--border)" }} />
-            <Link href="/articles" className="career-btn career-btn-soft" style={{ padding: "9px 14px", fontSize: 13 }}>View All</Link>
-          </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(250px,1fr))", gap: 20 }}>
-            {mostViewed.map(article => <ArticleCard key={`popular-${article.id || article.slug}`} article={article} />)}
+          <div style={{
+            borderRadius: 30,
+            padding: 24,
+            background: "linear-gradient(135deg,rgba(255,255,255,.96),rgba(255,247,237,.92))",
+            border: "1px solid rgba(254,215,170,.85)",
+          }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 18, flexWrap: "wrap" }}>
+              <h2 style={{ fontSize: 28, fontWeight: 950, letterSpacing: "-0.04em" }}>Most viewed guides</h2>
+              <div style={{ flex: 1, height: 1, background: "var(--border)" }} />
+              <Link href="/articles" className="career-btn career-btn-soft" style={{ padding: "9px 14px", fontSize: 13 }}>View All</Link>
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(250px,1fr))", gap: 20 }}>
+              {mostViewed.map(article => <ArticleCard key={`popular-${article.id || article.slug}`} article={article} />)}
+            </div>
           </div>
         </div>
 
         <aside style={{ display: "flex", flexDirection: "column", gap: 18 }}>
-          <div className="glass-panel" style={{ borderRadius: 22, padding: 24 }}>
+          <div className="glass-panel" style={{ borderRadius: 22, padding: 24, background: "linear-gradient(135deg,rgba(255,255,255,.92),rgba(239,246,255,.9))" }}>
             <h3 style={{ fontSize: 21, fontWeight: 950, marginBottom: 10 }}>Safe job search checklist</h3>
             <ul style={{ color: "var(--muted)", paddingLeft: 18, lineHeight: 1.9, fontSize: 14 }}>
               <li>Verify company name and official website.</li>

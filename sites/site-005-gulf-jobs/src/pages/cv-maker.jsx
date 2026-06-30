@@ -1,6 +1,7 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Layout from "../components/Layout.jsx";
 import { getSite } from "../lib/data";
+import { getAuth, requireLogin } from "../lib/authClient";
 import { SITE } from "../site.config";
 
 export async function getServerSideProps() {
@@ -221,12 +222,13 @@ function AccessModal({ mode, templateLabel, onClose, onLogin, onSignup, onPaymen
 export default function CvMaker({ theme }) {
   const [cv, setCv] = useState(initialCv);
   const [template, setTemplate] = useState("modern");
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [auth, setAuth] = useState(null);
   const [paidAccess, setPaidAccess] = useState({});
   const [modal, setModal] = useState(null);
   const selectedTemplate = templates[template] || templates.modern;
   const isPaidTemplate = selectedTemplate.tier === "paid";
   const hasPaidAccess = Boolean(paidAccess[template]);
+  const isAuthenticated = Boolean(auth?.token);
   const canDownload = isAuthenticated && (!isPaidTemplate || hasPaidAccess);
   const schema = useMemo(() => ({
     "@context": "https://schema.org",
@@ -240,17 +242,13 @@ export default function CvMaker({ theme }) {
 
   const update = (key) => (value) => setCv(current => ({ ...current, [key]: value }));
   const closeModal = () => setModal(null);
-  const finishAuth = () => {
-    setIsAuthenticated(true);
-    setModal(isPaidTemplate && !hasPaidAccess ? "payment" : null);
-  };
   const finishPayment = () => {
     setPaidAccess(current => ({ ...current, [template]: true }));
     setModal(null);
   };
   const downloadCv = () => {
     if (!isAuthenticated) {
-      setModal("auth");
+      requireLogin();
       return;
     }
     if (isPaidTemplate && !hasPaidAccess) {
@@ -259,6 +257,13 @@ export default function CvMaker({ theme }) {
     }
     window.print();
   };
+
+  useEffect(() => {
+    const refresh = () => setAuth(getAuth());
+    refresh();
+    window.addEventListener("gulf-auth-changed", refresh);
+    return () => window.removeEventListener("gulf-auth-changed", refresh);
+  }, []);
 
   return (
     <Layout
@@ -346,8 +351,8 @@ export default function CvMaker({ theme }) {
         mode={modal}
         templateLabel={selectedTemplate.label}
         onClose={closeModal}
-        onLogin={finishAuth}
-        onSignup={finishAuth}
+        onLogin={requireLogin}
+        onSignup={requireLogin}
         onPayment={finishPayment}
       />
     </Layout>

@@ -4,7 +4,28 @@ import { SITE } from "../site.config";
 import { byDateDesc, withArticleStats } from "./seed";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://api:4000";
-const SITE_ID = process.env.NEXT_PUBLIC_SITE_ID;
+const SITE_ID = process.env.NEXT_PUBLIC_SITE_ID || "site-005-gulf-jobs";
+
+async function getPersistedStats() {
+  try {
+    const res = await fetch(`${API}/api/articles/stats?site_id=${encodeURIComponent(SITE_ID)}`);
+    if (!res.ok) return {};
+    const rows = await res.json();
+    if (!Array.isArray(rows)) return {};
+    return rows.reduce((map, row) => ({ ...map, [row.slug]: row }), {});
+  } catch {
+    return {};
+  }
+}
+
+function mergePersistedStats(article, statsBySlug) {
+  const stats = statsBySlug[article.slug];
+  return withArticleStats({
+    ...article,
+    view_count: stats?.view_count ?? article.view_count,
+    like_count: stats?.like_count ?? article.like_count,
+  });
+}
 
 export async function getSite() {
   try {
@@ -19,15 +40,16 @@ export async function getSite() {
 }
 
 export async function getPublishedArticles() {
+  const statsBySlug = await getPersistedStats();
   try {
     const res = await fetch(`${API}/api/articles?site_id=${SITE_ID}&status=published`);
     if (res.ok) {
       const list = await res.json();
-      if (Array.isArray(list) && list.length > 0) return list.map(withArticleStats).sort(byDateDesc);
+      if (Array.isArray(list) && list.length > 0) return list.map(article => mergePersistedStats(article, statsBySlug)).sort(byDateDesc);
     }
   } catch { /* fall through */ }
   // Fallback to the per-site seed articles (>=5, dated) when the API has none.
-  return [...(SITE.seedArticles || [])].map(withArticleStats).sort(byDateDesc);
+  return [...(SITE.seedArticles || [])].map(article => mergePersistedStats(article, statsBySlug)).sort(byDateDesc);
 }
 
 // Slug helper so nav labels and article categories map to the same URL.
