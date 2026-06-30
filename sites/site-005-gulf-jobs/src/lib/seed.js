@@ -5,7 +5,7 @@
 // Branded article artwork generated in-repo. This avoids generic stock or
 // placeholder services while still giving each article a crawlable image.
 export function seedImage(slug) {
-  return `/article-image/${encodeURIComponent(slug)}.svg`;
+  return `/article-image/${encodeURIComponent(slug)}`;
 }
 
 export function makeArticle({
