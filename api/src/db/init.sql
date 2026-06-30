@@ -56,5 +56,5 @@ INSERT INTO sites (id, name, niche, domain) VALUES
 ON CONFLICT DO NOTHING;
 
 INSERT INTO sites (id, name, niche, domain, theme) VALUES
-  ('site-005-gulf-jobs', 'Gulf Jobs Guide', 'gulf-jobs', 'jobs.skoolai.cloud', 'royal')
+  ('site-005-gulf-jobs', 'Gulf Jobs Guide', 'gulf-jobs', 'gulfjobss.com', 'royal')
 ON CONFLICT DO NOTHING;

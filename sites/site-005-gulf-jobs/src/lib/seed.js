@@ -2,9 +2,10 @@
 // Used by each site's site.config.js to seed >=5 dated articles so the site is
 // always populated (fallback when the API/DB has no published content).
 
-// Stable topical image from Lorem Picsum, seeded by slug (no 404s, varies per article).
-export function seedImage(slug) {
-  return `https://picsum.photos/seed/${encodeURIComponent(slug)}/1200/675`;
+// Default to the site's designed gradient placeholders instead of generic stock
+// image services. Real custom images can still be passed per article via image.
+export function seedImage() {
+  return null;
 }
 
 export function makeArticle({
