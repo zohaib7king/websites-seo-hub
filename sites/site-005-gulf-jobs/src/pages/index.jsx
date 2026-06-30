@@ -16,11 +16,6 @@ const clusters = [
   { title: "Walk-In Interviews", text: "Prepare documents, answers and follow-up for Gulf hiring events.", href: "/category/interviews" },
   { title: "Job Portals", text: "Use LinkedIn, GulfTalent, Bayt-style portals and alerts with a routine.", href: "/category/job-portals" },
 ];
-const stats = [
-  ["6", "Gulf countries covered"],
-  ["5+", "practical starter guides"],
-  ["3", "CV templates"],
-];
 
 function Pill({ children }) {
   return (
@@ -34,10 +29,24 @@ function Pill({ children }) {
   );
 }
 
+function formatCount(value) {
+  const number = Number(value || 0);
+  if (number >= 1000000) return `${(number / 1000000).toFixed(1)}M`;
+  if (number >= 1000) return `${(number / 1000).toFixed(1)}K`;
+  return String(number);
+}
+
 export default function Home({ articles, theme }) {
   const featured = articles[0];
   const latest = articles.slice(0, 4);
   const mostViewed = [...articles].sort((a, b) => Number(b.view_count || 0) - Number(a.view_count || 0)).slice(0, 4);
+  const totalViews = articles.reduce((sum, article) => sum + Number(article.view_count || 0), 0);
+  const totalLikes = articles.reduce((sum, article) => sum + Number(article.like_count || 0), 0);
+  const stats = [
+    ["6", "Gulf countries covered"],
+    [String(articles.length), "career guides live"],
+    [formatCount(totalViews), "real article views"],
+  ];
   const schema = {
     "@context": "https://schema.org",
     "@type": "WebSite",
@@ -57,10 +66,12 @@ export default function Home({ articles, theme }) {
       schema={schema}
     >
       <section className="hero-portal glass-panel" style={{
-        position: "relative", overflow: "hidden", borderRadius: 30, padding: "54px 34px",
+        position: "relative", overflow: "hidden", borderRadius: 34, padding: "54px 34px",
         display: "grid", gridTemplateColumns: "1.1fr .9fr", gap: 34, alignItems: "center",
+        background: "linear-gradient(135deg,rgba(255,255,255,.92),rgba(239,246,255,.9) 48%,rgba(250,245,255,.92))",
       }}>
         <div style={{ position: "absolute", inset: "auto -120px -180px auto", width: 360, height: 360, borderRadius: "50%", background: "rgba(14,165,233,.16)" }} />
+        <div style={{ position: "absolute", inset: "-160px auto auto -120px", width: 320, height: 320, borderRadius: "50%", background: "rgba(124,58,237,.12)" }} />
         <div style={{ position: "relative", zIndex: 1 }}>
           <Pill>Gulf career planning made practical</Pill>
           <h1 className="hero-title" style={{ fontSize: 56, lineHeight: 1.02, letterSpacing: "-0.06em", margin: "18px 0 18px", fontWeight: 950 }}>
@@ -79,23 +90,69 @@ export default function Home({ articles, theme }) {
         </div>
 
         <div className="hide-mobile" style={{ position: "relative", zIndex: 1 }}>
-          <div style={{ background: "var(--hero)", borderRadius: 28, padding: 22, color: "#fff", boxShadow: "var(--glow)" }}>
-            <div style={{ background: "rgba(255,255,255,.14)", border: "1px solid rgba(255,255,255,.25)", borderRadius: 22, padding: 20 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18 }}>
-                <strong style={{ fontSize: 18 }}>Professional CV Preview</strong>
-                <span style={{ background: "#fff", color: "var(--accent)", borderRadius: 999, padding: "4px 10px", fontSize: 12, fontWeight: 900 }}>ATS-ready</span>
-              </div>
-              <div style={{ height: 10, width: "64%", background: "#fff", borderRadius: 999, marginBottom: 8 }} />
-              <div style={{ height: 8, width: "42%", background: "rgba(255,255,255,.7)", borderRadius: 999, marginBottom: 22 }} />
-              {["Experience", "Skills", "Education", "Languages"].map((label, index) => (
-                <div key={label} style={{ marginBottom: 15 }}>
-                  <div style={{ fontSize: 12, fontWeight: 900, textTransform: "uppercase", letterSpacing: ".08em", opacity: .85, marginBottom: 6 }}>{label}</div>
-                  <div style={{ height: 8, width: `${86 - index * 10}%`, background: "rgba(255,255,255,.72)", borderRadius: 999 }} />
+          <div style={{ background: "var(--hero)", borderRadius: 30, padding: 18, color: "#fff", boxShadow: "var(--glow)" }}>
+            {featured && (
+              <Link href={`/article/${featured.slug}`} style={{ display: "block", background: "rgba(255,255,255,.14)", border: "1px solid rgba(255,255,255,.25)", borderRadius: 24, overflow: "hidden", marginBottom: 14 }}>
+                <div style={{ height: 150, background: featured.image_url ? `linear-gradient(rgba(15,23,42,.12),rgba(15,23,42,.36)),url(${featured.image_url}) center/cover` : "rgba(255,255,255,.16)" }} />
+                <div style={{ padding: 18 }}>
+                  <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 10, flexWrap: "wrap" }}>
+                    <span style={{ background: "#fff", color: "var(--accent)", borderRadius: 999, padding: "4px 10px", fontSize: 12, fontWeight: 900 }}>Featured</span>
+                    <span style={{ color: "rgba(255,255,255,.82)", fontSize: 12, fontWeight: 800 }}>{featured.category}</span>
+                  </div>
+                  <h2 style={{ fontSize: 22, lineHeight: 1.18, letterSpacing: "-0.04em", fontWeight: 950, marginBottom: 10 }}>{featured.title}</h2>
+                  <div style={{ display: "flex", gap: 10, color: "rgba(255,255,255,.84)", fontSize: 12, fontWeight: 900 }}>
+                    <span>{formatCount(featured.view_count)} views</span>
+                    <span>{formatCount(featured.like_count)} likes</span>
+                  </div>
                 </div>
-              ))}
+              </Link>
+            )}
+            <div style={{ background: "rgba(255,255,255,.14)", border: "1px solid rgba(255,255,255,.25)", borderRadius: 22, padding: 18 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+                <strong style={{ fontSize: 17 }}>Live reader activity</strong>
+                <span style={{ background: "#fff", color: "var(--accent)", borderRadius: 999, padding: "4px 10px", fontSize: 12, fontWeight: 900 }}>Real counts</span>
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                {[
+                  [formatCount(totalViews), "total views"],
+                  [formatCount(totalLikes), "total likes"],
+                ].map(([value, label]) => (
+                  <div key={label} style={{ background: "rgba(255,255,255,.16)", borderRadius: 18, padding: 14 }}>
+                    <div style={{ fontSize: 24, fontWeight: 950, lineHeight: 1 }}>{value}</div>
+                    <div style={{ color: "rgba(255,255,255,.78)", fontSize: 12, fontWeight: 800, marginTop: 4 }}>{label}</div>
+                  </div>
+                ))}
+              </div>
+              <Link href="/cv-maker" className="career-btn" style={{ background: "#fff", color: "var(--accent)", width: "100%", marginTop: 14 }}>
+                Build a Gulf CV
+              </Link>
             </div>
           </div>
         </div>
+      </section>
+
+      <section style={{
+        margin: "22px 0 0",
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fit,minmax(190px,1fr))",
+        gap: 14,
+      }}>
+        {[
+          ["CV Maker", "Free and paid templates for Gulf applicants", "/cv-maker"],
+          ["All Articles", "Browse every guide by category", "/articles"],
+          ["Most Viewed", "See what readers are opening now", featured ? `/article/${featured.slug}` : "/articles"],
+        ].map(([title, text, href]) => (
+          <Link key={title} href={href} className="card-hover" style={{
+            background: "#fff",
+            border: "1px solid var(--border)",
+            borderRadius: 22,
+            padding: 18,
+            boxShadow: "0 14px 35px rgba(15,23,42,.05)",
+          }}>
+            <div style={{ color: "var(--accent)", fontWeight: 950, marginBottom: 4 }}>{title}</div>
+            <div style={{ color: "var(--muted)", fontSize: 13, lineHeight: 1.55 }}>{text}</div>
+          </Link>
+        ))}
       </section>
 
       <section className="stats-grid" style={{
