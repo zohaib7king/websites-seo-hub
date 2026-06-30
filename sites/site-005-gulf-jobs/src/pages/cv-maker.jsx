@@ -97,13 +97,13 @@ function CvPreview({ cv, template, showWatermark }) {
   const skillList = String(cv.skills || "").split("\n").filter(Boolean);
   const content = (
     <>
-      <header style={{ borderBottom: `4px solid ${config.accent}`, paddingBottom: 18, marginBottom: 20 }}>
+      <div className="cv-header" style={{ borderBottom: `4px solid ${config.accent}`, paddingBottom: 18, marginBottom: 20 }}>
         <h2 style={{ fontSize: 34, lineHeight: 1.05, letterSpacing: "-0.04em", color: "#111827", marginBottom: 6 }}>{cv.name}</h2>
         <div style={{ fontSize: 16, color: config.accent, fontWeight: 800, marginBottom: 10 }}>{cv.title}</div>
         <div style={{ display: "flex", flexWrap: "wrap", gap: "6px 14px", color: "#475569", fontSize: 12.5 }}>
           <span>{cv.phone}</span><span>{cv.email}</span><span>{cv.location}</span><span>{cv.linkedin}</span>
         </div>
-      </header>
+      </div>
       <Section title="Professional Summary">{cv.summary}</Section>
       <Section title="Core Skills">
         <div style={{ display: "flex", gap: 7, flexWrap: "wrap" }}>
