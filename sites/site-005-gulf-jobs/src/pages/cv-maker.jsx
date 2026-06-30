@@ -59,14 +59,14 @@ function Lines({ text }) {
   return String(text || "")
     .split("\n")
     .filter(Boolean)
-    .map((line, index) => <div key={`${line}-${index}`}>{line}</div>);
+    .map((line, index) => <div className="cv-line" key={`${line}-${index}`}>{line}</div>);
 }
 
 function Section({ title, children }) {
   return (
-    <section style={{ marginTop: 22 }}>
+    <section className="cv-section" style={{ marginTop: 22 }}>
       <h3 style={{ fontSize: 13, textTransform: "uppercase", letterSpacing: ".12em", color: "inherit", borderBottom: "1px solid rgba(148,163,184,.35)", paddingBottom: 6, marginBottom: 10 }}>{title}</h3>
-      <div style={{ fontSize: 13.5, lineHeight: 1.65 }}>{children}</div>
+      <div className="cv-section-content" style={{ fontSize: 13.5, lineHeight: 1.65 }}>{children}</div>
     </section>
   );
 }
@@ -121,7 +121,7 @@ function CvPreview({ cv, template, showWatermark }) {
 
   if (config.sidebar) {
     return (
-      <div id="cv-preview" style={{ position: "relative", background: "#fff", color: "#111827", minHeight: 980, boxShadow: "0 25px 70px rgba(15,23,42,.14)", borderRadius: 18, overflow: "hidden", display: "grid", gridTemplateColumns: "230px 1fr" }}>
+      <div id="cv-preview" className="cv-preview cv-preview-sidebar" style={{ position: "relative", background: "#fff", color: "#111827", minHeight: 980, boxShadow: "0 25px 70px rgba(15,23,42,.14)", borderRadius: 18, overflow: "hidden", display: "grid", gridTemplateColumns: "230px 1fr" }}>
         <aside style={{ background: config.accent, color: "#fff", padding: 24 }}>
           <h2 style={{ fontSize: 27, lineHeight: 1.05, letterSpacing: "-0.04em", marginBottom: 10 }}>{cv.name}</h2>
           <p style={{ opacity: .9, fontWeight: 800, marginBottom: 24 }}>{cv.title}</p>
@@ -143,7 +143,7 @@ function CvPreview({ cv, template, showWatermark }) {
   }
 
   return (
-    <div id="cv-preview" style={{ position: "relative", background: "#fff", color: "#111827", minHeight: 980, boxShadow: "0 25px 70px rgba(15,23,42,.14)", borderRadius: 18, padding: 34 }}>
+    <div id="cv-preview" className="cv-preview" style={{ position: "relative", background: "#fff", color: "#111827", minHeight: 980, boxShadow: "0 25px 70px rgba(15,23,42,.14)", borderRadius: 18, padding: 34 }}>
       {content}
       <Watermark show={showWatermark} />
     </div>
@@ -274,11 +274,44 @@ export default function CvMaker({ theme }) {
       schema={schema}
     >
       <style dangerouslySetInnerHTML={{ __html: `
+        .cv-preview{overflow-wrap:anywhere;word-break:break-word;}
+        .cv-section-content{overflow-wrap:anywhere;word-break:break-word;}
+        .cv-line{min-height:1.2em;}
         @media(max-width:980px){.cv-grid{grid-template-columns:1fr !important;}.cv-preview-wrap{position:static !important;}}
+        @page{size:A4;margin:12mm;}
         @media print{
-          #cv-preview{box-shadow:none !important;border-radius:0 !important;min-height:auto !important;width:100% !important;}
-          .cv-print-shell{display:block !important;}
-          .cv-watermark{position:fixed !important;right:10px !important;bottom:16px !important;}
+          html,body{background:#fff !important;}
+          #__next{background:#fff !important;}
+          .cv-preview,.cv-preview *{
+            -webkit-print-color-adjust:exact !important;
+            print-color-adjust:exact !important;
+            color-adjust:exact !important;
+          }
+          .cv-print-shell{display:block !important;width:100% !important;margin:0 !important;padding:0 !important;}
+          #cv-preview{
+            box-shadow:none !important;
+            border-radius:18px !important;
+            min-height:auto !important;
+            width:186mm !important;
+            max-width:186mm !important;
+            margin:0 auto !important;
+            overflow:visible !important;
+            break-inside:auto !important;
+            page-break-inside:auto !important;
+          }
+          .cv-section{
+            break-inside:auto;
+            page-break-inside:auto;
+          }
+          .cv-section h3{
+            break-after:avoid;
+            page-break-after:avoid;
+          }
+          .cv-line{
+            break-inside:avoid;
+            page-break-inside:avoid;
+          }
+          .cv-watermark{position:fixed !important;right:6mm !important;bottom:8mm !important;}
         }
       `}} />
 
