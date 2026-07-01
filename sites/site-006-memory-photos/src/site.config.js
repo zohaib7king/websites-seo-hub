@@ -7,7 +7,7 @@ export const SITE = {
   eyebrow: "Memory photos · Face remake · Family keepsakes",
   nav: ["Home", "Demo", "How It Works", "Photo Remake", "About", "Contact"],
   defaultTheme: "sunset",
-  domain: "remakememory.com",
+  domain: "memory.skoolai.cloud",
 
   demoPairs: [
     {

@@ -88,5 +88,5 @@ INSERT INTO sites (id, name, niche, domain, theme) VALUES
 ON CONFLICT DO NOTHING;
 
 INSERT INTO sites (id, name, niche, domain, theme) VALUES
-  ('site-006-memory-photos', 'Remake Memory', 'memory-photos', 'remakememory.com', 'sunset')
+  ('site-006-memory-photos', 'Remake Memory', 'memory-photos', 'memory.skoolai.cloud', 'sunset')
 ON CONFLICT DO NOTHING;

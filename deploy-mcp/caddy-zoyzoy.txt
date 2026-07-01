@@ -62,7 +62,7 @@ gulfjobss.com {
 }
 
 # Site 006 — Remake Memory  (:3007)
-remakememory.com {
+memory.skoolai.cloud {
 	import common
 	reverse_proxy 127.0.0.1:3007
 }
