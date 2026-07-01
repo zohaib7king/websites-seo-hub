@@ -29,6 +29,7 @@ services:
     environment:
       DATABASE_URL: postgresql://zoyzoy:zoyzoy_secret@db:5432/zoyzoy_hub
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+      REPLICATE_API_TOKEN: ${REPLICATE_API_TOKEN:-}
       JWT_SECRET: ${JWT_SECRET:-supersecretjwt}
       NODE_ENV: production
       # Repo is bind-mounted below so the site-scaffolder can write sites/<id>/,
@@ -187,6 +188,26 @@ services:
       - api
     ports:
       - "127.0.0.1:3006:3000"
+    networks:
+      - zoyzoy_net
+
+  # ── Site: site-006-memory-photos (Remake Memory) ─────────
+  site-006-memory-photos:
+    build:
+      context: .
+      dockerfile: sites/site-006-memory-photos/Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: http://api:4000
+        NEXT_PUBLIC_SITE_ID: site-006-memory-photos
+    container_name: zoyzoy_site-006-memory-photos
+    restart: unless-stopped
+    environment:
+      NEXT_PUBLIC_API_URL: http://api:4000
+      NEXT_PUBLIC_SITE_ID: site-006-memory-photos
+    depends_on:
+      - api
+    ports:
+      - "127.0.0.1:3007:3000"
     networks:
       - zoyzoy_net
 

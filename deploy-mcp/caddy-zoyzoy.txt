@@ -60,3 +60,9 @@ gulfjobss.com {
 	import common
 	reverse_proxy 127.0.0.1:3006
 }
+
+# Site 006 — Remake Memory  (:3007)
+remakememory.com {
+	import common
+	reverse_proxy 127.0.0.1:3007
+}
