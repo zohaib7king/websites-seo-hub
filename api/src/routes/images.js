@@ -45,7 +45,14 @@ async function handleRemake(req, res, files) {
     });
   } catch (err) {
     console.error("[images/remake]", err.message);
-    return res.status(500).json({ error: "Image remake failed", detail: err.message });
+    const status = err.code === "AI_NOT_CONFIGURED" ? 503
+      : err.code === "DUPLICATE_REFERENCE" ? 400
+      : 500;
+    return res.status(status).json({
+      error: err.code === "AI_NOT_CONFIGURED" ? "AI not configured" : err.code === "DUPLICATE_REFERENCE" ? "Duplicate portrait" : "Image remake failed",
+      detail: err.message,
+      code: err.code || "REMAKE_FAILED",
+    });
   }
 }
 

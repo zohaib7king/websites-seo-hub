@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Layout from "../components/Layout.jsx";
 import { getSite } from "../lib/data";
 import { SITE } from "../site.config";
@@ -58,10 +58,24 @@ export default function PhotoRemake({ theme }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [result, setResult] = useState(null);
+  const [aiEnabled, setAiEnabled] = useState(null);
 
   const activeKeys = useMemo(() => FACE_KEYS.slice(0, peopleCount), [peopleCount]);
   const uploadedFaces = useMemo(() => activeKeys.filter((key) => faces[key]?.file), [activeKeys, faces]);
-  const canGenerate = useMemo(() => source?.file && uploadedFaces.length > 0, [source, uploadedFaces.length]);
+  const duplicateKeys = useMemo(() => (
+    activeKeys.filter((key) => faces[key]?.preview && source?.preview && faces[key].preview === source.preview)
+  ), [activeKeys, faces, source]);
+  const canGenerate = useMemo(
+    () => source?.file && uploadedFaces.length === peopleCount && duplicateKeys.length === 0 && aiEnabled === true,
+    [source, uploadedFaces.length, peopleCount, duplicateKeys.length, aiEnabled]
+  );
+
+  useEffect(() => {
+    fetch("/api/ai-status")
+      .then((res) => res.json())
+      .then((data) => setAiEnabled(!!data.ai_enabled))
+      .catch(() => setAiEnabled(false));
+  }, []);
 
   const setFace = (key, file) => {
     readFile(file, (value) => {
@@ -70,7 +84,16 @@ export default function PhotoRemake({ theme }) {
   };
 
   const generate = async () => {
-    if (!canGenerate) return;
+    if (!canGenerate) {
+      if (aiEnabled === false) {
+        setError("Real AI remake is not active yet. The server needs REPLICATE_API_TOKEN before it can replace faces.");
+      } else if (duplicateKeys.length) {
+        setError("A new portrait matches the old photo. Upload a different current face photo for each person.");
+      } else if (uploadedFaces.length < peopleCount) {
+        setError(`Please upload all ${peopleCount} current portrait${peopleCount > 1 ? "s" : ""} before generating.`);
+      }
+      return;
+    }
     setLoading(true);
     setError("");
     setResult(null);
@@ -90,7 +113,7 @@ export default function PhotoRemake({ theme }) {
         }),
       });
       const payload = await res.json();
-      if (!res.ok) throw new Error(payload.error || payload.detail || "Generation failed");
+      if (!res.ok) throw new Error(payload.detail || payload.error || "Generation failed");
 
       setResult(payload);
     } catch (err) {
@@ -115,6 +138,19 @@ export default function PhotoRemake({ theme }) {
       theme={theme}
       canonical={`https://${SITE.domain}/photo-remake`}
     >
+      {aiEnabled === false && (
+        <section style={{
+          marginBottom: 20, borderRadius: 20, padding: "18px 20px",
+          background: "color-mix(in srgb, #ef4444 14%, var(--surface))",
+          border: "1px solid color-mix(in srgb, #ef4444 35%, var(--border))",
+        }}>
+          <h2 style={{ fontSize: 18, fontWeight: 900, marginBottom: 8, color: "#fecaca" }}>AI remake is not active on the server</h2>
+          <p style={{ color: "var(--muted)", fontSize: 14, lineHeight: 1.7 }}>
+            Right now the tool cannot replace faces yet. Without <strong>REPLICATE_API_TOKEN</strong> on the server, it would only return the same old image. Add the token, rebuild the API, then upload a <strong>different new portrait</strong> for each person.
+          </p>
+        </section>
+      )}
+
       <section className="glass-panel" style={{ marginBottom: 24, borderRadius: 30, padding: "30px 24px" }}>
         <span style={{ color: "var(--accent)", fontSize: 12, fontWeight: 900, letterSpacing: ".08em", textTransform: "uppercase" }}>Photo Remake Studio</span>
         <h1 className="hero-title" style={{ fontSize: 42, fontWeight: 950, letterSpacing: "-0.04em", margin: "8px 0 10px" }}>
@@ -139,8 +175,8 @@ export default function PhotoRemake({ theme }) {
 
       <div style={{ display: "grid", gridTemplateColumns: "1.05fr .95fr", gap: 18, marginBottom: 18 }} className="feature-split">
         <UploadBox
-          label="Original childhood photo"
-          hint="Upload the old image exactly as it is. Best results come from clear scans or sharp phone photos."
+          label="OLD photo — childhood / original image"
+          hint="Upload the old family photo you want to recreate."
           file={source?.file}
           preview={source?.preview}
           onChange={(e) => readFile(e.target.files?.[0], setSource)}
@@ -175,8 +211,10 @@ export default function PhotoRemake({ theme }) {
       <section style={{ marginBottom: 22, background: "linear-gradient(135deg, color-mix(in srgb,var(--surface) 95%,#fff), color-mix(in srgb,var(--accent) 7%, var(--surface)))", border: "1px solid var(--border)", borderRadius: 24, padding: 22 }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 14, flexWrap: "wrap", marginBottom: 16 }}>
           <div>
-            <h2 style={{ fontSize: 24, fontWeight: 950 }}>Current portraits for each person</h2>
-            <p style={{ color: "var(--muted)", fontSize: 14, marginTop: 4 }}>Upload one current image for every person in the old photo.</p>
+            <h2 style={{ fontSize: 24, fontWeight: 950 }}>NEW portraits — one per person today</h2>
+            <p style={{ color: "var(--muted)", fontSize: 14, marginTop: 4 }}>
+              Do <strong>not</strong> upload the old photo again here. Each box needs a different current face photo.
+            </p>
           </div>
           <div style={{ color: "var(--accent2)", fontSize: 13, fontWeight: 800 }}>
             Uploaded: {uploadedFaces.length}/{peopleCount}
@@ -187,28 +225,30 @@ export default function PhotoRemake({ theme }) {
             <UploadBox
               key={key}
               badge={key}
-              label={`Person ${key} — position ${index + 1}`}
-              hint={`Upload the current portrait for person ${key}`}
+              label={`Person ${key} — NEW current face`}
+              hint={`Upload today's portrait for person ${key}. Must be different from the old photo.`}
               file={faces[key]?.file}
               preview={faces[key]?.preview}
               onChange={(e) => setFace(key, e.target.files?.[0])}
             />
           ))}
         </div>
+        {duplicateKeys.length > 0 && (
+          <p style={{ color: "#f87171", fontSize: 13, fontWeight: 700, marginTop: 14 }}>
+            Person {duplicateKeys.join(", ")} uses the same image as the old photo. Upload a different new portrait.
+          </p>
+        )}
       </section>
 
       <div style={{ display: "flex", gap: 12, flexWrap: "wrap", alignItems: "center", marginBottom: 22 }}>
         <button type="button" onClick={generate} disabled={!canGenerate || loading} className="memory-btn memory-btn-primary" style={{ opacity: !canGenerate || loading ? 0.6 : 1 }}>
-          {loading ? "Generating..." : "Generate Remake"}
+          {loading ? "Generating..." : aiEnabled === false ? "AI Not Ready" : "Generate Remake"}
         </button>
         <span style={{ color: "var(--muted)", fontSize: 13 }}>
-          Perfect pixel-by-pixel matching cannot be guaranteed, but clearer portraits and correct A-G ordering improve results a lot.
+          {aiEnabled === false
+            ? "Server AI token missing — real face swap cannot run yet."
+            : "Upload the old photo once, then upload different new portraits for A, B, C..."}
         </span>
-        {result?.mode === "demo" && (
-          <span style={{ color: "var(--accent2)", fontSize: 13, fontWeight: 700 }}>
-            Demo mode — add REPLICATE_API_TOKEN for real AI face swap
-          </span>
-        )}
       </div>
 
       {error && <p style={{ color: "#f87171", marginBottom: 18, fontWeight: 700 }}>{error}</p>}
@@ -216,10 +256,10 @@ export default function PhotoRemake({ theme }) {
       <section style={{ marginBottom: 22, background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 22, padding: 18 }}>
         <h2 style={{ fontSize: 20, fontWeight: 900, marginBottom: 10 }}>Before you click generate</h2>
         <ul style={{ color: "var(--muted)", paddingLeft: 20, lineHeight: 1.9, fontSize: 14 }}>
-          <li>Make sure the old photo shows faces clearly enough to identify each person.</li>
-          <li>Use one recent portrait per person, front-facing, with no sunglasses.</li>
-          <li>Upload portraits in the same left-to-right order as people appear in the old photo.</li>
-          <li>If the result is weak, retry with a cleaner crop or fewer people first.</li>
+          <li>Upload the <strong>old photo only once</strong> in the first box.</li>
+          <li>Each person needs a <strong>different new portrait</strong> from today — not the childhood photo again.</li>
+          <li>Current portraits should be front-facing, well lit, and without sunglasses.</li>
+          <li>Match left-to-right order: first person in the old photo = A, second = B, and so on.</li>
         </ul>
       </section>
 

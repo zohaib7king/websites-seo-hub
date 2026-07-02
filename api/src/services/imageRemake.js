@@ -68,26 +68,30 @@ async function downloadToBuffer(url) {
 }
 
 /**
- * Demo fallback: return the source with a note when Replicate is not configured.
- */
-function demoResult(sourceBuffer, mime) {
-  return {
-    mode: "demo",
-    buffer: sourceBuffer,
-    mime,
-    message: "Demo mode is active. Set REPLICATE_API_TOKEN in .env for real AI face swapping.",
-  };
-}
-
-/**
  * Remake a childhood photo by swapping a left-to-right ordered list of faces.
  * This is still model-limited: the underlying provider does not let us pin
  * exact bounding boxes, so the best approximation is to apply replacements in
  * the same order the user sees people in the original image.
  */
+function buffersMatch(a, b) {
+  if (!a || !b) return false;
+  return Buffer.compare(a, b) === 0;
+}
+
 async function remakePhoto({ sourceBuffer, sourceMime, faces = [] }) {
   const token = process.env.REPLICATE_API_TOKEN;
-  if (!token) return demoResult(sourceBuffer, sourceMime || "image/jpeg");
+  if (!token) {
+    const err = new Error("AI face swap is not configured on the server. Add REPLICATE_API_TOKEN to enable real remakes.");
+    err.code = "AI_NOT_CONFIGURED";
+    throw err;
+  }
+
+  const duplicate = faces.find((face) => buffersMatch(sourceBuffer, face.buffer));
+  if (duplicate) {
+    const err = new Error("One of the new portraits is identical to the old photo. Upload a different current face photo for each person.");
+    err.code = "DUPLICATE_REFERENCE";
+    throw err;
+  }
 
   let working = sourceBuffer;
   let workingMime = sourceMime || "image/jpeg";
