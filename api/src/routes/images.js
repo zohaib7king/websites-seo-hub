@@ -1,6 +1,6 @@
 const express = require("express");
 const multer = require("multer");
-const { remakePhoto, bufferToDataUri } = require("../services/imageRemake");
+const { remakePhoto, bufferToDataUri, REPLICATE_MODEL } = require("../services/imageRemake");
 
 const router = express.Router();
 const upload = multer({
@@ -103,7 +103,7 @@ router.post("/remake", (req, res) => {
 router.get("/status", (_req, res) => {
   res.json({
     ai_enabled: !!process.env.REPLICATE_API_TOKEN,
-    model: "lucataco/faceswap",
+    model: REPLICATE_MODEL,
   });
 });
 

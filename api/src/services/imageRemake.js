@@ -1,7 +1,8 @@
 // Face-swap image remake via Replicate.
-// `lucataco/faceswap` is no longer publicly available, so use a currently
-// reachable model with a simple input_image/swap_image schema.
-const REPLICATE_MODEL = "cdingram/face-swap";
+// Use a pinned model version so the API path stays stable.
+const REPLICATE_MODEL_OWNER = "codeplugtech";
+const REPLICATE_MODEL_NAME = "face-swap";
+const REPLICATE_MODEL_VERSION = "278a81e7ebb22db98bcba54de985d22cc1abeead2754eb1f2af717247be69b34";
 const POLL_MS = 1500;
 const MAX_POLLS = 120;
 
@@ -17,7 +18,7 @@ async function runFaceSwap(token, targetBuffer, swapBuffer, mime = "image/jpeg")
   const targetImage = bufferToDataUri(targetBuffer, mime);
   const swapImage = bufferToDataUri(swapBuffer, mime);
 
-  const createRes = await fetch(`https://api.replicate.com/v1/models/${REPLICATE_MODEL}/predictions`, {
+  const createRes = await fetch(`https://api.replicate.com/v1/models/${REPLICATE_MODEL_OWNER}/${REPLICATE_MODEL_NAME}/versions/${REPLICATE_MODEL_VERSION}/predictions`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -111,4 +112,9 @@ async function remakePhoto({ sourceBuffer, sourceMime, faces = [] }) {
   };
 }
 
-module.exports = { remakePhoto, bufferToDataUri, downloadToBuffer };
+module.exports = {
+  remakePhoto,
+  bufferToDataUri,
+  downloadToBuffer,
+  REPLICATE_MODEL: `${REPLICATE_MODEL_OWNER}/${REPLICATE_MODEL_NAME}:${REPLICATE_MODEL_VERSION}`,
+};
