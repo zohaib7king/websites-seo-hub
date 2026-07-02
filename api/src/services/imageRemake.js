@@ -1,6 +1,7 @@
-// Face-swap image remake via Replicate (with demo fallback when no API token).
-
-const REPLICATE_MODEL = "lucataco/faceswap";
+// Face-swap image remake via Replicate.
+// `lucataco/faceswap` is no longer publicly available, so use a currently
+// reachable model with a simple input_image/swap_image schema.
+const REPLICATE_MODEL = "cdingram/face-swap";
 const POLL_MS = 1500;
 const MAX_POLLS = 120;
 
@@ -25,7 +26,7 @@ async function runFaceSwap(token, targetBuffer, swapBuffer, mime = "image/jpeg")
     },
     body: JSON.stringify({
       input: {
-        target_image: targetImage,
+        input_image: targetImage,
         swap_image: swapImage,
       },
     }),
