@@ -1,14 +1,16 @@
 import Layout from "../../components/Layout.jsx";
+import ContentStats from "../../components/ContentStats.jsx";
 import Link from "next/link";
 import { getSite, getPublishedArticles, catSlug } from "../../lib/data";
 import { readingTime, fmtDate } from "../../lib/seed";
+import { SITE } from "../../site.config";
 
 export async function getServerSideProps({ params }) {
   const [site, articles] = await Promise.all([getSite(), getPublishedArticles()]);
   const article = articles.find(a => a.slug === params.slug);
   if (!article) return { notFound: true };
   const related = articles.filter(a => a.slug !== article.slug).slice(0, 3);
-  return { props: { article, related, theme: site?.theme || "midnight" } };
+  return { props: { article, related, theme: site?.theme || SITE.defaultTheme || "sunset" } };
 }
 
 const ARTICLE_CSS = `
@@ -78,11 +80,7 @@ export default function ArticlePage({ article, related, theme }) {
             <div style={{ fontWeight: 700, fontSize: 14 }}>{article.author || "Editorial Team"}</div>
             <div style={{ color: "var(--muted)", fontSize: 12.5 }}>{fmtDate(article.published_at)} · {mins} min read</div>
           </div>
-          <div style={{ display: "flex", gap: 8 }}>
-            {["𝕏", "in", "f"].map(s => (
-              <span key={s} style={{ width: 32, height: 32, borderRadius: 8, background: "var(--surface)", border: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--muted)", fontSize: 13 }}>{s}</span>
-            ))}
-          </div>
+          <ContentStats type="article" slug={article.slug} initialViews={article.view_count} initialLikes={article.like_count} />
         </div>
 
         {/* Featured image */}

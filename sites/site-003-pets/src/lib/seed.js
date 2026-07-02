@@ -1,10 +1,6 @@
 // Shared helper to build fully-formed article objects from compact specs.
-// Used by each site's site.config.js to seed >=5 dated articles so the site is
-// always populated (fallback when the API/DB has no published content).
-
-// Stable topical image from Lorem Picsum, seeded by slug (no 404s, varies per article).
 export function seedImage(slug) {
-  return `https://picsum.photos/seed/${encodeURIComponent(slug)}/1200/675`;
+  return `/article-image/${encodeURIComponent(slug)}`;
 }
 
 export function makeArticle({
@@ -30,17 +26,59 @@ export function makeArticle({
     image_url: image === null ? null : (image || seedImage(slug)),
     tags,
     author,
-    data: data || null, // optional headline stat for the article callout
+    data: data || null,
     status: "published",
     ai_generated: false,
     published_at: date,
     content: parts.join(""),
+    view_count: 0,
+    like_count: 0,
   };
 }
 
-// Sort newest-first; tolerates missing dates.
+export function makeStory({
+  slug, title, category, date, excerpt, author = "Pet Historian",
+  image, lead, sections = [], takeaway, conclusion,
+}) {
+  const parts = [];
+  if (lead) parts.push(`<p>${lead}</p>`);
+  if (takeaway) parts.push(`<blockquote><p>${takeaway}</p></blockquote>`);
+  (sections || []).forEach((s) => {
+    parts.push(`<h2>${s.h}</h2>`);
+    (s.p || []).forEach((p) => parts.push(`<p>${p}</p>`));
+    if (s.list) parts.push("<ul>" + s.list.map((li) => `<li>${li}</li>`).join("") + "</ul>");
+  });
+  if (conclusion) parts.push(`<h2>Final Thoughts</h2><p>${conclusion}</p>`);
+
+  return {
+    id: slug,
+    slug,
+    title,
+    category,
+    excerpt,
+    image_url: image,
+    author,
+    published_at: date,
+    content: parts.join(""),
+    view_count: 0,
+    like_count: 0,
+  };
+}
+
+export function withArticleStats(article) {
+  return {
+    ...article,
+    view_count: Number(article?.view_count ?? article?.views ?? 0),
+    like_count: Number(article?.like_count ?? article?.likes ?? 0),
+  };
+}
+
 export function byDateDesc(a, b) {
-  return new Date(b.published_at || 0) - new Date(a.published_at || 0);
+  return new Date(b.published_at || b.created_at || 0) - new Date(a.published_at || a.created_at || 0);
+}
+
+export function byViewsDesc(a, b) {
+  return Number(b.view_count || 0) - Number(a.view_count || 0);
 }
 
 export function readingTime(html) {
@@ -51,4 +89,11 @@ export function readingTime(html) {
 export function fmtDate(d) {
   if (!d) return "";
   return new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+}
+
+export function formatCount(value) {
+  const number = Number(value || 0);
+  if (number >= 1000000) return `${(number / 1000000).toFixed(1)}M`;
+  if (number >= 1000) return `${(number / 1000).toFixed(1)}K`;
+  return String(number);
 }
