@@ -8,33 +8,32 @@ const upload = multer({
   limits: { fileSize: 12 * 1024 * 1024 },
 });
 
+const FACE_KEYS = ["A", "B", "C", "D", "E", "F", "G"];
 const fields = upload.fields([
   { name: "source", maxCount: 1 },
-  { name: "face1", maxCount: 1 },
-  { name: "face2", maxCount: 1 },
+  ...FACE_KEYS.map((key) => ({ name: `face${key}`, maxCount: 1 })),
 ]);
+
+function collectFaces(files, order = FACE_KEYS) {
+  return order
+    .map((key) => files[`face${key}`])
+    .filter(Boolean);
+}
 
 async function handleRemake(req, res, files) {
   try {
     const source = files.source;
-    const face1 = files.face1;
-    const face2 = files.face2;
-    const faceOrder = req.body?.face_order || "face1-first";
+    const faceOrder = Array.isArray(req.body?.face_order) ? req.body.face_order : FACE_KEYS;
+    const faces = collectFaces(files, faceOrder);
 
-    if (!source || !face1) {
-      return res.status(400).json({ error: "source and face1 images are required" });
+    if (!source || faces.length === 0) {
+      return res.status(400).json({ error: "source and at least one face image are required" });
     }
-
-    const firstFace = faceOrder === "face2-first" && face2 ? face2 : face1;
-    const secondFace = faceOrder === "face2-first" ? face1 : face2;
 
     const result = await remakePhoto({
       sourceBuffer: source.buffer,
-      face1Buffer: firstFace.buffer,
-      face2Buffer: secondFace?.buffer,
       sourceMime: source.mimetype,
-      face1Mime: firstFace.mimetype,
-      face2Mime: secondFace?.mimetype,
+      faces: faces.map((face) => ({ buffer: face.buffer, mimetype: face.mimetype })),
     });
 
     const result_url = bufferToDataUri(result.buffer, result.mime || "image/jpeg");
@@ -59,15 +58,16 @@ function parseDataUri(dataUri, fallbackMime = "image/jpeg") {
 // POST /api/images/remake-json — same as /remake but accepts base64 JSON (for site proxy)
 router.post("/remake-json", async (req, res) => {
   try {
-    const { source, face1, face2, face_order } = req.body || {};
-    if (!source || !face1) {
-      return res.status(400).json({ error: "source and face1 are required" });
+    const { source, faces = {}, face_order } = req.body || {};
+    if (!source || !Object.keys(faces).length) {
+      return res.status(400).json({ error: "source and at least one face are required" });
     }
-    const files = {
-      source: parseDataUri(source),
-      face1: parseDataUri(face1),
-      face2: face2 ? parseDataUri(face2) : null,
-    };
+    const parsedFaces = Object.fromEntries(
+      FACE_KEYS
+        .filter((key) => faces[key])
+        .map((key) => [`face${key}`, parseDataUri(faces[key])])
+    );
+    const files = { source: parseDataUri(source), ...parsedFaces };
     req.body = { face_order };
     return handleRemake(req, res, files);
   } catch (err) {
@@ -83,9 +83,12 @@ router.post("/remake", (req, res) => {
     }
 
     const source = req.files?.source?.[0];
-    const face1 = req.files?.face1?.[0];
-    const face2 = req.files?.face2?.[0];
-    return handleRemake(req, res, { source, face1, face2 });
+    const faceFiles = Object.fromEntries(
+      FACE_KEYS
+        .map((key) => [`face${key}`, req.files?.[`face${key}`]?.[0]])
+        .filter(([, value]) => value)
+    );
+    return handleRemake(req, res, { source, ...faceFiles });
   });
 });
 

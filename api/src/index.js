@@ -6,7 +6,7 @@ const { processQueue } = require("./services/queueWorker");
 
 const app = express();
 app.use(cors());
-app.use(express.json({ limit: "20mb" }));
+app.use(express.json({ limit: "40mb" }));
 
 // ── Routes ───────────────────────────────────────────────
 app.use("/api/sites",    require("./routes/sites"));

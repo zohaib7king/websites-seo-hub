@@ -80,27 +80,29 @@ function demoResult(sourceBuffer, mime) {
 }
 
 /**
- * Remake a childhood photo by swapping one or two reference faces.
+ * Remake a childhood photo by swapping a left-to-right ordered list of faces.
+ * This is still model-limited: the underlying provider does not let us pin
+ * exact bounding boxes, so the best approximation is to apply replacements in
+ * the same order the user sees people in the original image.
  */
-async function remakePhoto({ sourceBuffer, face1Buffer, face2Buffer, sourceMime, face1Mime, face2Mime }) {
+async function remakePhoto({ sourceBuffer, sourceMime, faces = [] }) {
   const token = process.env.REPLICATE_API_TOKEN;
   if (!token) return demoResult(sourceBuffer, sourceMime || "image/jpeg");
 
   let working = sourceBuffer;
   let workingMime = sourceMime || "image/jpeg";
 
-  working = await runFaceSwap(token, working, face1Buffer, face1Mime || "image/jpeg");
-  workingMime = "image/jpeg";
-
-  if (face2Buffer) {
-    working = await runFaceSwap(token, working, face2Buffer, face2Mime || "image/jpeg");
+  for (const face of faces) {
+    if (!face?.buffer) continue;
+    working = await runFaceSwap(token, working, face.buffer, face.mimetype || "image/jpeg");
+    workingMime = "image/jpeg";
   }
 
   return {
     mode: "ai",
     buffer: working,
     mime: workingMime,
-    message: "AI face swap complete. Results vary with photo quality and lighting.",
+    message: "AI face swap complete. Best results come from clear left-to-right mapping, front-facing portraits, and uncluttered original photos.",
   };
 }
 
