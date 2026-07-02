@@ -58,23 +58,24 @@ export default function PhotoRemake({ theme }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [result, setResult] = useState(null);
-  const [aiEnabled, setAiEnabled] = useState(null);
+  const [aiStatus, setAiStatus] = useState(null);
 
   const activeKeys = useMemo(() => FACE_KEYS.slice(0, peopleCount), [peopleCount]);
   const uploadedFaces = useMemo(() => activeKeys.filter((key) => faces[key]?.file), [activeKeys, faces]);
   const duplicateKeys = useMemo(() => (
     activeKeys.filter((key) => faces[key]?.preview && source?.preview && faces[key].preview === source.preview)
   ), [activeKeys, faces, source]);
+  const aiReady = aiStatus?.ready === true;
   const canGenerate = useMemo(
-    () => source?.file && uploadedFaces.length === peopleCount && duplicateKeys.length === 0 && aiEnabled === true,
-    [source, uploadedFaces.length, peopleCount, duplicateKeys.length, aiEnabled]
+    () => source?.file && uploadedFaces.length === peopleCount && duplicateKeys.length === 0 && aiReady,
+    [source, uploadedFaces.length, peopleCount, duplicateKeys.length, aiReady]
   );
 
   useEffect(() => {
     fetch("/api/ai-status")
       .then((res) => res.json())
-      .then((data) => setAiEnabled(!!data.ai_enabled))
-      .catch(() => setAiEnabled(false));
+      .then((data) => setAiStatus(data))
+      .catch(() => setAiStatus({ ready: false, ai_enabled: false }));
   }, []);
 
   const setFace = (key, file) => {
@@ -85,8 +86,8 @@ export default function PhotoRemake({ theme }) {
 
   const generate = async () => {
     if (!canGenerate) {
-      if (aiEnabled === false) {
-        setError("Real AI remake is not active yet. The server needs REPLICATE_API_TOKEN before it can replace faces.");
+      if (!aiReady) {
+        setError(aiStatus?.message || "The free open-source face swap engine is still starting. Wait 1-2 minutes after deploy, then try again.");
       } else if (duplicateKeys.length) {
         setError("A new portrait matches the old photo. Upload a different current face photo for each person.");
       } else if (uploadedFaces.length < peopleCount) {
@@ -138,15 +139,27 @@ export default function PhotoRemake({ theme }) {
       theme={theme}
       canonical={`https://${SITE.domain}/photo-remake`}
     >
-      {aiEnabled === false && (
+      {aiStatus && !aiReady && (
         <section style={{
           marginBottom: 20, borderRadius: 20, padding: "18px 20px",
-          background: "color-mix(in srgb, #ef4444 14%, var(--surface))",
-          border: "1px solid color-mix(in srgb, #ef4444 35%, var(--border))",
+          background: "color-mix(in srgb, #f59e0b 14%, var(--surface))",
+          border: "1px solid color-mix(in srgb, #f59e0b 35%, var(--border))",
         }}>
-          <h2 style={{ fontSize: 18, fontWeight: 900, marginBottom: 8, color: "#fecaca" }}>AI remake is not active on the server</h2>
+          <h2 style={{ fontSize: 18, fontWeight: 900, marginBottom: 8, color: "#fde68a" }}>Face swap engine is starting</h2>
           <p style={{ color: "var(--muted)", fontSize: 14, lineHeight: 1.7 }}>
-            Right now the tool cannot replace faces yet. Without <strong>REPLICATE_API_TOKEN</strong> on the server, it would only return the same old image. Add the token, rebuild the API, then upload a <strong>different new portrait</strong> for each person.
+            Remake Memory now uses a <strong>free open-source</strong> model on this server (InsightFace / inswapper) — no Replicate credits needed. On first deploy the model files download and load; this can take 1-2 minutes. Refresh this page, then try again.
+          </p>
+        </section>
+      )}
+
+      {aiReady && aiStatus?.provider === "local-open-source" && (
+        <section style={{
+          marginBottom: 20, borderRadius: 20, padding: "14px 18px",
+          background: "color-mix(in srgb, #22c55e 12%, var(--surface))",
+          border: "1px solid color-mix(in srgb, #22c55e 30%, var(--border))",
+        }}>
+          <p style={{ color: "var(--muted)", fontSize: 14, lineHeight: 1.7, margin: 0 }}>
+            <strong style={{ color: "#86efac" }}>Free open-source AI is active.</strong> No paid API required. CPU processing may take 30-90 seconds per person.
           </p>
         </section>
       )}
@@ -242,11 +255,11 @@ export default function PhotoRemake({ theme }) {
 
       <div style={{ display: "flex", gap: 12, flexWrap: "wrap", alignItems: "center", marginBottom: 22 }}>
         <button type="button" onClick={generate} disabled={!canGenerate || loading} className="memory-btn memory-btn-primary" style={{ opacity: !canGenerate || loading ? 0.6 : 1 }}>
-          {loading ? "Generating..." : aiEnabled === false ? "AI Not Ready" : "Generate Remake"}
+          {loading ? "Generating (30-90s)..." : !aiReady ? "Engine Starting" : "Generate Remake"}
         </button>
         <span style={{ color: "var(--muted)", fontSize: 13 }}>
-          {aiEnabled === false
-            ? "Server AI token missing — real face swap cannot run yet."
+          {!aiReady
+            ? "Waiting for the free open-source face swap service to finish loading."
             : "Upload the old photo once, then upload different new portraits for A, B, C..."}
         </span>
       </div>

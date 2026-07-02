@@ -1,6 +1,6 @@
 const express = require("express");
 const multer = require("multer");
-const { remakePhoto, bufferToDataUri, REPLICATE_MODEL } = require("../services/imageRemake");
+const { remakePhoto, bufferToDataUri, getSwapStatus } = require("../services/imageRemake");
 
 const router = express.Router();
 const upload = multer({
@@ -45,11 +45,11 @@ async function handleRemake(req, res, files) {
     });
   } catch (err) {
     console.error("[images/remake]", err.message);
-    const status = err.code === "AI_NOT_CONFIGURED" ? 503
+    const status = err.code === "AI_NOT_READY" ? 503
       : err.code === "DUPLICATE_REFERENCE" ? 400
       : 500;
     return res.status(status).json({
-      error: err.code === "AI_NOT_CONFIGURED" ? "AI not configured" : err.code === "DUPLICATE_REFERENCE" ? "Duplicate portrait" : "Image remake failed",
+      error: err.code === "AI_NOT_READY" ? "AI not ready" : err.code === "DUPLICATE_REFERENCE" ? "Duplicate portrait" : "Image remake failed",
       detail: err.message,
       code: err.code || "REMAKE_FAILED",
     });
@@ -99,12 +99,18 @@ router.post("/remake", (req, res) => {
   });
 });
 
-// GET /api/images/status — whether AI mode is available
-router.get("/status", (_req, res) => {
-  res.json({
-    ai_enabled: !!process.env.REPLICATE_API_TOKEN,
-    model: REPLICATE_MODEL,
-  });
+// GET /api/images/status — whether face-swap engine is available
+router.get("/status", async (_req, res) => {
+  try {
+    const status = await getSwapStatus();
+    return res.json(status);
+  } catch (err) {
+    return res.status(500).json({
+      ai_enabled: false,
+      ready: false,
+      error: err.message,
+    });
+  }
 });
 
 module.exports = router;
