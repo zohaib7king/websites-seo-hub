@@ -139,5 +139,5 @@ CREATE TABLE IF NOT EXISTS user_pet_story_likes (
 );
 
 INSERT INTO sites (id, name, niche, domain, theme) VALUES
-  ('site-003-pets', 'Pet Lovers Daily', 'pet-care', 'petlovers.com', 'sunset')
+  ('site-003-pets', 'Pet Lovers Daily', 'pet-care', 'petlovers.com', 'petportal')
 ON CONFLICT DO NOTHING;

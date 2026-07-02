@@ -16,7 +16,7 @@ export const SITE = {
   accent: "Happy, Healthy Pets",
   tagline: "Vet-informed tips, colorful pet stories, and a community sharing love for dogs, cats, birds, and more.",
   eyebrow: "Pets · Stories · Community",
-  defaultTheme: "sunset",
+  defaultTheme: "petportal",
   domain: "petlovers.com",
 
   // Article categories (shown on /articles page)

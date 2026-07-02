@@ -39,10 +39,10 @@ export async function getSite() {
     const res = await fetch(`${API}/api/sites/${SITE_ID}`);
     if (res.ok) {
       const s = await res.json();
-      if (s) return { ...s, theme: s.theme || SITE.defaultTheme || "sunset" };
+      if (s) return { ...s, theme: s.theme === "sunset" ? "petportal" : (s.theme || SITE.defaultTheme || "petportal") };
     }
   } catch { /* fall through */ }
-  return { id: SITE_ID, name: SITE.name, theme: SITE.defaultTheme || "sunset", domain: SITE.domain || "" };
+  return { id: SITE_ID, name: SITE.name, theme: SITE.defaultTheme || "petportal", domain: SITE.domain || "" };
 }
 
 export async function getPublishedArticles() {

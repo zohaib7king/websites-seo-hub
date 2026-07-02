@@ -10,28 +10,28 @@ export async function getServerSideProps({ params }) {
   const article = articles.find(a => a.slug === params.slug);
   if (!article) return { notFound: true };
   const related = articles.filter(a => a.slug !== article.slug).slice(0, 3);
-  return { props: { article, related, theme: site?.theme || SITE.defaultTheme || "sunset" } };
+  return { props: { article, related, theme: site?.theme || SITE.defaultTheme || "petportal" } };
 }
 
 const ARTICLE_CSS = `
-.article-h1{font-size:40px;font-weight:800;line-height:1.15;letter-spacing:-0.02em;margin-bottom:14px;}
-.article-body{font-size:17px;line-height:1.8;color:var(--text);}
-.article-body > p:first-of-type{font-size:1.15em;line-height:1.7;font-weight:500;}
-.article-body h2{font-size:1.5em;font-weight:800;line-height:1.3;margin:1.9em 0 .6em;}
-.article-body h3{font-size:1.2em;font-weight:700;margin:1.5em 0 .5em;}
-.article-body p{margin:0 0 1.25em;}
-.article-body ul,.article-body ol{margin:0 0 1.3em 1.4em;}
-.article-body li{margin:.45em 0;}
-.article-body strong{font-weight:700;}
-.article-body a{color:var(--accent);text-decoration:underline;}
+.article-shell{max-width:760px;margin:0 auto;}
+.article-h1{font-size:40px;font-weight:800;line-height:1.15;letter-spacing:-0.02em;margin-bottom:14px;color:#0f172a;}
+.article-body{font-size:17px;line-height:1.8;color:#334155;}
+.article-body > p:first-of-type{font-size:1.15em;line-height:1.7;font-weight:500;color:#1e293b;}
+.article-body h2{font-size:1.5em;font-weight:800;line-height:1.3;margin:1.9em 0 .6em;color:#0f172a;}
+.article-body h3{font-size:1.2em;font-weight:700;margin:1.5em 0 .5em;color:#1e293b;}
+.article-body p{margin:0 0 1.25em;color:#334155;}
+.article-body ul,.article-body ol{margin:0 0 1.3em 1.4em;color:#334155;}
+.article-body li{margin:.45em 0;color:#334155;}
+.article-body strong{font-weight:700;color:#1e293b;}
+.article-body a{color:#ea580c;text-decoration:underline;}
 .article-body blockquote{
-  margin:1.7em 0;padding:18px 22px;border-left:4px solid var(--accent);
-  background:color-mix(in srgb, var(--accent) 13%, transparent);
-  border-radius:0 12px 12px 0;font-size:1.05em;
+  margin:1.7em 0;padding:18px 22px;border-left:4px solid #ea580c;
+  background:#fff7ed;border-radius:0 12px 12px 0;font-size:1.05em;color:#334155;
 }
 .article-body blockquote::before{
-  content:"💡 Key Takeaway";display:block;font-size:.72em;font-weight:800;
-  letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:6px;
+  content:"Key Takeaway";display:block;font-size:.72em;font-weight:800;
+  letter-spacing:.08em;text-transform:uppercase;color:#ea580c;margin-bottom:6px;
 }
 .article-body blockquote p:last-child{margin-bottom:0;}
 @media(max-width:768px){.article-h1{font-size:28px;}.article-body{font-size:16px;}}
@@ -39,12 +39,12 @@ const ARTICLE_CSS = `
 
 function RelatedCard({ a }) {
   return (
-    <Link href={`/article/${a.slug}`} className="card-hover" style={{ display: "block", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 14, overflow: "hidden", height: "100%" }}>
-      <div style={{ height: 120, background: a.image_url ? `url(${a.image_url}) center/cover` : "var(--hero)" }} />
+    <Link href={`/article/${a.slug}`} className="card-hover" style={{ display: "block", background: "#fff", border: "1px solid #e2e8f0", borderRadius: 14, overflow: "hidden", height: "100%" }}>
+      <div style={{ height: 120, background: a.image_url ? `url(${a.image_url}) center/cover` : "linear-gradient(135deg,#f97316,#fb7185)" }} />
       <div style={{ padding: 16 }}>
-        <div style={{ fontSize: 11, fontWeight: 700, color: "var(--accent)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 8 }}>{a.category}</div>
-        <div style={{ fontSize: 15, fontWeight: 700, lineHeight: 1.4, marginBottom: 10 }}>{a.title}</div>
-        <div style={{ color: "var(--muted)", fontSize: 12 }}>{fmtDate(a.published_at)} · {readingTime(a.content)} min read</div>
+        <div style={{ fontSize: 11, fontWeight: 700, color: "#ea580c", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 8 }}>{a.category}</div>
+        <div style={{ fontSize: 15, fontWeight: 700, lineHeight: 1.4, marginBottom: 10, color: "#0f172a" }}>{a.title}</div>
+        <div style={{ color: "#64748b", fontSize: 12 }}>{fmtDate(a.published_at)} · {readingTime(a.content)} min read</div>
       </div>
     </Link>
   );
@@ -57,28 +57,28 @@ export default function ArticlePage({ article, related, theme }) {
     <Layout title={article.title} description={article.meta_desc} theme={theme}>
       <style dangerouslySetInnerHTML={{ __html: ARTICLE_CSS }} />
 
-      <article style={{ maxWidth: 760, margin: "0 auto" }}>
+      <article className="article-shell content-panel">
         {/* Breadcrumb */}
-        <div style={{ fontSize: 12.5, color: "var(--muted)", marginBottom: 18 }}>
-          <Link href="/" style={{ color: "var(--muted)" }}>Home</Link>
-          {article.category && <> <span style={{ opacity: 0.5 }}>/</span> <Link href={`/category/${catSlug(article.category)}`} style={{ color: "var(--accent)" }}>{article.category}</Link></>}
+        <div style={{ fontSize: 12.5, color: "#64748b", marginBottom: 18 }}>
+          <Link href="/" style={{ color: "#64748b" }}>Home</Link>
+          {article.category && <> <span style={{ opacity: 0.5 }}>/</span> <Link href={`/category/${catSlug(article.category)}`} style={{ color: "#ea580c", fontWeight: 600 }}>{article.category}</Link></>}
         </div>
 
         {/* Title + subtitle */}
-        <div style={{ fontSize: 12, fontWeight: 700, color: "var(--accent)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 10 }}>{article.category}</div>
+        <div style={{ fontSize: 12, fontWeight: 700, color: "#ea580c", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 10 }}>{article.category}</div>
         <h1 className="article-h1">{article.title}</h1>
         {article.meta_desc && (
-          <p style={{ fontSize: 19, lineHeight: 1.7, fontWeight: 500, color: "var(--muted)", margin: "0 0 22px" }}>{article.meta_desc}</p>
+          <p style={{ fontSize: 19, lineHeight: 1.7, fontWeight: 500, color: "#64748b", margin: "0 0 22px" }}>{article.meta_desc}</p>
         )}
 
         {/* Byline */}
-        <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "16px 0", borderTop: "1px solid var(--border)", borderBottom: "1px solid var(--border)", marginBottom: 28, flexWrap: "wrap" }}>
-          <div style={{ width: 40, height: 40, borderRadius: "50%", background: "var(--hero)", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 800 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "16px 0", borderTop: "1px solid #e2e8f0", borderBottom: "1px solid #e2e8f0", marginBottom: 28, flexWrap: "wrap" }}>
+          <div style={{ width: 40, height: 40, borderRadius: "50%", background: "linear-gradient(135deg,#f97316,#fb7185)", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 800 }}>
             {(article.author || "E").charAt(0)}
           </div>
           <div style={{ flex: 1, minWidth: 160 }}>
-            <div style={{ fontWeight: 700, fontSize: 14 }}>{article.author || "Editorial Team"}</div>
-            <div style={{ color: "var(--muted)", fontSize: 12.5 }}>{fmtDate(article.published_at)} · {mins} min read</div>
+            <div style={{ fontWeight: 700, fontSize: 14, color: "#0f172a" }}>{article.author || "Editorial Team"}</div>
+            <div style={{ color: "#64748b", fontSize: 12.5 }}>{fmtDate(article.published_at)} · {mins} min read</div>
           </div>
           <ContentStats type="article" slug={article.slug} initialViews={article.view_count} initialLikes={article.like_count} />
         </div>
@@ -108,7 +108,7 @@ export default function ArticlePage({ article, related, theme }) {
         {article.tags?.length > 0 && (
           <div style={{ marginTop: 32, display: "flex", gap: 8, flexWrap: "wrap" }}>
             {article.tags.map(tag => (
-              <Link key={tag} href={`/category/${catSlug(article.category)}`} style={{ padding: "4px 12px", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 20, fontSize: 12, color: "var(--muted)" }}>#{tag}</Link>
+              <Link key={tag} href={`/category/${catSlug(article.category)}`} style={{ padding: "4px 12px", background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: 20, fontSize: 12, color: "#64748b", fontWeight: 600 }}>#{tag}</Link>
             ))}
           </div>
         )}
@@ -118,8 +118,8 @@ export default function ArticlePage({ article, related, theme }) {
       {related?.length > 0 && (
         <section style={{ maxWidth: "var(--max)", margin: "48px auto 0" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
-            <h2 style={{ fontSize: 20, fontWeight: 800 }}>Related Stories</h2>
-            <div style={{ flex: 1, height: 1, background: "var(--border)" }} />
+            <h2 style={{ fontSize: 20, fontWeight: 800, color: "#0f172a" }}>Related Stories</h2>
+            <div style={{ flex: 1, height: 1, background: "#e2e8f0" }} />
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(240px,1fr))", gap: 20 }}>
             {related.map(a => <RelatedCard key={a.id} a={a} />)}

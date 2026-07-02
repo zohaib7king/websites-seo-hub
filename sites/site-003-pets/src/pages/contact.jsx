@@ -3,7 +3,7 @@ import { getSite } from "../lib/data";
 
 export async function getServerSideProps() {
   const site = await getSite();
-  return { props: { theme: site?.theme || "sunset", domain: site?.domain || "" } };
+  return { props: { theme: site?.theme || "petportal", domain: site?.domain || "" } };
 }
 
 export default function Contact({ theme, domain }) {

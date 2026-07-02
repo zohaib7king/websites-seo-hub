@@ -14,7 +14,7 @@ export async function getServerSideProps() {
   return {
     props: {
       articles, stories, userStories,
-      theme: site?.theme || SITE.defaultTheme || "sunset",
+      theme: site?.theme || SITE.defaultTheme || "petportal",
     },
   };
 }
@@ -23,8 +23,8 @@ function SectionHeader({ title, subtitle, href, linkLabel }) {
   return (
     <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: 16, marginBottom: 22, flexWrap: "wrap" }}>
       <div>
-        <h2 style={{ fontSize: 28, fontWeight: 950, letterSpacing: "-0.04em", marginBottom: 4 }}>{title}</h2>
-        {subtitle && <p style={{ color: "var(--muted)", fontSize: 15 }}>{subtitle}</p>}
+        <h2 style={{ fontSize: 28, fontWeight: 950, letterSpacing: "-0.04em", marginBottom: 4, color: "#0f172a" }}>{title}</h2>
+        {subtitle && <p style={{ color: "#64748b", fontSize: 15 }}>{subtitle}</p>}
       </div>
       {href && (
         <Link href={href} className="pet-btn pet-btn-soft" style={{ flexShrink: 0 }}>
@@ -51,10 +51,13 @@ export default function Home({ articles, stories, userStories, theme }) {
           <span style={{ display: "inline-block", background: "linear-gradient(90deg,#f97316,#fb7185)", color: "#fff", borderRadius: 999, padding: "6px 16px", fontSize: 12, fontWeight: 900, letterSpacing: ".06em", textTransform: "uppercase", marginBottom: 14 }}>
             Welcome to the colorful world of pets
           </span>
-          <h1 className="hero-title" style={{ fontSize: 48, fontWeight: 950, letterSpacing: "-0.05em", lineHeight: 1.08, marginBottom: 12 }}>
-            {SITE.lead} <span style={{ background: "linear-gradient(90deg,#f97316,#fb7185,#a855f7)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>{SITE.accent}</span>
+          <h1 className="hero-title" style={{ fontSize: 48, fontWeight: 950, letterSpacing: "-0.05em", lineHeight: 1.08, marginBottom: 12, color: "#0f172a" }}>
+            {SITE.lead}{" "}
+            <span style={{ background: "linear-gradient(90deg,#ea580c,#db2777,#7c3aed)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
+              {SITE.accent}
+            </span>
           </h1>
-          <p style={{ color: "var(--muted)", fontSize: 17, lineHeight: 1.75, maxWidth: 640, margin: "0 auto 20px" }}>{SITE.tagline}</p>
+          <p style={{ color: "#64748b", fontSize: 17, lineHeight: 1.75, maxWidth: 640, margin: "0 auto 20px" }}>{SITE.tagline}</p>
           <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
             <Link href="/articles" className="pet-btn pet-btn-primary">Browse Articles</Link>
             <Link href="/stories" className="pet-btn pet-btn-soft">Pet History Stories</Link>
@@ -81,9 +84,9 @@ export default function Home({ articles, stories, userStories, theme }) {
             [formatCount(totalViews), "Article views"],
             [String(userStories.length), "Community stories"],
           ].map(([val, label]) => (
-            <div key={label} style={{ background: "rgba(255,255,255,.7)", borderRadius: 16, padding: "14px 16px", textAlign: "center", border: "1px solid rgba(251,113,133,.2)" }}>
-              <div style={{ fontSize: 26, fontWeight: 950, color: "var(--accent)" }}>{val}</div>
-              <div style={{ fontSize: 12, fontWeight: 800, color: "var(--muted)" }}>{label}</div>
+            <div key={label} style={{ background: "#fff", borderRadius: 16, padding: "14px 16px", textAlign: "center", border: "1px solid #e2e8f0", boxShadow: "0 4px 12px rgba(0,0,0,.04)" }}>
+              <div style={{ fontSize: 26, fontWeight: 950, color: "#ea580c" }}>{val}</div>
+              <div style={{ fontSize: 12, fontWeight: 800, color: "#64748b" }}>{label}</div>
             </div>
           ))}
         </div>
@@ -103,7 +106,7 @@ export default function Home({ articles, stories, userStories, theme }) {
       </section>
 
       {/* Most viewed pet history stories */}
-      <section style={{ marginBottom: 40, background: "linear-gradient(135deg,rgba(168,85,247,.08),rgba(236,72,153,.06))", borderRadius: 24, padding: "28px 24px" }}>
+      <section style={{ marginBottom: 40, background: "linear-gradient(135deg,rgba(168,85,247,.06),rgba(236,72,153,.04))", borderRadius: 24, padding: "28px 24px", border: "1px solid #e2e8f0" }}>
         <SectionHeader
           title="📖 Pet History Stories"
           subtitle="The fascinating history of cats, dogs, birds, and more"
@@ -128,9 +131,9 @@ export default function Home({ articles, stories, userStories, theme }) {
             {topUserStories.map(s => <UserStoryCard key={s.id} story={s} />)}
           </div>
         ) : (
-          <div style={{ background: "#fff", border: "1px dashed var(--border)", borderRadius: 20, padding: 40, textAlign: "center" }}>
+          <div style={{ background: "#fff", border: "1px dashed #cbd5e1", borderRadius: 20, padding: 40, textAlign: "center" }}>
             <div style={{ fontSize: 48, marginBottom: 12 }}>🐾</div>
-            <p style={{ color: "var(--muted)", fontSize: 16, marginBottom: 16 }}>No community stories yet. Be the first to share your pet's story!</p>
+            <p style={{ color: "#64748b", fontSize: 16, marginBottom: 16 }}>No community stories yet. Be the first to share your pet's story!</p>
             <Link href="/user-stories/submit" className="pet-btn pet-btn-primary">Share Your Pet Story</Link>
           </div>
         )}

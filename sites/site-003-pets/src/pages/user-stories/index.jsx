@@ -7,7 +7,7 @@ import { SITE } from "../../site.config";
 
 export async function getServerSideProps() {
   const [site, userStories] = await Promise.all([getSite(), getUserPetStories()]);
-  return { props: { userStories, theme: site?.theme || SITE.defaultTheme || "sunset" } };
+  return { props: { userStories, theme: site?.theme || SITE.defaultTheme || "petportal" } };
 }
 
 export default function UserStories({ userStories, theme }) {

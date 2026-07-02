@@ -11,7 +11,7 @@ export async function getServerSideProps({ params }) {
   const story = stories.find(s => s.slug === params.slug);
   if (!story) return { notFound: true };
   const related = stories.filter(s => s.slug !== story.slug).slice(0, 3);
-  return { props: { story, related, theme: site?.theme || SITE.defaultTheme || "sunset" } };
+  return { props: { story, related, theme: site?.theme || SITE.defaultTheme || "petportal" } };
 }
 
 const STORY_CSS = `

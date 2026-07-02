@@ -7,7 +7,7 @@ import { SITE } from "../../site.config";
 
 export async function getServerSideProps() {
   const [site, stories] = await Promise.all([getSite(), getPetStories()]);
-  return { props: { stories, theme: site?.theme || SITE.defaultTheme || "sunset" } };
+  return { props: { stories, theme: site?.theme || SITE.defaultTheme || "petportal" } };
 }
 
 function groupByCategory(stories) {

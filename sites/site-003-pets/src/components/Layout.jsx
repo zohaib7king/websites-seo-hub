@@ -79,7 +79,7 @@ function LoginModal({ open, onClose, initialMode = "login" }) {
   );
 }
 
-export default function Layout({ children, title, description, theme = "sunset", canonical, schema }) {
+export default function Layout({ children, title, description, theme = "petportal", canonical, schema }) {
   const t = getTheme(theme);
   const year = new Date().getFullYear();
   const [auth, setAuth] = useState(null);
@@ -126,19 +126,19 @@ export default function Layout({ children, title, description, theme = "sunset",
         }
         html{scroll-behavior:smooth;}
         html,body{color:var(--text);font-family:var(--font);line-height:1.6;min-height:100vh;-webkit-font-smoothing:antialiased;}
-        body{
-          background:linear-gradient(160deg,#fff7ed 0%,#fef3c7 20%,#fce7f3 45%,#e0f2fe 70%,#f0fdf4 100%);
-          background-attachment:fixed;
-        }
+        body{background:${t.body};background-attachment:fixed;}
         a{color:inherit;text-decoration:none;}
-        .nav-link{color:var(--muted);font-size:14px;font-weight:700;transition:color .15s,background .15s;padding:8px 10px;border-radius:999px;}
-        .nav-link:hover{color:var(--accent);background:color-mix(in srgb,var(--accent) 9%,transparent);}
+        .nav-link{color:#475569;font-size:14px;font-weight:700;transition:color .15s,background .15s;padding:8px 10px;border-radius:999px;}
+        .nav-link:hover{color:var(--accent);background:rgba(234,88,12,.08);}
         .pet-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:999px;font-weight:800;font-size:14px;padding:12px 18px;border:1px solid transparent;cursor:pointer;}
         .pet-btn-primary{background:var(--hero);color:#fff;box-shadow:var(--glow);}
-        .pet-btn-soft{background:#fff;color:var(--accent);border-color:var(--border);}
+        .pet-btn-soft{background:#fff;color:#c2410c;border-color:#e2e8f0;box-shadow:0 2px 8px rgba(0,0,0,.06);}
         .card-hover{transition:border-color .2s,transform .2s,box-shadow .2s;}
-        .card-hover:hover{border-color:color-mix(in srgb,var(--accent) 40%,var(--border)) !important;transform:translateY(-3px);box-shadow:0 18px 40px rgba(249,115,22,.12);}
-        .glass-panel{background:rgba(255,255,255,.88);border:1px solid rgba(255,255,255,.6);box-shadow:0 24px 70px rgba(249,115,22,.10);backdrop-filter:blur(14px);}
+        .card-hover:hover{border-color:rgba(234,88,12,.35) !important;transform:translateY(-3px);box-shadow:0 18px 40px rgba(249,115,22,.14);}
+        .glass-panel{background:rgba(255,255,255,.95);border:1px solid #e2e8f0;box-shadow:0 24px 70px rgba(249,115,22,.08);backdrop-filter:blur(14px);}
+        .content-panel{background:#fff;border:1px solid #e2e8f0;border-radius:24px;padding:32px 36px;box-shadow:0 8px 40px rgba(15,23,42,.06);}
+        h1,h2,h3,h4{color:#0f172a;}
+        p,li{color:#334155;}
         @media(max-width:960px){
           .hide-mobile{display:none !important;}
           .hero-title{font-size:30px !important;}
@@ -169,7 +169,7 @@ export default function Layout({ children, title, description, theme = "sunset",
         <div style={{ maxWidth: "var(--max)", margin: "0 auto", padding: "0 20px", display: "flex", justifyContent: "space-between", alignItems: "center", height: 66, gap: 12 }}>
           <Link href="/" style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
             <span style={{ width: 38, height: 38, borderRadius: 12, background: "var(--hero)", display: "inline-flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 900, fontSize: 18, boxShadow: "var(--glow)" }}>🐾</span>
-            <span style={{ fontWeight: 900, fontSize: 19, letterSpacing: "-0.03em", background: "var(--hero)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>{SITE.name}</span>
+            <span style={{ fontWeight: 900, fontSize: 19, letterSpacing: "-0.03em", color: "#c2410c" }}>{SITE.name}</span>
           </Link>
           <nav className="hide-mobile" style={{ display: "flex", gap: 4, alignItems: "center", flexWrap: "wrap", justifyContent: "flex-end" }}>
             {mainNav.map(item => (
@@ -207,29 +207,29 @@ export default function Layout({ children, title, description, theme = "sunset",
       </div>
 
       {/* Footer */}
-      <footer style={{ borderTop: "1px solid var(--border)", background: "#fff" }}>
+      <footer style={{ borderTop: "1px solid #e2e8f0", background: "#fff" }}>
         <div style={{ maxWidth: "var(--max)", margin: "0 auto", padding: "40px 24px 28px", display: "flex", flexWrap: "wrap", gap: 24, justifyContent: "space-between" }}>
           <div style={{ maxWidth: 340 }}>
-            <div style={{ fontWeight: 900, fontSize: 18, marginBottom: 8 }}>🐾 {SITE.name}</div>
-            <p style={{ color: "var(--muted)", fontSize: 13, lineHeight: 1.7 }}>{SITE.tagline}</p>
+            <div style={{ fontWeight: 900, fontSize: 18, marginBottom: 8, color: "#0f172a" }}>🐾 {SITE.name}</div>
+            <p style={{ color: "#64748b", fontSize: 13, lineHeight: 1.7 }}>{SITE.tagline}</p>
           </div>
           <div style={{ display: "flex", gap: 48, flexWrap: "wrap" }}>
             <div>
-              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--muted)", marginBottom: 12 }}>Explore</div>
+              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#94a3b8", marginBottom: 12 }}>Explore</div>
               {mainNav.map(item => (
-                <Link key={item.href} href={item.href} style={{ display: "block", color: "var(--text)", fontSize: 13, marginBottom: 8 }}>{item.label}</Link>
+                <Link key={item.href} href={item.href} style={{ display: "block", color: "#334155", fontSize: 13, marginBottom: 8, fontWeight: 600 }}>{item.label}</Link>
               ))}
             </div>
             <div>
-              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--muted)", marginBottom: 12 }}>Categories</div>
+              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#94a3b8", marginBottom: 12 }}>Categories</div>
               {(SITE.articleCategories || []).slice(0, 6).map(cat => (
-                <Link key={cat} href={`/category/${catSlug(cat)}`} style={{ display: "block", color: "var(--text)", fontSize: 13, marginBottom: 8 }}>{cat}</Link>
+                <Link key={cat} href={`/category/${catSlug(cat)}`} style={{ display: "block", color: "#334155", fontSize: 13, marginBottom: 8, fontWeight: 600 }}>{cat}</Link>
               ))}
             </div>
           </div>
         </div>
-        <div style={{ borderTop: "1px solid var(--border)", padding: "16px 24px", maxWidth: "var(--max)", margin: "0 auto", textAlign: "center" }}>
-          <p style={{ color: "var(--muted)", fontSize: 12 }}>© {year} {SITE.name}. All rights reserved.</p>
+        <div style={{ borderTop: "1px solid #e2e8f0", padding: "16px 24px", maxWidth: "var(--max)", margin: "0 auto", textAlign: "center" }}>
+          <p style={{ color: "#94a3b8", fontSize: 12 }}>© {year} {SITE.name}. All rights reserved.</p>
         </div>
       </footer>
 

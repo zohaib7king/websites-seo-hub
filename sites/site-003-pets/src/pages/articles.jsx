@@ -6,7 +6,7 @@ import { SITE } from "../site.config";
 
 export async function getServerSideProps() {
   const [site, articles] = await Promise.all([getSite(), getPublishedArticles()]);
-  return { props: { articles, theme: site?.theme || SITE.defaultTheme || "sunset" } };
+  return { props: { articles, theme: site?.theme || SITE.defaultTheme || "petportal" } };
 }
 
 function groupByCategory(articles) {

@@ -29,6 +29,13 @@ export const THEMES = {
     body: "linear-gradient(160deg,#2a141c 0%,#3d1a14 100%)",
     hero: "linear-gradient(135deg,#f97316 0%,#fb7185 100%)",
   },
+  petportal: {
+    label: "Pet Portal",
+    bg: "#f8fafc", surface: "#ffffff", border: "#e2e8f0",
+    accent: "#ea580c", accent2: "#db2777", text: "#1e293b", muted: "#64748b",
+    body: "linear-gradient(160deg,#fff7ed 0%,#fef3c7 18%,#fce7f3 42%,#e0f2fe 68%,#f0fdf4 100%)",
+    hero: "linear-gradient(135deg,#f97316 0%,#fb7185 100%)",
+  },
   forest: {
     label: "Forest",
     bg: "#07120d", surface: "#0f1c16", border: "#1d3327",

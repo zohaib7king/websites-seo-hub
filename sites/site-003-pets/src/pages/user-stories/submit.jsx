@@ -8,7 +8,7 @@ import { SITE } from "../../site.config";
 
 export async function getServerSideProps() {
   const site = await getSite();
-  return { props: { theme: site?.theme || SITE.defaultTheme || "sunset" } };
+  return { props: { theme: site?.theme || SITE.defaultTheme || "petportal" } };
 }
 
 const PET_TYPES = ["Dog", "Cat", "Parrot", "Bird", "Rabbit", "Rooster", "Other"];

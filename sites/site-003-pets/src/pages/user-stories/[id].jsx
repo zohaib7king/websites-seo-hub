@@ -11,7 +11,7 @@ export async function getServerSideProps({ params }) {
   const story = userStories.find(s => String(s.id) === String(params.id));
   if (!story) return { notFound: true };
   const related = userStories.filter(s => String(s.id) !== String(params.id)).slice(0, 3);
-  return { props: { story, related, theme: site?.theme || SITE.defaultTheme || "sunset" } };
+  return { props: { story, related, theme: site?.theme || SITE.defaultTheme || "petportal" } };
 }
 
 export default function UserStoryPage({ story, related, theme }) {

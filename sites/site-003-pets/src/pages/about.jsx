@@ -5,7 +5,7 @@ import { SITE } from "../site.config";
 
 export async function getServerSideProps() {
   const site = await getSite();
-  return { props: { theme: site?.theme || SITE.defaultTheme || "sunset" } };
+  return { props: { theme: site?.theme || SITE.defaultTheme || "petportal" } };
 }
 
 export default function About({ theme }) {
