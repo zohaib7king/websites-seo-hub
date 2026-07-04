@@ -1,4 +1,8 @@
-import io
+import os
+from pathlib import Path
+from urllib.request import urlretrieve
+
+os.environ.setdefault("INSIGHTFACE_HOME", "/root/.insightface")
 
 import cv2
 import insightface
@@ -11,6 +15,12 @@ app = FastAPI(title="Remake Memory Face Swap", version="1.0.0")
 
 face_app = None
 swapper = None
+MODEL_HOME = Path(os.environ["INSIGHTFACE_HOME"])
+INSWAPPER_PATH = MODEL_HOME / "models" / "inswapper_128.onnx"
+INSWAPPER_MIRRORS = [
+    "https://huggingface.co/ezioruan/inswapper_128.onnx/resolve/main/inswapper_128.onnx",
+    "https://huggingface.co/facefusion/models/resolve/main/inswapper_128.onnx",
+]
 
 
 def read_image(file_bytes: bytes) -> np.ndarray:
@@ -21,16 +31,29 @@ def read_image(file_bytes: bytes) -> np.ndarray:
     return image
 
 
+def ensure_inswapper() -> str:
+    if INSWAPPER_PATH.exists() and INSWAPPER_PATH.stat().st_size > 1_000_000:
+        return str(INSWAPPER_PATH)
+
+    INSWAPPER_PATH.parent.mkdir(parents=True, exist_ok=True)
+    last_error = None
+    for url in INSWAPPER_MIRRORS:
+        try:
+            urlretrieve(url, INSWAPPER_PATH)
+            if INSWAPPER_PATH.exists() and INSWAPPER_PATH.stat().st_size > 1_000_000:
+                return str(INSWAPPER_PATH)
+        except Exception as err:
+            last_error = err
+
+    raise RuntimeError(f"Could not download inswapper_128.onnx: {last_error}")
+
+
 @app.on_event("startup")
 def load_models() -> None:
     global face_app, swapper
     face_app = FaceAnalysis(name="buffalo_l")
     face_app.prepare(ctx_id=-1, det_size=(640, 640))
-    swapper = insightface.model_zoo.get_model(
-        "inswapper_128.onnx",
-        download=True,
-        download_zip=True,
-    )
+    swapper = insightface.model_zoo.get_model(ensure_inswapper())
 
 
 @app.get("/health")

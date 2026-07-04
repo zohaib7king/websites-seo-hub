@@ -18,6 +18,7 @@ app.use("/api/queue",    require("./routes/queue"));
 app.use("/api/images",   require("./routes/images"));
 app.use("/api/pet-stories",      require("./routes/petStories"));
 app.use("/api/user-pet-stories", require("./routes/userPetStories"));
+app.use("/api/video-editor",     require("./routes/videoEditor"));
 
 app.get("/health", (_req, res) => res.json({ status: "ok", service: "zoyzoy-api" }));
 

@@ -5,14 +5,16 @@ import Sites from "./pages/Sites.jsx";
 import Articles from "./pages/Articles.jsx";
 import AIGenerator from "./pages/AIGenerator.jsx";
 import Revenue from "./pages/Revenue.jsx";
+import VideoEditor from "./pages/VideoEditor.jsx";
 import Topbar from "./components/Topbar.jsx";
 
 const NAV = [
-  { to: "/dashboard", label: "Dashboard",   icon: "▦" },
-  { to: "/sites",     label: "Sites",        icon: "🌐" },
-  { to: "/articles",  label: "Articles",     icon: "📝" },
-  { to: "/ai",        label: "AI Generator", icon: "✨" },
-  { to: "/revenue",   label: "Revenue",      icon: "💰" },
+  { to: "/dashboard",    label: "Dashboard",    icon: "▦" },
+  { to: "/sites",        label: "Sites",         icon: "🌐" },
+  { to: "/articles",     label: "Articles",      icon: "📝" },
+  { to: "/video-editor", label: "Video Editor",  icon: "🎬" },
+  { to: "/ai",           label: "AI Generator",  icon: "✨" },
+  { to: "/revenue",      label: "Revenue",       icon: "💰" },
 ];
 
 export default function App() {
@@ -62,7 +64,7 @@ export default function App() {
         </nav>
 
         <div style={{ marginTop: "auto", padding: "18px 20px 0", borderTop: "1px solid var(--border)", marginLeft: 0 }}>
-          <div style={{ color: "var(--muted)", fontSize: 11 }}>v1.3 · zoyzoy-hub</div>
+          <div style={{ color: "var(--muted)", fontSize: 11 }}>v1.4 · zoyzoy-hub</div>
         </div>
       </aside>
 
@@ -77,6 +79,7 @@ export default function App() {
             <Route path="/articles" element={<Articles />} />
             <Route path="/ai" element={<AIGenerator />} />
             <Route path="/revenue" element={<Revenue />} />
+            <Route path="/video-editor" element={<VideoEditor />} />
           </Routes>
         </div>
       </main>

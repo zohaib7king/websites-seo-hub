@@ -56,7 +56,7 @@ services:
     container_name: zoyzoy_face_swap
     restart: unless-stopped
     volumes:
-      - face_swap_models:/models
+      - face_swap_models:/root/.insightface
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
       interval: 30s
@@ -227,6 +227,26 @@ services:
       - api
     ports:
       - "127.0.0.1:3007:3000"
+    networks:
+      - zoyzoy_net
+
+  # ── Site: site-007-video-editor (FrameForge portfolio) ───
+  site-007-video-editor:
+    build:
+      context: .
+      dockerfile: sites/site-007-video-editor/Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: http://api:4000
+        NEXT_PUBLIC_SITE_ID: site-007-video-editor
+    container_name: zoyzoy_site-007-video-editor
+    restart: unless-stopped
+    environment:
+      NEXT_PUBLIC_API_URL: http://api:4000
+      NEXT_PUBLIC_SITE_ID: site-007-video-editor
+    depends_on:
+      - api
+    ports:
+      - "127.0.0.1:3008:3000"
     networks:
       - zoyzoy_net
 

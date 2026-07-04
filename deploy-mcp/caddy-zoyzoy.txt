@@ -66,3 +66,9 @@ memory.skoolai.cloud {
 	import common
 	reverse_proxy 127.0.0.1:3007
 }
+
+# Site 007 — FrameForge video editor portfolio (:3008)
+frameforge.skoolai.cloud {
+	import common
+	reverse_proxy 127.0.0.1:3008
+}

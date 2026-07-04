@@ -141,3 +141,83 @@ CREATE TABLE IF NOT EXISTS user_pet_story_likes (
 INSERT INTO sites (id, name, niche, domain, theme) VALUES
   ('site-003-pets', 'Pet Lovers Daily', 'pet-care', 'petlovers.com', 'petportal')
 ON CONFLICT DO NOTHING;
+
+INSERT INTO sites (id, name, niche, domain, theme) VALUES
+  ('site-007-video-editor', 'FrameForge', 'video-editing', 'frameforge.skoolai.cloud', 'midnight')
+ON CONFLICT DO NOTHING;
+
+-- Video editor portfolio CMS (site-007-video-editor)
+CREATE TABLE IF NOT EXISTS editor_settings (
+  site_id           TEXT PRIMARY KEY REFERENCES sites(id) ON DELETE CASCADE,
+  brand_name        TEXT NOT NULL DEFAULT 'FrameForge',
+  tagline           TEXT,
+  eyebrow           TEXT,
+  hero_lead         TEXT,
+  hero_accent       TEXT,
+  hero_cta          TEXT,
+  about_title       TEXT,
+  about_body        TEXT,
+  email             TEXT,
+  phone             TEXT,
+  location          TEXT,
+  social_instagram  TEXT,
+  social_youtube    TEXT,
+  social_vimeo      TEXT,
+  social_whatsapp   TEXT,
+  footer_note       TEXT,
+  updated_at        TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS editor_portfolio (
+  id             SERIAL PRIMARY KEY,
+  site_id        TEXT NOT NULL REFERENCES sites(id) ON DELETE CASCADE,
+  title          TEXT NOT NULL,
+  slug           TEXT NOT NULL,
+  description    TEXT,
+  category       TEXT,
+  video_url      TEXT,
+  thumbnail_url  TEXT,
+  client_name    TEXT,
+  featured       BOOLEAN DEFAULT FALSE,
+  sort_order     INT DEFAULT 0,
+  status         TEXT DEFAULT 'published',
+  created_at     TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(site_id, slug)
+);
+
+CREATE TABLE IF NOT EXISTS editor_services (
+  id           SERIAL PRIMARY KEY,
+  site_id      TEXT NOT NULL REFERENCES sites(id) ON DELETE CASCADE,
+  title        TEXT NOT NULL,
+  description  TEXT,
+  price_label  TEXT,
+  features     TEXT[],
+  sort_order   INT DEFAULT 0,
+  status       TEXT DEFAULT 'published',
+  created_at   TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS editor_testimonials (
+  id           SERIAL PRIMARY KEY,
+  site_id      TEXT NOT NULL REFERENCES sites(id) ON DELETE CASCADE,
+  client_name  TEXT NOT NULL,
+  client_role  TEXT,
+  quote        TEXT NOT NULL,
+  rating       INT DEFAULT 5,
+  avatar_url   TEXT,
+  sort_order   INT DEFAULT 0,
+  status       TEXT DEFAULT 'published',
+  created_at   TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS editor_inquiries (
+  id            SERIAL PRIMARY KEY,
+  site_id       TEXT NOT NULL REFERENCES sites(id) ON DELETE CASCADE,
+  name          TEXT NOT NULL,
+  email         TEXT NOT NULL,
+  phone         TEXT,
+  project_type  TEXT,
+  message       TEXT NOT NULL,
+  status        TEXT DEFAULT 'new',
+  created_at    TIMESTAMPTZ DEFAULT NOW()
+);
