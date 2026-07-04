@@ -243,6 +243,9 @@ services:
     environment:
       NEXT_PUBLIC_API_URL: http://api:4000
       NEXT_PUBLIC_SITE_ID: site-007-video-editor
+      # Same-domain /admin panel password (change in production)
+      ADMIN_PASSWORD: ${FRAMEFORGE_ADMIN_PASSWORD:-admin123}
+      ADMIN_SECRET: ${FRAMEFORGE_ADMIN_SECRET:-frameforge-admin-secret}
     depends_on:
       - api
     ports:

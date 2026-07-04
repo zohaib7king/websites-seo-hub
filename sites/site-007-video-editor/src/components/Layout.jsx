@@ -210,16 +210,19 @@ export default function Layout({ children, title, description, theme = "cinema",
               </div>
               <div>
                 <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--accent)", marginBottom: 12 }}>Company</div>
-                <Link href="/about" style={{ display: "block", fontSize: 13, marginBottom: 8 }}>About</Link>
-                <Link href="/contact" style={{ display: "block", fontSize: 13, marginBottom: 8 }}>Contact</Link>
-                <Link href="/privacy" style={{ display: "block", fontSize: 13, marginBottom: 8 }}>Privacy</Link>
-              </div>
+              <Link href="/about" style={{ display: "block", fontSize: 13, marginBottom: 8 }}>About</Link>
+              <Link href="/contact" style={{ display: "block", fontSize: 13, marginBottom: 8 }}>Contact</Link>
+              <Link href="/privacy" style={{ display: "block", fontSize: 13, marginBottom: 8 }}>Privacy</Link>
+              <Link href="/admin" style={{ display: "block", fontSize: 13, marginBottom: 8, color: "var(--accent2)" }}>Admin</Link>
             </div>
           </div>
-          <div style={{ borderTop: "1px solid var(--border)", padding: "16px 24px", maxWidth: "var(--max)", margin: "0 auto" }}>
-            <p style={{ color: "var(--muted)", fontSize: 11.5, lineHeight: 1.7, marginBottom: 8 }}>{b.footerNote}</p>
-            <p style={{ color: "var(--muted)", fontSize: 12.5, textAlign: "center" }}>© {year} {b.name}. All rights reserved.</p>
-          </div>
+        </div>
+        <div style={{ borderTop: "1px solid var(--border)", padding: "16px 24px", maxWidth: "var(--max)", margin: "0 auto" }}>
+          <p style={{ color: "var(--muted)", fontSize: 11.5, lineHeight: 1.7, marginBottom: 8 }}>{b.footerNote}</p>
+          <p style={{ color: "var(--muted)", fontSize: 12.5, textAlign: "center" }}>
+            © {year} {b.name}. All rights reserved. · <Link href="/admin" style={{ color: "var(--accent2)" }}>Admin</Link>
+          </p>
+        </div>
         </footer>
       </div>
     </>
