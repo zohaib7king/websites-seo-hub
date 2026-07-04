@@ -8,10 +8,10 @@ export async function getSite() {
     const res = await fetch(`${API}/api/sites/${SITE_ID}`);
     if (res.ok) {
       const s = await res.json();
-      if (s) return { ...s, theme: s.theme || SITE.defaultTheme || "midnight" };
+      if (s) return { ...s, theme: s.theme || SITE.defaultTheme || "cinema" };
     }
   } catch { /* fall through */ }
-  return { id: SITE_ID, name: SITE.name, theme: SITE.defaultTheme || "midnight", domain: SITE.domain || "" };
+  return { id: SITE_ID, name: SITE.name, theme: SITE.defaultTheme || "cinema", domain: SITE.domain || "" };
 }
 
 export async function getEditorBundle() {

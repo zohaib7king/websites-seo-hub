@@ -1,4 +1,16 @@
 export const THEMES = {
+  cinema: {
+    label: "Cinema",
+    bg: "#0b0614",
+    surface: "#161022",
+    border: "#3b2458",
+    accent: "#ff4d9a",
+    accent2: "#45f0ff",
+    text: "#fff7fb",
+    muted: "#c4b0d8",
+    body: "radial-gradient(ellipse 120% 80% at 10% -10%, #4c1d95 0%, transparent 50%), radial-gradient(ellipse 90% 70% at 100% 0%, #9d174d 0%, transparent 45%), radial-gradient(ellipse 80% 60% at 50% 100%, #0e7490 0%, transparent 50%), #0b0614",
+    hero: "linear-gradient(125deg,#ff4d9a 0%,#a855f7 35%,#38bdf8 70%,#34d399 100%)",
+  },
   midnight: {
     label: "Midnight",
     bg: "#09090b", surface: "#18181b", border: "#27272a",
@@ -44,5 +56,5 @@ export const THEMES = {
 };
 
 export function getTheme(name) {
-  return THEMES[name] || THEMES.midnight;
+  return THEMES[name] || THEMES.cinema;
 }

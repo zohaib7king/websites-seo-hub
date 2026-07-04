@@ -2,7 +2,7 @@
 -- Settings, portfolio, services, testimonials, contact inquiries — all admin-managed.
 
 INSERT INTO sites (id, name, niche, domain, theme)
-VALUES ('site-007-video-editor', 'FrameForge', 'video-editing', 'frameforge.skoolai.cloud', 'midnight')
+VALUES ('site-007-video-editor', 'FrameForge', 'video-editing', 'frameforge.skoolai.cloud', 'cinema')
 ON CONFLICT (id) DO UPDATE SET
   name = EXCLUDED.name,
   niche = EXCLUDED.niche,
