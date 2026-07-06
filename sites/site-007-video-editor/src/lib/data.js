@@ -8,10 +8,10 @@ export async function getSite() {
     const res = await fetch(`${API}/api/sites/${SITE_ID}`);
     if (res.ok) {
       const s = await res.json();
-      if (s) return { ...s, theme: s.theme || SITE.defaultTheme || "cinema" };
+      if (s) return { ...s, theme: s.theme || SITE.defaultTheme || "pro" };
     }
   } catch { /* fall through */ }
-  return { id: SITE_ID, name: SITE.name, theme: SITE.defaultTheme || "cinema", domain: SITE.domain || "" };
+  return { id: SITE_ID, name: SITE.name, theme: SITE.defaultTheme || "pro", domain: SITE.domain || "" };
 }
 
 export async function getEditorBundle() {
@@ -32,8 +32,13 @@ export async function getEditorBundle() {
   return { brand: SITE, portfolio: [], services: [], testimonials: [], thumbnails: [], team: [] };
 }
 
+export function isUploadedMedia(url) {
+  if (!url) return false;
+  return url.startsWith("/api/media/");
+}
+
 export function youtubeEmbed(url) {
-  if (!url) return null;
+  if (!url || isUploadedMedia(url)) return null;
   try {
     const u = new URL(url);
     if (u.hostname.includes("youtu.be")) return `https://www.youtube.com/embed/${u.pathname.slice(1)}`;

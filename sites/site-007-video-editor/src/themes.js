@@ -1,4 +1,17 @@
 export const THEMES = {
+  pro: {
+    label: "Professional",
+    bg: "#f8fafb",
+    surface: "#ffffff",
+    border: "#cfe8e0",
+    accent: "#0d9488",
+    accent2: "#0284c7",
+    accent3: "#059669",
+    text: "#0f172a",
+    muted: "#64748b",
+    body: "linear-gradient(180deg, #f0fdf9 0%, #f8fafc 45%, #eff6ff 100%)",
+    hero: "linear-gradient(135deg, #0d9488 0%, #0284c7 100%)",
+  },
   forge: {
     label: "Forge",
     bg: "#fff8f2",
@@ -81,5 +94,5 @@ export const THEMES = {
 };
 
 export function getTheme(name) {
-  return THEMES[name] || THEMES.forge;
+  return THEMES[name] || THEMES.pro;
 }

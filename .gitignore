@@ -7,6 +7,10 @@ dist/
 .DS_Store
 db_data/
 
+# uploaded CMS media (video editor, etc.)
+api/uploads/*
+!api/uploads/.gitkeep
+
 # design-sync (staged scripts, generated bundle, machine state)
 .ds-sync/
 ds-bundle/

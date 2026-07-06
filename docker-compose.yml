@@ -37,10 +37,12 @@ services:
       # Repo is bind-mounted below so the site-scaffolder can write sites/<id>/,
       # docker-compose.yml and nginx.conf. The scaffolder reads/writes under here.
       REPO_ROOT: /workspace
+      VIDEO_EDITOR_UPLOAD_DIR: /app/uploads/video-editor
     volumes:
       # Read-write mount of the whole repo for dashboard-triggered site scaffolding
       # ("Provision files" button). The container build still uses /app; this is separate.
       - ./:/workspace
+      - ./api/uploads:/app/uploads
     depends_on:
       - db
       - face-swap

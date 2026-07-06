@@ -1,7 +1,11 @@
 const router = require("express").Router();
 const db = require("../db/pool");
+const path = require("path");
+const fs = require("fs");
 
 const SITE_ID = "site-007-video-editor";
+const UPLOAD_ROOT = process.env.VIDEO_EDITOR_UPLOAD_DIR
+  || path.join(__dirname, "../../uploads/video-editor");
 
 function siteId(req) {
   return req.params.siteId || req.query.site_id || SITE_ID;
@@ -589,6 +593,54 @@ router.delete("/:siteId/team/:id", async (req, res) => {
     res.json({ ok: true });
   } catch (err) {
     res.status(500).json({ error: "Failed to delete team member", detail: err.message });
+  }
+});
+
+// ── Media upload (images + videos) ───────────────────────
+function mediaDir(id) {
+  return path.join(UPLOAD_ROOT, id);
+}
+
+function safeFilename(name) {
+  const ext = path.extname(name || "").toLowerCase().slice(0, 8);
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}${ext || ".bin"}`;
+}
+
+router.post("/:siteId/upload", async (req, res) => {
+  try {
+    const id = siteId(req);
+    const { filename, mime, data } = req.body || {};
+    if (!data) return res.status(400).json({ error: "File data is required (base64)" });
+
+    const allowed = /^(image\/(jpeg|png|gif|webp)|video\/(mp4|webm|quicktime))$/i;
+    if (mime && !allowed.test(mime)) {
+      return res.status(400).json({ error: "Only images (jpg/png/webp/gif) and videos (mp4/webm) allowed" });
+    }
+
+    const buffer = Buffer.from(data, "base64");
+    if (buffer.length > 100 * 1024 * 1024) {
+      return res.status(400).json({ error: "File too large (max 100MB)" });
+    }
+
+    const dir = mediaDir(id);
+    fs.mkdirSync(dir, { recursive: true });
+    const stored = safeFilename(filename);
+    fs.writeFileSync(path.join(dir, stored), buffer);
+
+    res.status(201).json({ url: `/api/media/${stored}`, filename: stored });
+  } catch (err) {
+    res.status(500).json({ error: "Upload failed", detail: err.message });
+  }
+});
+
+router.get("/:siteId/media/:filename", (req, res) => {
+  try {
+    const id = siteId(req);
+    const file = path.join(mediaDir(id), path.basename(req.params.filename));
+    if (!fs.existsSync(file)) return res.status(404).json({ error: "File not found" });
+    res.sendFile(file);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to serve media", detail: err.message });
   }
 });
 

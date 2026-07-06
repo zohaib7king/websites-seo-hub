@@ -143,7 +143,7 @@ INSERT INTO sites (id, name, niche, domain, theme) VALUES
 ON CONFLICT DO NOTHING;
 
 INSERT INTO sites (id, name, niche, domain, theme) VALUES
-  ('site-007-video-editor', 'ibtihajForage', 'video-editing', 'frameforge.skoolai.cloud', 'forge')
+  ('site-007-video-editor', 'ibtihajForage', 'video-editing', 'frameforge.skoolai.cloud', 'pro')
 ON CONFLICT DO NOTHING;
 
 -- Video editor portfolio CMS (site-007-video-editor)

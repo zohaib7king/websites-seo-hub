@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Layout from "../../components/Layout.jsx";
-import { getEditorBundle, getSite, youtubeEmbed } from "../../lib/data";
+import { getEditorBundle, getSite, youtubeEmbed, isUploadedMedia } from "../../lib/data";
 import { SITE } from "../../site.config";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://api:4000";
@@ -46,7 +46,7 @@ export default function ProjectPage({ theme, brand, project, related }) {
         <p style={{ color: "var(--muted)", fontSize: 17, lineHeight: 1.8, maxWidth: 760, marginBottom: 24 }}>{project.description}</p>
       )}
 
-      <div style={{ borderRadius: 22, overflow: "hidden", border: "1px solid var(--border)", background: "#000", marginBottom: 28 }}>
+      <div style={{ borderRadius: 12, overflow: "hidden", border: "1px solid var(--border)", background: "#000", marginBottom: 28 }}>
         {embed ? (
           <div style={{ position: "relative", paddingTop: "56.25%" }}>
             <iframe
@@ -57,6 +57,8 @@ export default function ProjectPage({ theme, brand, project, related }) {
               style={{ position: "absolute", inset: 0, width: "100%", height: "100%", border: 0 }}
             />
           </div>
+        ) : isUploadedMedia(project.video_url) ? (
+          <video src={project.video_url} controls style={{ width: "100%", display: "block" }} poster={project.thumbnail_url || undefined} />
         ) : project.thumbnail_url ? (
           <img src={project.thumbnail_url} alt={project.title} style={{ width: "100%", display: "block" }} />
         ) : (

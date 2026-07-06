@@ -1,40 +1,43 @@
 import { useCallback, useEffect, useState } from "react";
 import Head from "next/head";
 import Link from "next/link";
+import MediaUpload from "../../components/MediaUpload.jsx";
+import { isYoutubeUrl } from "../../lib/upload";
 
 const TABS = [
   { id: "settings", label: "Site text & name" },
-  { id: "thumbnails", label: "Thumbnails" },
+  { id: "thumbnails", label: "Thumbnails (images)" },
+  { id: "portfolio", label: "My Work (videos)" },
   { id: "team", label: "Team" },
-  { id: "portfolio", label: "Portfolio" },
   { id: "services", label: "Services" },
   { id: "testimonials", label: "Reviews" },
   { id: "inquiries", label: "Messages" },
 ];
 
 const inputStyle = {
-  width: "100%", background: "#0b0614", border: "1px solid #3b2458",
-  borderRadius: 12, padding: "11px 12px", color: "#fff7fb", fontSize: 14,
+  width: "100%", background: "#fff", border: "1px solid #cbd5e1",
+  borderRadius: 10, padding: "11px 12px", color: "#0f172a", fontSize: 14,
 };
 const labelStyle = {
-  display: "block", color: "#c4b0d8", fontSize: 11, fontWeight: 700,
+  display: "block", color: "#475569", fontSize: 11, fontWeight: 700,
   marginBottom: 6, letterSpacing: "0.05em", textTransform: "uppercase",
 };
 const btnPrimary = {
-  background: "linear-gradient(125deg,#ff4d9a,#a855f7,#38bdf8)",
-  color: "#fff", border: "none", borderRadius: 999, padding: "10px 18px",
-  fontWeight: 800, fontSize: 13, cursor: "pointer",
+  background: "linear-gradient(135deg,#0d9488,#0284c7)",
+  color: "#fff", border: "none", borderRadius: 8, padding: "10px 18px",
+  fontWeight: 700, fontSize: 13, cursor: "pointer",
 };
 const btnGhost = {
-  background: "transparent", color: "#c4b0d8", border: "1px solid #3b2458",
-  borderRadius: 999, padding: "8px 14px", fontWeight: 700, fontSize: 12, cursor: "pointer",
+  background: "#fff", color: "#475569", border: "1px solid #cbd5e1",
+  borderRadius: 8, padding: "8px 14px", fontWeight: 600, fontSize: 12, cursor: "pointer",
 };
 const btnDanger = {
-  background: "rgba(239,68,68,0.15)", color: "#fca5a5", border: "1px solid rgba(239,68,68,0.4)",
-  borderRadius: 999, padding: "8px 14px", fontWeight: 700, fontSize: 12, cursor: "pointer",
+  background: "#fef2f2", color: "#dc2626", border: "1px solid #fecaca",
+  borderRadius: 8, padding: "8px 14px", fontWeight: 600, fontSize: 12, cursor: "pointer",
 };
 const card = {
-  background: "#161022", border: "1px solid #3b2458", borderRadius: 18, padding: 20,
+  background: "#fff", border: "1px solid #e2e8f0", borderRadius: 14, padding: 20,
+  boxShadow: "0 4px 20px rgba(15,23,42,.04)",
 };
 
 async function cms(path, options = {}) {
@@ -146,8 +149,9 @@ export default function AdminPage() {
 
   async function saveThumbnail(form) {
     try {
-      if (form.id) await cms(`thumbnails/${form.id}`, { method: "PATCH", body: JSON.stringify(form) });
-      else await cms("thumbnails", { method: "POST", body: JSON.stringify(form) });
+      const payload = { ...form, video_url: null };
+      if (form.id) await cms(`thumbnails/${form.id}`, { method: "PATCH", body: JSON.stringify(payload) });
+      else await cms("thumbnails", { method: "POST", body: JSON.stringify(payload) });
       setEditing(null);
       await load();
       flash("Thumbnail saved");
@@ -170,11 +174,21 @@ export default function AdminPage() {
 
   async function savePortfolio(form) {
     try {
-      if (form.id) await cms(`portfolio/${form.id}`, { method: "PATCH", body: JSON.stringify(form) });
-      else await cms("portfolio", { method: "POST", body: JSON.stringify(form) });
+      const payload = { ...form };
+      if (form.video_source === "youtube" && !form.video_url) {
+        flash("YouTube / Vimeo link required", true);
+        return;
+      }
+      if (form.video_source === "upload" && !form.video_url?.startsWith("/api/media/")) {
+        flash("Please upload a video file", true);
+        return;
+      }
+      delete payload.video_source;
+      if (form.id) await cms(`portfolio/${form.id}`, { method: "PATCH", body: JSON.stringify(payload) });
+      else await cms("portfolio", { method: "POST", body: JSON.stringify(payload) });
       setEditing(null);
       await load();
-      flash("Portfolio saved");
+      flash("Work item saved");
     } catch (e) {
       flash(e.message, true);
     }
@@ -219,10 +233,7 @@ export default function AdminPage() {
       </Head>
       <style dangerouslySetInnerHTML={{ __html: `
         *{box-sizing:border-box;margin:0;padding:0}
-        body{font-family:Outfit,Inter,system-ui,sans-serif;background:
-          radial-gradient(ellipse 100% 80% at 0% 0%,#4c1d95,transparent 50%),
-          radial-gradient(ellipse 80% 60% at 100% 0%,#9d174d,transparent 45%),#0b0614;
-          color:#fff7fb;min-height:100vh}
+        body{font-family:Outfit,Inter,system-ui,sans-serif;background:linear-gradient(180deg,#f0fdf9,#eff6ff);color:#0f172a;min-height:100vh}
         input,textarea,select,button{font:inherit}
       `}} />
       <div style={{ maxWidth: 980, margin: "0 auto", padding: "28px 18px 60px" }}>
@@ -362,7 +373,7 @@ export default function AdminPage() {
           items={thumbnails}
           empty="No thumbnails yet — add images for the homepage reel."
           onAdd={() => setEditing({
-            title: "", thumbnail_url: "", video_url: "", category: "Featured",
+            title: "", thumbnail_url: "", category: "Gallery",
             sort_order: 0, status: "published",
           })}
           onEdit={setEditing}
@@ -435,10 +446,14 @@ export default function AdminPage() {
           empty="No portfolio projects yet."
           onAdd={() => setEditing({
             title: "", slug: "", description: "", category: "YouTube",
-            video_url: "", thumbnail_url: "", client_name: "", featured: true,
+            video_source: "youtube", video_url: "", thumbnail_url: "", client_name: "", featured: true,
             sort_order: 0, status: "published",
           })}
-          onEdit={setEditing}
+          onEdit={(item) => setEditing({
+            ...item,
+            video_source: isYoutubeUrl(item.video_url) || !item.video_url?.startsWith("/api/media/")
+              ? "youtube" : "upload",
+          })}
           onDelete={async (item) => {
             if (!confirm("Delete this project?")) return;
             await cms(`portfolio/${item.id}`, { method: "DELETE" });
@@ -571,26 +586,30 @@ function ThumbnailForm({ form, setForm, onSave, onCancel }) {
   return (
     <div style={card}>
       <h3 style={{ marginBottom: 12, fontSize: 17 }}>{form.id ? "Edit thumbnail" : "New thumbnail"}</h3>
-      <p style={{ color: "#c4b0d8", fontSize: 13, marginBottom: 14 }}>
-        Homepage reel aur grid mein dikhega. Image URL zaroori hai.
+      <p style={{ color: "#64748b", fontSize: 13, marginBottom: 14 }}>
+        Homepage gallery — <strong>image only</strong> (upload file or paste URL).
       </p>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-        {[
-          ["title", "Title"],
-          ["category", "Category (Featured, Wedding, etc.)"],
-          ["thumbnail_url", "Thumbnail image URL"],
-          ["video_url", "Video URL (optional)"],
-          ["sort_order", "Sort order"],
-          ["status", "Status (published / draft)"],
-        ].map(([key, label]) => (
-          <Field key={key} label={label}>
-            <input style={inputStyle} value={form[key] ?? ""} onChange={(e) => setForm((f) => ({ ...f, [key]: e.target.value }))} />
-          </Field>
-        ))}
+        <Field label="Title">
+          <input style={inputStyle} value={form.title || ""} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))} />
+        </Field>
+        <Field label="Category">
+          <input style={inputStyle} value={form.category || ""} onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))} />
+        </Field>
+        <Field label="Sort order">
+          <input style={inputStyle} value={form.sort_order ?? 0} onChange={(e) => setForm((f) => ({ ...f, sort_order: e.target.value }))} />
+        </Field>
+        <Field label="Status">
+          <input style={inputStyle} value={form.status || "published"} onChange={(e) => setForm((f) => ({ ...f, status: e.target.value }))} />
+        </Field>
       </div>
-      {form.thumbnail_url && (
-        <img src={form.thumbnail_url} alt="Preview" style={{ width: "100%", maxWidth: 320, borderRadius: 10, marginBottom: 14 }} />
-      )}
+      <MediaUpload
+        label="Thumbnail image"
+        accept="image/jpeg,image/png,image/webp,image/gif"
+        value={form.thumbnail_url}
+        onChange={(url) => setForm((f) => ({ ...f, thumbnail_url: url }))}
+        hint="Upload from computer or paste image URL"
+      />
       <div style={{ display: "flex", gap: 8 }}>
         <button type="button" style={btnPrimary} onClick={onSave}>Save</button>
         <button type="button" style={btnGhost} onClick={onCancel}>Cancel</button>
@@ -604,25 +623,31 @@ function TeamForm({ form, setForm, onSave, onCancel }) {
     <div style={card}>
       <h3 style={{ marginBottom: 12, fontSize: 17 }}>{form.id ? "Edit team member" : "New team member"}</h3>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-        {[
-          ["name", "Name"],
-          ["role", "Role (e.g. Lead Editor)"],
-          ["photo_url", "Photo URL"],
-          ["social_url", "Social / portfolio URL"],
-          ["sort_order", "Sort order"],
-          ["status", "Status (published / draft)"],
-        ].map(([key, label]) => (
-          <Field key={key} label={label}>
-            <input style={inputStyle} value={form[key] ?? ""} onChange={(e) => setForm((f) => ({ ...f, [key]: e.target.value }))} />
-          </Field>
-        ))}
+        <Field label="Name">
+          <input style={inputStyle} value={form.name || ""} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} />
+        </Field>
+        <Field label="Role">
+          <input style={inputStyle} value={form.role || ""} onChange={(e) => setForm((f) => ({ ...f, role: e.target.value }))} />
+        </Field>
+        <Field label="Social URL">
+          <input style={inputStyle} value={form.social_url || ""} onChange={(e) => setForm((f) => ({ ...f, social_url: e.target.value }))} />
+        </Field>
+        <Field label="Sort order">
+          <input style={inputStyle} value={form.sort_order ?? 0} onChange={(e) => setForm((f) => ({ ...f, sort_order: e.target.value }))} />
+        </Field>
+        <Field label="Status">
+          <input style={inputStyle} value={form.status || "published"} onChange={(e) => setForm((f) => ({ ...f, status: e.target.value }))} />
+        </Field>
       </div>
       <Field label="Bio">
         <textarea rows={3} style={{ ...inputStyle, resize: "vertical" }} value={form.bio || ""} onChange={(e) => setForm((f) => ({ ...f, bio: e.target.value }))} />
       </Field>
-      {form.photo_url && (
-        <img src={form.photo_url} alt="Preview" style={{ width: 80, height: 80, objectFit: "cover", borderRadius: "50%", marginBottom: 14 }} />
-      )}
+      <MediaUpload
+        label="Photo"
+        accept="image/jpeg,image/png,image/webp,image/gif"
+        value={form.photo_url}
+        onChange={(url) => setForm((f) => ({ ...f, photo_url: url }))}
+      />
       <div style={{ display: "flex", gap: 8 }}>
         <button type="button" style={btnPrimary} onClick={onSave}>Save</button>
         <button type="button" style={btnGhost} onClick={onCancel}>Cancel</button>
@@ -632,28 +657,83 @@ function TeamForm({ form, setForm, onSave, onCancel }) {
 }
 
 function PortfolioForm({ form, setForm, onSave, onCancel }) {
+  const source = form.video_source || "youtube";
   return (
     <div style={card}>
-      <h3 style={{ marginBottom: 12, fontSize: 17 }}>{form.id ? "Edit project" : "New project"}</h3>
+      <h3 style={{ marginBottom: 12, fontSize: 17 }}>{form.id ? "Edit work" : "New work item"}</h3>
+      <p style={{ color: "#64748b", fontSize: 13, marginBottom: 14 }}>
+        <strong>My Work</strong> — video projects with YouTube link or uploaded video file.
+      </p>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-        {[
-          ["title", "Title"],
-          ["slug", "URL slug (optional)"],
-          ["category", "Category"],
-          ["client_name", "Client name"],
-          ["video_url", "Video URL (YouTube / Vimeo)"],
-          ["thumbnail_url", "Image / thumbnail URL"],
-          ["sort_order", "Sort order"],
-          ["status", "Status (published / draft)"],
-        ].map(([key, label]) => (
-          <Field key={key} label={label}>
-            <input style={inputStyle} value={form[key] ?? ""} onChange={(e) => setForm((f) => ({ ...f, [key]: e.target.value }))} />
-          </Field>
-        ))}
+        <Field label="Title">
+          <input style={inputStyle} value={form.title || ""} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))} />
+        </Field>
+        <Field label="URL slug (optional)">
+          <input style={inputStyle} value={form.slug || ""} onChange={(e) => setForm((f) => ({ ...f, slug: e.target.value }))} />
+        </Field>
+        <Field label="Category">
+          <input style={inputStyle} value={form.category || ""} onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))} />
+        </Field>
+        <Field label="Client name">
+          <input style={inputStyle} value={form.client_name || ""} onChange={(e) => setForm((f) => ({ ...f, client_name: e.target.value }))} />
+        </Field>
+        <Field label="Sort order">
+          <input style={inputStyle} value={form.sort_order ?? 0} onChange={(e) => setForm((f) => ({ ...f, sort_order: e.target.value }))} />
+        </Field>
+        <Field label="Status">
+          <input style={inputStyle} value={form.status || "published"} onChange={(e) => setForm((f) => ({ ...f, status: e.target.value }))} />
+        </Field>
       </div>
       <Field label="Description">
         <textarea rows={3} style={{ ...inputStyle, resize: "vertical" }} value={form.description || ""} onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))} />
       </Field>
+
+      <Field label="Video source">
+        <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+          {[
+            ["youtube", "YouTube / Vimeo link"],
+            ["upload", "Upload video file"],
+          ].map(([val, lab]) => (
+            <label key={val} style={{ display: "flex", gap: 6, alignItems: "center", fontSize: 13, cursor: "pointer" }}>
+              <input
+                type="radio"
+                name="video_source"
+                checked={source === val}
+                onChange={() => setForm((f) => ({ ...f, video_source: val, video_url: val === "youtube" ? f.video_url : "" }))}
+              />
+              {lab}
+            </label>
+          ))}
+        </div>
+      </Field>
+
+      {source === "youtube" ? (
+        <Field label="YouTube or Vimeo URL">
+          <input
+            style={inputStyle}
+            placeholder="https://www.youtube.com/watch?v=..."
+            value={form.video_url || ""}
+            onChange={(e) => setForm((f) => ({ ...f, video_url: e.target.value }))}
+          />
+        </Field>
+      ) : (
+        <MediaUpload
+          label="Video file"
+          accept="video/mp4,video/webm,video/quicktime"
+          value={form.video_url?.startsWith("/api/media/") ? form.video_url : ""}
+          onChange={(url) => setForm((f) => ({ ...f, video_url: url }))}
+          hint="Upload MP4 or WebM (max 100MB)"
+          previewType="video"
+        />
+      )}
+
+      <MediaUpload
+        label="Cover / thumbnail image"
+        accept="image/jpeg,image/png,image/webp,image/gif"
+        value={form.thumbnail_url}
+        onChange={(url) => setForm((f) => ({ ...f, thumbnail_url: url }))}
+      />
+
       <label style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 14, fontSize: 13 }}>
         <input type="checkbox" checked={!!form.featured} onChange={(e) => setForm((f) => ({ ...f, featured: e.target.checked }))} />
         Show on homepage
