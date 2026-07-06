@@ -2,6 +2,7 @@ const router = require("express").Router();
 const db = require("../db/pool");
 const path = require("path");
 const fs = require("fs");
+const { sendInquiryEmail } = require("../services/mailer");
 
 const SITE_ID = "site-007-video-editor";
 const UPLOAD_ROOT = process.env.VIDEO_EDITOR_UPLOAD_DIR
@@ -81,17 +82,19 @@ router.put("/:siteId/settings", async (req, res) => {
     const b = req.body || {};
     const fields = [
       "brand_name", "tagline", "eyebrow", "hero_lead", "hero_accent", "hero_cta",
-      "about_title", "about_body", "email", "phone", "location",
+      "about_title", "about_body", "contact_title", "contact_body",
+      "email", "phone", "location", "notify_email", "whatsapp_message",
       "social_instagram", "social_youtube", "social_vimeo", "social_whatsapp", "footer_note",
     ];
     const values = fields.map((f) => (b[f] !== undefined ? b[f] : null));
     const { rows } = await db.query(
       `INSERT INTO editor_settings (
          site_id, brand_name, tagline, eyebrow, hero_lead, hero_accent, hero_cta,
-         about_title, about_body, email, phone, location,
+         about_title, about_body, contact_title, contact_body,
+         email, phone, location, notify_email, whatsapp_message,
          social_instagram, social_youtube, social_vimeo, social_whatsapp, footer_note, updated_at
        ) VALUES (
-         $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,NOW()
+         $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,NOW()
        )
        ON CONFLICT (site_id) DO UPDATE SET
          brand_name=COALESCE(EXCLUDED.brand_name, editor_settings.brand_name),
@@ -102,9 +105,13 @@ router.put("/:siteId/settings", async (req, res) => {
          hero_cta=COALESCE(EXCLUDED.hero_cta, editor_settings.hero_cta),
          about_title=COALESCE(EXCLUDED.about_title, editor_settings.about_title),
          about_body=COALESCE(EXCLUDED.about_body, editor_settings.about_body),
+         contact_title=COALESCE(EXCLUDED.contact_title, editor_settings.contact_title),
+         contact_body=COALESCE(EXCLUDED.contact_body, editor_settings.contact_body),
          email=COALESCE(EXCLUDED.email, editor_settings.email),
          phone=COALESCE(EXCLUDED.phone, editor_settings.phone),
          location=COALESCE(EXCLUDED.location, editor_settings.location),
+         notify_email=COALESCE(EXCLUDED.notify_email, editor_settings.notify_email),
+         whatsapp_message=COALESCE(EXCLUDED.whatsapp_message, editor_settings.whatsapp_message),
          social_instagram=COALESCE(EXCLUDED.social_instagram, editor_settings.social_instagram),
          social_youtube=COALESCE(EXCLUDED.social_youtube, editor_settings.social_youtube),
          social_vimeo=COALESCE(EXCLUDED.social_vimeo, editor_settings.social_vimeo),
@@ -412,6 +419,28 @@ router.post("/:siteId/inquiries", async (req, res) => {
         b.phone || null, b.project_type || null, b.message.trim(),
       ]
     );
+
+    try {
+      const settingsRes = await db.query(
+        "SELECT brand_name, email, notify_email FROM editor_settings WHERE site_id=$1",
+        [siteId(req)]
+      );
+      const s = settingsRes.rows[0] || {};
+      await sendInquiryEmail({
+        to: s.notify_email || s.email,
+        siteName: s.brand_name,
+        inquiry: {
+          name: b.name.trim(),
+          email: b.email.trim(),
+          phone: b.phone,
+          project_type: b.project_type,
+          message: b.message.trim(),
+        },
+      });
+    } catch (mailErr) {
+      console.error("[inquiry email]", mailErr.message);
+    }
+
     res.status(201).json({ ok: true, id: rows[0].id });
   } catch (err) {
     res.status(500).json({ error: "Failed to submit inquiry", detail: err.message });

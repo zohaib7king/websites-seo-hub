@@ -3,6 +3,7 @@ import Layout from "../components/Layout.jsx";
 import ScrollReveal from "../components/ScrollReveal.jsx";
 import { getEditorBundle, getSite } from "../lib/data";
 import { SITE } from "../site.config";
+import { whatsappLink } from "../lib/whatsapp";
 
 export async function getServerSideProps() {
   const [site, bundle] = await Promise.all([getSite(), getEditorBundle()]);
@@ -16,6 +17,8 @@ export async function getServerSideProps() {
 }
 
 export default function About({ theme, brand, team }) {
+  const waHref = whatsappLink(brand.social?.whatsapp, brand.whatsappMessage);
+
   return (
     <Layout
       title="About"
@@ -26,13 +29,11 @@ export default function About({ theme, brand, team }) {
     >
       <section style={{ paddingTop: 48, paddingBottom: 48 }}>
         <ScrollReveal>
-          <p style={{ fontSize: 13, fontWeight: 700, letterSpacing: ".08em", textTransform: "uppercase", color: "var(--muted)", marginBottom: 12 }}>
-            About
-          </p>
-          <h1 className="sw-headline" style={{ fontSize: "clamp(40px,6vw,64px)", marginBottom: 20 }}>
+          <p className="pro-eyebrow" style={{ marginBottom: 10 }}>About us</p>
+          <h1 style={{ fontSize: "clamp(32px,4vw,44px)", fontWeight: 800, marginBottom: 20, lineHeight: 1.15 }}>
             {brand.aboutTitle || `About ${brand.name}`}
           </h1>
-          <p style={{ color: "var(--muted)", fontSize: 18, lineHeight: 1.85, maxWidth: 720, whiteSpace: "pre-wrap" }}>
+          <p style={{ color: "var(--muted)", fontSize: 17, lineHeight: 1.85, maxWidth: 720, whiteSpace: "pre-wrap" }}>
             {brand.aboutBody}
           </p>
         </ScrollReveal>
@@ -76,7 +77,12 @@ export default function About({ theme, brand, team }) {
           <div style={{ color: "var(--muted)", fontSize: 14, marginBottom: 8 }}>{brand.location}</div>
           <div style={{ fontWeight: 700, fontSize: 16, marginBottom: 4 }}>{brand.email}</div>
           {brand.phone && <div style={{ color: "var(--muted)", marginBottom: 20 }}>{brand.phone}</div>}
-          <Link href="/contact" className="sw-btn sw-btn-primary">{brand.heroCta || "Get in touch"}</Link>
+          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+            <Link href="/contact" className="sw-btn sw-btn-primary">{brand.heroCta || "Get in touch"}</Link>
+            {waHref && (
+              <a href={waHref} target="_blank" rel="noreferrer" className="sw-btn sw-btn-ghost">WhatsApp</a>
+            )}
+          </div>
         </div>
       </ScrollReveal>
     </Layout>

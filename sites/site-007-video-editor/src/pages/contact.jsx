@@ -1,7 +1,9 @@
 import { useState } from "react";
 import Layout from "../components/Layout.jsx";
+import ScrollReveal from "../components/ScrollReveal.jsx";
 import { getEditorBundle, getSite } from "../lib/data";
 import { SITE } from "../site.config";
+import { whatsappLink } from "../lib/whatsapp";
 
 export async function getServerSideProps() {
   const [site, bundle] = await Promise.all([getSite(), getEditorBundle()]);
@@ -14,8 +16,8 @@ export async function getServerSideProps() {
 }
 
 const fieldStyle = {
-  width: "100%", background: "var(--bg)", border: "1px solid var(--border)",
-  borderRadius: 12, padding: "12px 14px", color: "var(--text)", fontSize: 14,
+  width: "100%", background: "#fff", border: "1px solid var(--border)",
+  borderRadius: 8, padding: "12px 14px", color: "var(--text)", fontSize: 14,
 };
 
 export default function Contact({ theme, brand }) {
@@ -23,11 +25,16 @@ export default function Contact({ theme, brand }) {
     name: "", email: "", phone: "", project_type: "YouTube", message: "",
   });
   const [status, setStatus] = useState({ loading: false, ok: false, error: "" });
+  const waHref = whatsappLink(brand.social?.whatsapp, brand.whatsappMessage);
 
   async function submit() {
+    if (!form.name.trim() || !form.email.trim() || !form.message.trim()) {
+      setStatus({ loading: false, ok: false, error: "Name, email, and message are required." });
+      return;
+    }
     setStatus({ loading: true, ok: false, error: "" });
     try {
-      const res = await fetch(`/api/inquiries`, {
+      const res = await fetch("/api/inquiries", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
@@ -43,92 +50,112 @@ export default function Contact({ theme, brand }) {
 
   return (
     <Layout
-      title="Hire me"
-      description={`Contact ${brand.name} for freelance video editing.`}
+      title="Contact"
+      description={brand.contactBody}
       theme={theme}
       brand={brand}
       canonical={`https://${brand.domain}/contact`}
     >
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 28 }} className="hero-split">
-        <div>
-          <h1 className="hero-title" style={{ fontSize: 40, fontWeight: 950, letterSpacing: "-0.04em", marginBottom: 10 }}>
-            Let&apos;s edit your next video
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 32, paddingTop: 24 }} className="hero-grid">
+        <ScrollReveal>
+          <p className="pro-eyebrow" style={{ marginBottom: 10 }}>Contact us</p>
+          <h1 style={{ fontSize: "clamp(32px,4vw,44px)", fontWeight: 800, marginBottom: 14, lineHeight: 1.15 }}>
+            {brand.contactTitle || "Get in touch"}
           </h1>
-          <p style={{ color: "var(--muted)", fontSize: 16, lineHeight: 1.8, marginBottom: 24 }}>
-            Tell me about the project, deadline, and style. I usually reply within 24 hours.
+          <p style={{ color: "var(--muted)", fontSize: 16, lineHeight: 1.75, marginBottom: 24, whiteSpace: "pre-wrap" }}>
+            {brand.contactBody}
           </p>
-          <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 18, padding: 22 }}>
+          <div style={{
+            background: "var(--surface)", border: "1px solid var(--border)",
+            borderRadius: "var(--radius)", padding: 22, boxShadow: "var(--shadow)",
+          }}>
             <div style={{ marginBottom: 14 }}>
-              <div style={{ fontSize: 11, color: "var(--muted)", textTransform: "uppercase", letterSpacing: ".06em", marginBottom: 4 }}>Email</div>
-              <a href={`mailto:${brand.email}`} style={{ fontWeight: 800, color: "var(--accent)" }}>{brand.email}</a>
+              <div className="pro-eyebrow" style={{ marginBottom: 4 }}>Email</div>
+              <a href={`mailto:${brand.email}`} style={{ fontWeight: 700, color: "var(--accent)" }}>{brand.email}</a>
             </div>
             {brand.phone && (
               <div style={{ marginBottom: 14 }}>
-                <div style={{ fontSize: 11, color: "var(--muted)", textTransform: "uppercase", letterSpacing: ".06em", marginBottom: 4 }}>Phone</div>
-                <div style={{ fontWeight: 800 }}>{brand.phone}</div>
+                <div className="pro-eyebrow" style={{ marginBottom: 4 }}>Phone</div>
+                <div style={{ fontWeight: 700 }}>{brand.phone}</div>
               </div>
             )}
-            <div>
-              <div style={{ fontSize: 11, color: "var(--muted)", textTransform: "uppercase", letterSpacing: ".06em", marginBottom: 4 }}>Location</div>
-              <div style={{ fontWeight: 800 }}>{brand.location}</div>
+            <div style={{ marginBottom: 18 }}>
+              <div className="pro-eyebrow" style={{ marginBottom: 4 }}>Location</div>
+              <div style={{ fontWeight: 700 }}>{brand.location}</div>
             </div>
-            {brand.social?.whatsapp && (
-              <a href={brand.social.whatsapp} target="_blank" rel="noreferrer" className="ff-btn ff-btn-soft" style={{ marginTop: 18, display: "inline-flex" }}>
-                WhatsApp
+            {waHref && (
+              <a href={waHref} target="_blank" rel="noreferrer" className="sw-btn" style={{
+                display: "inline-flex", background: "#25D366", color: "#fff", borderColor: "#25D366",
+              }}>
+                💬 Message on WhatsApp
               </a>
             )}
           </div>
-        </div>
+        </ScrollReveal>
 
-        <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 22, padding: 24 }}>
-          {[
-            ["name", "Your name"],
-            ["email", "Email"],
-            ["phone", "Phone (optional)"],
-          ].map(([key, label]) => (
-            <div key={key} style={{ marginBottom: 14 }}>
-              <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: "var(--muted)", marginBottom: 6 }}>{label}</label>
-              <input
-                style={fieldStyle}
-                value={form[key]}
-                onChange={(e) => setForm((f) => ({ ...f, [key]: e.target.value }))}
+        <ScrollReveal delay={80}>
+          <div style={{
+            background: "var(--surface)", border: "1px solid var(--border)",
+            borderRadius: "var(--radius)", padding: 24, boxShadow: "var(--shadow)",
+          }}>
+            <h2 style={{ fontSize: 20, fontWeight: 800, marginBottom: 16 }}>Send an inquiry</h2>
+            {[
+              ["name", "Your name", "text"],
+              ["email", "Email", "email"],
+              ["phone", "Phone (optional)", "text"],
+            ].map(([key, label, type]) => (
+              <div key={key} style={{ marginBottom: 14 }}>
+                <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: "var(--muted)", marginBottom: 6 }}>{label}</label>
+                <input
+                  type={type}
+                  style={fieldStyle}
+                  value={form[key]}
+                  onChange={(e) => setForm((f) => ({ ...f, [key]: e.target.value }))}
+                />
+              </div>
+            ))}
+            <div style={{ marginBottom: 14 }}>
+              <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: "var(--muted)", marginBottom: 6 }}>Project type</label>
+              <select style={fieldStyle} value={form.project_type} onChange={(e) => setForm((f) => ({ ...f, project_type: e.target.value }))}>
+                {["YouTube", "Reels / Shorts", "Wedding", "Brand / Ads", "Event", "Other"].map((opt) => (
+                  <option key={opt} value={opt}>{opt}</option>
+                ))}
+              </select>
+            </div>
+            <div style={{ marginBottom: 16 }}>
+              <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: "var(--muted)", marginBottom: 6 }}>Project details</label>
+              <textarea
+                rows={5}
+                style={{ ...fieldStyle, resize: "vertical" }}
+                value={form.message}
+                onChange={(e) => setForm((f) => ({ ...f, message: e.target.value }))}
+                placeholder="Footage type, length, deadline, references…"
               />
             </div>
-          ))}
-          <div style={{ marginBottom: 14 }}>
-            <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: "var(--muted)", marginBottom: 6 }}>Project type</label>
-            <select
-              style={fieldStyle}
-              value={form.project_type}
-              onChange={(e) => setForm((f) => ({ ...f, project_type: e.target.value }))}
-            >
-              {["YouTube", "Reels / Shorts", "Wedding", "Brand / Ads", "Event", "Other"].map((opt) => (
-                <option key={opt} value={opt}>{opt}</option>
-              ))}
-            </select>
+            {status.ok && (
+              <p style={{ color: "var(--accent)", fontWeight: 700, marginBottom: 12 }}>
+                Inquiry sent! We will email you back soon.
+              </p>
+            )}
+            {status.error && <p style={{ color: "#dc2626", fontWeight: 700, marginBottom: 12 }}>{status.error}</p>}
+            <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+              <button
+                type="button"
+                className="sw-btn sw-btn-primary"
+                disabled={status.loading}
+                onClick={submit}
+                style={{ flex: 1, minWidth: 140, opacity: status.loading ? 0.7 : 1 }}
+              >
+                {status.loading ? "Sending…" : "Send inquiry"}
+              </button>
+              {waHref && (
+                <a href={waHref} target="_blank" rel="noreferrer" className="sw-btn sw-btn-ghost" style={{ flex: 1, minWidth: 140, textAlign: "center" }}>
+                  WhatsApp
+                </a>
+              )}
+            </div>
           </div>
-          <div style={{ marginBottom: 16 }}>
-            <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: "var(--muted)", marginBottom: 6 }}>Project details</label>
-            <textarea
-              rows={5}
-              style={{ ...fieldStyle, resize: "vertical" }}
-              value={form.message}
-              onChange={(e) => setForm((f) => ({ ...f, message: e.target.value }))}
-              placeholder="Footage type, length, deadline, references…"
-            />
-          </div>
-          {status.ok && <p style={{ color: "var(--accent2)", fontWeight: 700, marginBottom: 12 }}>Message sent — I will get back to you soon.</p>}
-          {status.error && <p style={{ color: "#f87171", fontWeight: 700, marginBottom: 12 }}>{status.error}</p>}
-          <button
-            type="button"
-            className="ff-btn ff-btn-primary"
-            disabled={status.loading}
-            onClick={submit}
-            style={{ width: "100%", opacity: status.loading ? 0.7 : 1 }}
-          >
-            {status.loading ? "Sending…" : "Send inquiry"}
-          </button>
-        </div>
+        </ScrollReveal>
       </div>
     </Layout>
   );

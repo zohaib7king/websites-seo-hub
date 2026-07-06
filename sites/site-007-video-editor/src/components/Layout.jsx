@@ -2,6 +2,7 @@ import Head from "next/head";
 import Link from "next/link";
 import { getTheme } from "../themes";
 import { SITE } from "../site.config";
+import WhatsAppFloat from "./WhatsAppFloat.jsx";
 
 const mainNav = [
   { label: "Home", href: "/" },
@@ -104,6 +105,7 @@ export default function Layout({ children, title, description, theme = "pro", br
         .pro-band{background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border);}
         .card-hover{transition:transform .25s,box-shadow .25s;}
         .card-hover:hover{transform:translateY(-3px);}
+        .wa-float:hover{transform:translateY(-3px) scale(1.03);box-shadow:0 12px 32px rgba(37,211,102,.5);}
 
         @media(max-width:900px){
           .sw-thumb-grid,.sw-team-grid,.port-grid,.svc-grid,.feature-split,.hero-grid{grid-template-columns:1fr !important;}
@@ -164,6 +166,8 @@ export default function Layout({ children, title, description, theme = "pro", br
           <p style={{ color: "var(--muted)", fontSize: 12 }}>© {year} {b.name}. {b.footerNote}</p>
         </div>
       </footer>
+
+      <WhatsAppFloat url={b.social?.whatsapp} message={b.whatsappMessage} />
     </>
   );
 }

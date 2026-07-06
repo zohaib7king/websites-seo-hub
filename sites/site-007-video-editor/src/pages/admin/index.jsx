@@ -93,7 +93,8 @@ export default function AdminPage() {
     ]);
     setSettings(s || {
       brand_name: "ibtihajForage", tagline: "", eyebrow: "", hero_lead: "", hero_accent: "",
-      hero_cta: "Hire me", about_title: "", about_body: "", email: "", phone: "", location: "",
+      hero_cta: "Hire me", about_title: "", about_body: "", contact_title: "", contact_body: "",
+      email: "", phone: "", location: "", notify_email: "", whatsapp_message: "",
       social_instagram: "", social_youtube: "", social_vimeo: "", social_whatsapp: "", footer_note: "",
     });
     setPortfolio(p);
@@ -325,8 +326,8 @@ export default function AdminPage() {
 
       {tab === "settings" && settings && (
         <div style={card}>
-          <p style={{ color: "#c4b0d8", fontSize: 13, marginBottom: 16 }}>
-            Website name, hero text, about, contact, and social links — sab yahan se change hota hai.
+          <p style={{ color: "#64748b", fontSize: 13, marginBottom: 16 }}>
+            Website name, hero, About page, Contact page, email notifications, and WhatsApp — sab yahan se.
           </p>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
             {[
@@ -335,13 +336,14 @@ export default function AdminPage() {
               ["hero_lead", "Hero lead text"],
               ["hero_accent", "Hero colorful word"],
               ["hero_cta", "Button text (Hire me)"],
-              ["email", "Email"],
+              ["email", "Public email (shown on site)"],
+              ["notify_email", "Inquiry emails sent to (leave blank = public email)"],
               ["phone", "Phone"],
               ["location", "Location"],
               ["social_instagram", "Instagram URL"],
               ["social_youtube", "YouTube URL"],
               ["social_vimeo", "Vimeo URL"],
-              ["social_whatsapp", "WhatsApp URL"],
+              ["social_whatsapp", "WhatsApp link (wa.me/...)"],
             ].map(([key, label]) => (
               <Field key={key} label={label}>
                 <input
@@ -355,11 +357,20 @@ export default function AdminPage() {
           <Field label="Tagline">
             <textarea rows={2} style={{ ...inputStyle, resize: "vertical" }} value={settings.tagline || ""} onChange={(e) => setSettings((s) => ({ ...s, tagline: e.target.value }))} />
           </Field>
-          <Field label="About title">
+          <Field label="About page — title">
             <input style={inputStyle} value={settings.about_title || ""} onChange={(e) => setSettings((s) => ({ ...s, about_title: e.target.value }))} />
           </Field>
-          <Field label="About text">
+          <Field label="About page — text">
             <textarea rows={5} style={{ ...inputStyle, resize: "vertical" }} value={settings.about_body || ""} onChange={(e) => setSettings((s) => ({ ...s, about_body: e.target.value }))} />
+          </Field>
+          <Field label="Contact page — title">
+            <input style={inputStyle} value={settings.contact_title || ""} onChange={(e) => setSettings((s) => ({ ...s, contact_title: e.target.value }))} />
+          </Field>
+          <Field label="Contact page — intro text">
+            <textarea rows={3} style={{ ...inputStyle, resize: "vertical" }} value={settings.contact_body || ""} onChange={(e) => setSettings((s) => ({ ...s, contact_body: e.target.value }))} />
+          </Field>
+          <Field label="WhatsApp pre-filled message">
+            <textarea rows={2} style={{ ...inputStyle, resize: "vertical" }} value={settings.whatsapp_message || ""} onChange={(e) => setSettings((s) => ({ ...s, whatsapp_message: e.target.value }))} placeholder="Hi! I would like to discuss a video project." />
           </Field>
           <Field label="Footer note">
             <textarea rows={2} style={{ ...inputStyle, resize: "vertical" }} value={settings.footer_note || ""} onChange={(e) => setSettings((s) => ({ ...s, footer_note: e.target.value }))} />
