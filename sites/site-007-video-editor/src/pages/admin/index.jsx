@@ -89,7 +89,7 @@ export default function AdminPage() {
       cms("inquiries"),
     ]);
     setSettings(s || {
-      brand_name: "FrameForge", tagline: "", eyebrow: "", hero_lead: "", hero_accent: "",
+      brand_name: "ibtihajForage", tagline: "", eyebrow: "", hero_lead: "", hero_accent: "",
       hero_cta: "Hire me", about_title: "", about_body: "", email: "", phone: "", location: "",
       social_instagram: "", social_youtube: "", social_vimeo: "", social_whatsapp: "", footer_note: "",
     });
@@ -213,7 +213,7 @@ export default function AdminPage() {
   const shell = (children) => (
     <>
       <Head>
-        <title>Admin | FrameForge</title>
+        <title>Admin | ibtihajForage</title>
         <meta name="robots" content="noindex,nofollow" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>

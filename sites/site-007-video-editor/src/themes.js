@@ -1,4 +1,17 @@
 export const THEMES = {
+  forge: {
+    label: "Forge",
+    bg: "#fff8f2",
+    surface: "#ffffff",
+    border: "#f0d4ff",
+    accent: "#e11d8f",
+    accent2: "#0ea5e9",
+    accent3: "#8b5cf6",
+    text: "#1a0a2e",
+    muted: "#6b5b7a",
+    body: "radial-gradient(ellipse 90% 60% at 0% 0%, #ffe4f3 0%, transparent 55%), radial-gradient(ellipse 80% 55% at 100% 5%, #dbeafe 0%, transparent 50%), radial-gradient(ellipse 70% 50% at 50% 100%, #fef9c3 0%, transparent 55%), #fff8f2",
+    hero: "linear-gradient(125deg,#ff4d9a 0%,#a855f7 38%,#38bdf8 72%,#34d399 100%)",
+  },
   sandwich: {
     label: "Sandwich",
     bg: "#f4efe6",
@@ -68,5 +81,5 @@ export const THEMES = {
 };
 
 export function getTheme(name) {
-  return THEMES[name] || THEMES.sandwich;
+  return THEMES[name] || THEMES.forge;
 }

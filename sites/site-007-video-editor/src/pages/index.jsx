@@ -80,18 +80,21 @@ export default function Home({ theme, brand, portfolio, services, testimonials, 
       canonical={`https://${brand.domain}`}
       fullWidth
     >
-      {/* Hero — sandwich.co style */}
-      <section style={{ padding: "72px 24px 40px", maxWidth: "var(--max)", margin: "0 auto" }}>
+      {/* Hero */}
+      <section style={{ padding: "72px 24px 40px", maxWidth: "var(--max)", margin: "0 auto", position: "relative" }}>
         <ScrollReveal>
-          <p style={{ fontSize: 13, fontWeight: 700, letterSpacing: ".06em", color: "var(--muted)", marginBottom: 20 }}>
-            {brand.eyebrow}
-          </p>
-          <h1 className="sw-hero-title sw-headline" style={{ fontSize: "clamp(52px,8vw,96px)", maxWidth: 900 }}>
-            Hello. We&apos;re {brand.name}.
+          <span className="if-pill">{brand.eyebrow}</span>
+          <h1 className="sw-hero-title sw-headline" style={{ fontSize: "clamp(52px,8vw,96px)", maxWidth: 900, marginTop: 22 }}>
+            Hello. We&apos;re{" "}
+            <span className="grad-text grad-shift">{brand.name}</span>.
           </h1>
           <p style={{ fontSize: "clamp(18px,2.5vw,24px)", color: "var(--muted)", maxWidth: 560, marginTop: 28, lineHeight: 1.6 }}>
             {brand.tagline}
           </p>
+          <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginTop: 28 }}>
+            <Link href="/contact" className="sw-btn sw-btn-primary">{brand.heroCta || "Get in touch"} →</Link>
+            <Link href="/portfolio" className="sw-btn sw-btn-ghost">▶ View work</Link>
+          </div>
           <div className="sw-scroll-hint">Scroll down to see some ↓</div>
         </ScrollReveal>
       </section>
@@ -106,7 +109,7 @@ export default function Home({ theme, brand, portfolio, services, testimonials, 
       {/* This should be simple */}
       <section style={{ padding: "80px 24px", maxWidth: "var(--max)", margin: "0 auto" }}>
         <ScrollReveal>
-          <h2 className="sw-headline" style={{ fontSize: "clamp(40px,6vw,72px)", marginBottom: 28 }}>
+          <h2 className="sw-headline grad-text grad-shift" style={{ fontSize: "clamp(40px,6vw,72px)", marginBottom: 28 }}>
             This should<br />be simple.
           </h2>
           <p style={{ fontSize: 18, color: "var(--muted)", maxWidth: 620, lineHeight: 1.75, marginBottom: 28 }}>
@@ -124,7 +127,7 @@ export default function Home({ theme, brand, portfolio, services, testimonials, 
             <p style={{ fontSize: 13, fontWeight: 700, letterSpacing: ".08em", textTransform: "uppercase", color: "var(--muted)", marginBottom: 12 }}>
               Featured work
             </p>
-            <h2 className="sw-headline" style={{ fontSize: "clamp(32px,4vw,48px)", marginBottom: 32 }}>
+            <h2 className="sw-headline grad-text" style={{ fontSize: "clamp(32px,4vw,48px)", marginBottom: 32 }}>
               What&apos;s good?
             </h2>
           </ScrollReveal>
@@ -155,7 +158,7 @@ export default function Home({ theme, brand, portfolio, services, testimonials, 
 
       {/* Services */}
       {services.length > 0 && (
-        <section style={{ padding: "80px 24px", background: "var(--surface)", borderTop: "1px solid var(--border)", borderBottom: "1px solid var(--border)" }}>
+        <section className="if-section-band" style={{ padding: "80px 24px" }}>
           <div style={{ maxWidth: "var(--max)", margin: "0 auto" }}>
             <ScrollReveal>
               <h2 className="sw-headline" style={{ fontSize: "clamp(36px,5vw,56px)", marginBottom: 40 }}>
@@ -165,10 +168,17 @@ export default function Home({ theme, brand, portfolio, services, testimonials, 
             <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 24 }} className="svc-grid">
               {services.slice(0, 3).map((svc, i) => (
                 <ScrollReveal key={svc.id} delay={i * 80}>
-                  <div style={{ padding: "28px 0", borderTop: "2px solid var(--accent)" }}>
+                  <div className="card-hover" style={{
+                    padding: 28, borderRadius: "var(--radius)",
+                    background: "var(--surface)",
+                    border: "1px solid var(--border)",
+                    boxShadow: "0 12px 32px rgba(0,0,0,.06)",
+                    borderTop: "4px solid transparent",
+                    borderImage: `linear-gradient(90deg, ${["#ff4d9a", "#38bdf8", "#a855f7"][i % 3]}, ${["#a855f7", "#34d399", "#ff4d9a"][i % 3]}) 1`,
+                  }}>
                     <h3 className="sw-serif" style={{ fontSize: 28, marginBottom: 12 }}>{svc.title}</h3>
                     <p style={{ color: "var(--muted)", fontSize: 15, lineHeight: 1.7, marginBottom: 16 }}>{svc.description}</p>
-                    {svc.price_label && <div style={{ fontWeight: 800, fontSize: 15 }}>{svc.price_label}</div>}
+                    {svc.price_label && <div className="grad-text" style={{ fontWeight: 900, fontSize: 15 }}>{svc.price_label}</div>}
                   </div>
                 </ScrollReveal>
               ))}
@@ -208,17 +218,31 @@ export default function Home({ theme, brand, portfolio, services, testimonials, 
       )}
 
       {/* CTA */}
-      <section style={{ padding: "80px 24px 100px", textAlign: "center", background: "var(--accent)", color: "var(--bg)" }}>
+      <section style={{
+        padding: "80px 24px 100px", textAlign: "center",
+        background: "var(--hero)", backgroundSize: "200% 200%",
+        animation: "grad-shift 8s ease infinite",
+        color: "#fff", position: "relative", overflow: "hidden",
+      }}>
+        <div style={{
+          position: "absolute", inset: 0, opacity: 0.25, pointerEvents: "none",
+          background: "radial-gradient(circle at 20% 30%, #fff, transparent 40%), radial-gradient(circle at 80% 70%, #fff, transparent 35%)",
+        }} />
         <ScrollReveal>
-          <h2 className="sw-headline" style={{ fontSize: "clamp(36px,5vw,64px)", marginBottom: 16, color: "var(--bg)" }}>
-            Ready to get started?
-          </h2>
-          <p style={{ opacity: 0.85, maxWidth: 480, margin: "0 auto 28px", fontSize: 17, lineHeight: 1.6 }}>
-            Share your footage and deadline — we&apos;ll reply with a clear plan and quote.
-          </p>
-          <Link href="/contact" className="sw-btn" style={{ background: "var(--bg)", color: "var(--accent)", borderColor: "var(--bg)" }}>
-            Get in touch
-          </Link>
+          <div style={{ position: "relative" }}>
+            <h2 className="sw-headline" style={{ fontSize: "clamp(36px,5vw,64px)", marginBottom: 16 }}>
+              Ready to get started?
+            </h2>
+            <p style={{ opacity: 0.92, maxWidth: 480, margin: "0 auto 28px", fontSize: 17, lineHeight: 1.6, fontWeight: 600 }}>
+              Share your footage and deadline — we&apos;ll reply with a clear plan and quote.
+            </p>
+            <Link href="/contact" className="sw-btn" style={{
+              background: "#fff", color: "#c0267a", borderColor: "#fff",
+              boxShadow: "0 12px 30px rgba(0,0,0,.15)",
+            }}>
+              Get in touch
+            </Link>
+          </div>
         </ScrollReveal>
       </section>
     </Layout>

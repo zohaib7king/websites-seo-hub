@@ -1,6 +1,6 @@
 // Fallback identity when API/CMS is empty. Live content comes from admin panel.
 export const SITE = {
-  name: "FrameForge",
+  name: "ibtihajForage",
   lead: "Stories that",
   accent: "hit harder",
   tagline: "Cinematic edits for YouTube, brands, weddings, and social — delivered on time.",
@@ -12,7 +12,7 @@ export const SITE = {
   email: "hello@frameforge.skoolai.cloud",
   phone: "+92 300 0000000",
   location: "Remote · Worldwide",
-  defaultTheme: "sandwich",
+  defaultTheme: "forge",
   domain: "frameforge.skoolai.cloud",
   footerNote: "Professional freelance video editing. Fast turnaround. Clear communication.",
   social: {

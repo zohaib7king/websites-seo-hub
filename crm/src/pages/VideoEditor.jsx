@@ -72,7 +72,7 @@ export default function VideoEditor() {
         api.editorGetInquiries(SITE_ID),
       ]);
       setSettings(s || {
-        brand_name: "FrameForge", tagline: "", eyebrow: "", hero_lead: "", hero_accent: "",
+        brand_name: "ibtihajForage", tagline: "", eyebrow: "", hero_lead: "", hero_accent: "",
         hero_cta: "Hire me", about_title: "", about_body: "", email: "", phone: "", location: "",
         social_instagram: "", social_youtube: "", social_vimeo: "", social_whatsapp: "", footer_note: "",
       });
@@ -148,7 +148,7 @@ export default function VideoEditor() {
         <div>
           <h1 style={{ fontSize: 22, fontWeight: 700 }}>Video Editor Site</h1>
           <p style={{ color: "var(--muted)", marginTop: 4 }}>
-            Manage FrameForge pages — settings, portfolio, services, testimonials, and hire inquiries.
+            Manage ibtihajForage pages — settings, portfolio, services, testimonials, and hire inquiries.
           </p>
         </div>
         <div style={{ color: "var(--muted)", fontSize: 12, alignSelf: "center" }}>site-007-video-editor · port 3008</div>

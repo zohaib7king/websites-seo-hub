@@ -143,13 +143,13 @@ INSERT INTO sites (id, name, niche, domain, theme) VALUES
 ON CONFLICT DO NOTHING;
 
 INSERT INTO sites (id, name, niche, domain, theme) VALUES
-  ('site-007-video-editor', 'FrameForge', 'video-editing', 'frameforge.skoolai.cloud', 'sandwich')
+  ('site-007-video-editor', 'ibtihajForage', 'video-editing', 'frameforge.skoolai.cloud', 'forge')
 ON CONFLICT DO NOTHING;
 
 -- Video editor portfolio CMS (site-007-video-editor)
 CREATE TABLE IF NOT EXISTS editor_settings (
   site_id           TEXT PRIMARY KEY REFERENCES sites(id) ON DELETE CASCADE,
-  brand_name        TEXT NOT NULL DEFAULT 'FrameForge',
+  brand_name        TEXT NOT NULL DEFAULT 'ibtihajForage',
   tagline           TEXT,
   eyebrow           TEXT,
   hero_lead         TEXT,
