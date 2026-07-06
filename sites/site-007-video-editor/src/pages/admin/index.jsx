@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import Head from "next/head";
 import Link from "next/link";
 import MediaUpload from "../../components/MediaUpload.jsx";
+import Logo from "../../components/Logo.jsx";
 import { isYoutubeUrl } from "../../lib/upload";
 
 const TABS = [
@@ -231,6 +232,7 @@ export default function AdminPage() {
         <title>Admin | ibtihajForage</title>
         <meta name="robots" content="noindex,nofollow" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="icon" href="/logo-icon.svg" type="image/svg+xml" />
       </Head>
       <style dangerouslySetInnerHTML={{ __html: `
         *{box-sizing:border-box;margin:0;padding:0}
@@ -250,7 +252,10 @@ export default function AdminPage() {
   if (!authed) {
     return shell(
       <div style={{ ...card, maxWidth: 420, margin: "60px auto" }}>
-        <h1 style={{ fontSize: 26, fontWeight: 900, marginBottom: 8 }}>Website Admin</h1>
+        <div style={{ marginBottom: 20 }}>
+          <Logo name="ibtihajForage" href="/" size="md" />
+        </div>
+        <h1 style={{ fontSize: 22, fontWeight: 800, marginBottom: 8 }}>Website Admin</h1>
         <p style={{ color: "#c4b0d8", marginBottom: 20, fontSize: 14, lineHeight: 1.6 }}>
           Same website — login to edit name, text, portfolio videos, images, services, and reviews.
         </p>
@@ -276,11 +281,8 @@ export default function AdminPage() {
     <>
       <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap", marginBottom: 20, alignItems: "center" }}>
         <div>
-          <h1 style={{
-            fontSize: 28, fontWeight: 900,
-            background: "linear-gradient(125deg,#ff4d9a,#a855f7,#38bdf8)",
-            WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
-          }}>
+          <Logo name="ibtihajForage" href="/" size="sm" />
+          <h1 style={{ fontSize: 22, fontWeight: 800, marginTop: 12, color: "#0f172a" }}>
             Website Admin
           </h1>
           <p style={{ color: "#c4b0d8", fontSize: 13, marginTop: 4 }}>

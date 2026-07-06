@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getTheme } from "../themes";
 import { SITE } from "../site.config";
 import WhatsAppFloat from "./WhatsAppFloat.jsx";
+import Logo from "./Logo.jsx";
 
 const mainNav = [
   { label: "Home", href: "/" },
@@ -34,6 +35,8 @@ export default function Layout({ children, title, description, theme = "pro", br
         <meta property="og:description" content={pageDescription} />
         <meta property="og:url" content={canonicalUrl} />
         <meta name="theme-color" content={t.accent} />
+        <link rel="icon" href="/logo-icon.svg" type="image/svg+xml" />
+        <link rel="apple-touch-icon" href="/logo-icon.svg" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -125,7 +128,7 @@ export default function Layout({ children, title, description, theme = "pro", br
         backdropFilter: "blur(12px)",
       }}>
         <div style={{ maxWidth: "var(--max)", margin: "0 auto", padding: "0 24px", display: "flex", justifyContent: "space-between", alignItems: "center", height: 68 }}>
-          <Link href="/" style={{ fontWeight: 800, fontSize: 20, color: "var(--accent)" }}>{b.name}</Link>
+          <Logo name={b.name} href="/" size="md" />
           <nav className="hide-mobile" style={{ display: "flex", gap: 4, alignItems: "center" }}>
             {mainNav.map((item) => (
               <Link key={item.href} href={item.href} className="nav-link">{item.label}</Link>
@@ -144,8 +147,8 @@ export default function Layout({ children, title, description, theme = "pro", br
       <footer style={{ borderTop: "1px solid var(--border)", background: "var(--surface)" }}>
         <div style={{ maxWidth: "var(--max)", margin: "0 auto", padding: "40px 24px", display: "flex", flexWrap: "wrap", gap: 40, justifyContent: "space-between" }}>
           <div style={{ maxWidth: 320 }}>
-            <div style={{ fontWeight: 800, fontSize: 20, color: "var(--accent)", marginBottom: 8 }}>{b.name}</div>
-            <p style={{ color: "var(--muted)", fontSize: 14 }}>{b.tagline}</p>
+            <Logo name={b.name} href="/" size="sm" />
+            <p style={{ color: "var(--muted)", fontSize: 14, marginTop: 10 }}>{b.tagline}</p>
           </div>
           <div style={{ display: "flex", gap: 48 }}>
             <div>
