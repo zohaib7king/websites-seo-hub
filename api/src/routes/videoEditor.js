@@ -20,7 +20,7 @@ function slugify(text) {
 router.get("/:siteId/bundle", async (req, res) => {
   try {
     const id = siteId(req);
-    const [settings, portfolio, services, testimonials] = await Promise.all([
+    const [settings, portfolio, services, testimonials, thumbnails, team] = await Promise.all([
       db.query("SELECT * FROM editor_settings WHERE site_id=$1", [id]),
       db.query(
         `SELECT * FROM editor_portfolio WHERE site_id=$1 AND status='published'
@@ -37,12 +37,24 @@ router.get("/:siteId/bundle", async (req, res) => {
          ORDER BY sort_order ASC, id ASC`,
         [id]
       ),
+      db.query(
+        `SELECT * FROM editor_thumbnails WHERE site_id=$1 AND status='published'
+         ORDER BY sort_order ASC, id ASC`,
+        [id]
+      ),
+      db.query(
+        `SELECT * FROM editor_team WHERE site_id=$1 AND status='published'
+         ORDER BY sort_order ASC, id ASC`,
+        [id]
+      ),
     ]);
     res.json({
       settings: settings.rows[0] || null,
       portfolio: portfolio.rows,
       services: services.rows,
       testimonials: testimonials.rows,
+      thumbnails: thumbnails.rows,
+      team: team.rows,
     });
   } catch (err) {
     res.status(500).json({ error: "Failed to load editor bundle", detail: err.message });
@@ -427,6 +439,156 @@ router.delete("/:siteId/inquiries/:id", async (req, res) => {
     res.json({ ok: true });
   } catch (err) {
     res.status(500).json({ error: "Failed to delete inquiry", detail: err.message });
+  }
+});
+
+// ── Thumbnails (reel / showcase) ─────────────────────────
+router.get("/:siteId/thumbnails", async (req, res) => {
+  try {
+    const id = siteId(req);
+    const all = req.query.all === "1";
+    const { rows } = await db.query(
+      all
+        ? `SELECT * FROM editor_thumbnails WHERE site_id=$1 ORDER BY sort_order ASC, id ASC`
+        : `SELECT * FROM editor_thumbnails WHERE site_id=$1 AND status='published' ORDER BY sort_order ASC, id ASC`,
+      [id]
+    );
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch thumbnails", detail: err.message });
+  }
+});
+
+router.post("/:siteId/thumbnails", async (req, res) => {
+  try {
+    const b = req.body || {};
+    if (!b.title || !b.thumbnail_url) {
+      return res.status(400).json({ error: "title and thumbnail_url are required" });
+    }
+    const { rows } = await db.query(
+      `INSERT INTO editor_thumbnails (site_id, title, thumbnail_url, video_url, category, sort_order, status)
+       VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *`,
+      [
+        siteId(req), b.title, b.thumbnail_url, b.video_url || null, b.category || null,
+        Number(b.sort_order) || 0, b.status || "published",
+      ]
+    );
+    res.status(201).json(rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to create thumbnail", detail: err.message });
+  }
+});
+
+router.patch("/:siteId/thumbnails/:id", async (req, res) => {
+  try {
+    const b = req.body || {};
+    const { rows } = await db.query(
+      `UPDATE editor_thumbnails SET
+         title=COALESCE($3, title),
+         thumbnail_url=COALESCE($4, thumbnail_url),
+         video_url=COALESCE($5, video_url),
+         category=COALESCE($6, category),
+         sort_order=COALESCE($7, sort_order),
+         status=COALESCE($8, status)
+       WHERE site_id=$1 AND id=$2 RETURNING *`,
+      [
+        siteId(req), req.params.id,
+        b.title ?? null, b.thumbnail_url ?? null, b.video_url ?? null, b.category ?? null,
+        b.sort_order === undefined ? null : Number(b.sort_order), b.status ?? null,
+      ]
+    );
+    if (!rows[0]) return res.status(404).json({ error: "Thumbnail not found" });
+    res.json(rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to update thumbnail", detail: err.message });
+  }
+});
+
+router.delete("/:siteId/thumbnails/:id", async (req, res) => {
+  try {
+    const { rowCount } = await db.query(
+      "DELETE FROM editor_thumbnails WHERE site_id=$1 AND id=$2",
+      [siteId(req), req.params.id]
+    );
+    if (!rowCount) return res.status(404).json({ error: "Thumbnail not found" });
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to delete thumbnail", detail: err.message });
+  }
+});
+
+// ── Team members ───────────────────────────────────────────
+router.get("/:siteId/team", async (req, res) => {
+  try {
+    const id = siteId(req);
+    const all = req.query.all === "1";
+    const { rows } = await db.query(
+      all
+        ? `SELECT * FROM editor_team WHERE site_id=$1 ORDER BY sort_order ASC, id ASC`
+        : `SELECT * FROM editor_team WHERE site_id=$1 AND status='published' ORDER BY sort_order ASC, id ASC`,
+      [id]
+    );
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch team", detail: err.message });
+  }
+});
+
+router.post("/:siteId/team", async (req, res) => {
+  try {
+    const b = req.body || {};
+    if (!b.name) return res.status(400).json({ error: "name is required" });
+    const { rows } = await db.query(
+      `INSERT INTO editor_team (site_id, name, role, bio, photo_url, social_url, sort_order, status)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *`,
+      [
+        siteId(req), b.name, b.role || null, b.bio || null, b.photo_url || null,
+        b.social_url || null, Number(b.sort_order) || 0, b.status || "published",
+      ]
+    );
+    res.status(201).json(rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to create team member", detail: err.message });
+  }
+});
+
+router.patch("/:siteId/team/:id", async (req, res) => {
+  try {
+    const b = req.body || {};
+    const { rows } = await db.query(
+      `UPDATE editor_team SET
+         name=COALESCE($3, name),
+         role=COALESCE($4, role),
+         bio=COALESCE($5, bio),
+         photo_url=COALESCE($6, photo_url),
+         social_url=COALESCE($7, social_url),
+         sort_order=COALESCE($8, sort_order),
+         status=COALESCE($9, status)
+       WHERE site_id=$1 AND id=$2 RETURNING *`,
+      [
+        siteId(req), req.params.id,
+        b.name ?? null, b.role ?? null, b.bio ?? null, b.photo_url ?? null,
+        b.social_url ?? null,
+        b.sort_order === undefined ? null : Number(b.sort_order), b.status ?? null,
+      ]
+    );
+    if (!rows[0]) return res.status(404).json({ error: "Team member not found" });
+    res.json(rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to update team member", detail: err.message });
+  }
+});
+
+router.delete("/:siteId/team/:id", async (req, res) => {
+  try {
+    const { rowCount } = await db.query(
+      "DELETE FROM editor_team WHERE site_id=$1 AND id=$2",
+      [siteId(req), req.params.id]
+    );
+    if (!rowCount) return res.status(404).json({ error: "Team member not found" });
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to delete team member", detail: err.message });
   }
 });
 

@@ -12,7 +12,7 @@ export const SITE = {
   email: "hello@frameforge.skoolai.cloud",
   phone: "+92 300 0000000",
   location: "Remote · Worldwide",
-  defaultTheme: "cinema",
+  defaultTheme: "sandwich",
   domain: "frameforge.skoolai.cloud",
   footerNote: "Professional freelance video editing. Fast turnaround. Clear communication.",
   social: {

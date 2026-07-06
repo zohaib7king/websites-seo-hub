@@ -1,4 +1,16 @@
 export const THEMES = {
+  sandwich: {
+    label: "Sandwich",
+    bg: "#f4efe6",
+    surface: "#fffdf8",
+    border: "#ddd5c8",
+    accent: "#111111",
+    accent2: "#c45c26",
+    text: "#111111",
+    muted: "#5c564c",
+    body: "#f4efe6",
+    hero: "#111111",
+  },
   cinema: {
     label: "Cinema",
     bg: "#0b0614",
@@ -56,5 +68,5 @@ export const THEMES = {
 };
 
 export function getTheme(name) {
-  return THEMES[name] || THEMES.cinema;
+  return THEMES[name] || THEMES.sandwich;
 }

@@ -24,10 +24,12 @@ export async function getEditorBundle() {
         portfolio: data.portfolio || [],
         services: data.services || [],
         testimonials: data.testimonials || [],
+        thumbnails: data.thumbnails || [],
+        team: data.team || [],
       };
     }
   } catch { /* fall through */ }
-  return { brand: SITE, portfolio: [], services: [], testimonials: [] };
+  return { brand: SITE, portfolio: [], services: [], testimonials: [], thumbnails: [], team: [] };
 }
 
 export function youtubeEmbed(url) {

@@ -4,20 +4,20 @@ import { getTheme } from "../themes";
 import { SITE } from "../site.config";
 
 const mainNav = [
-  { label: "Home", href: "/" },
-  { label: "Portfolio", href: "/portfolio" },
+  { label: "Work", href: "/portfolio" },
   { label: "Services", href: "/services" },
   { label: "About", href: "/about" },
-  { label: "Hire me", href: "/contact", primary: true },
+  { label: "Contact", href: "/contact" },
 ];
 
-export default function Layout({ children, title, description, theme = "cinema", brand, canonical }) {
+export default function Layout({ children, title, description, theme = "sandwich", brand, canonical, fullWidth = false }) {
   const t = getTheme(theme);
   const b = brand || SITE;
   const year = new Date().getFullYear();
-  const pageTitle = title ? `${title} | ${b.name}` : `${b.name} — Freelance Video Editor`;
+  const pageTitle = title ? `${title} | ${b.name}` : `${b.name} — Video Editor`;
   const pageDescription = description || b.tagline;
   const canonicalUrl = canonical || `https://${b.domain || SITE.domain}`;
+  const isSandwich = theme === "sandwich";
 
   return (
     <>
@@ -33,10 +33,13 @@ export default function Layout({ children, title, description, theme = "cinema",
         <meta property="og:description" content={pageDescription} />
         <meta property="og:url" content={canonicalUrl} />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="theme-color" content={t.accent} />
+        <meta name="theme-color" content={t.bg} />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;700;800;900&display=swap" rel="stylesheet" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@400;500;600;700;800&display=swap"
+          rel="stylesheet"
+        />
       </Head>
 
       <style dangerouslySetInnerHTML={{ __html: `
@@ -45,186 +48,194 @@ export default function Layout({ children, title, description, theme = "cinema",
           --bg:${t.bg};--surface:${t.surface};--border:${t.border};
           --accent:${t.accent};--accent2:${t.accent2};--text:${t.text};--muted:${t.muted};
           --hero:${t.hero};
-          --glow:0 20px 50px color-mix(in srgb,${t.accent} 35%,transparent);
-          --glow2:0 16px 40px color-mix(in srgb,${t.accent2} 28%,transparent);
-          --radius:20px;
-          --font:Outfit,Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
-          --max:1180px;
+          --radius:4px;
+          --font:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+          --serif:"DM Serif Display",Georgia,"Times New Roman",serif;
+          --max:1240px;
         }
         html{scroll-behavior:smooth;}
         html,body{
-          background:${t.body};color:var(--text);font-family:var(--font);line-height:1.6;
+          background:var(--bg);color:var(--text);font-family:var(--font);line-height:1.55;
           min-height:100vh;-webkit-font-smoothing:antialiased;
         }
         a{color:inherit;text-decoration:none;}
         img{max-width:100%;display:block;}
         button,input,textarea,select{font:inherit;}
-        ::selection{background:var(--accent);color:#fff;}
+        ::selection{background:var(--accent);color:var(--bg);}
 
-        .ff-topbar{
-          background:linear-gradient(90deg,#ff4d9a,#a855f7,#38bdf8,#34d399,#fbbf24,#ff4d9a);
-          background-size:200% 100%;
-          animation:ff-shift 8s linear infinite;
-          color:#fff;
-        }
-        @keyframes ff-shift{0%{background-position:0% 50%}100%{background-position:200% 50%}}
-        @keyframes ff-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
-        @keyframes ff-pulse{0%,100%{opacity:.55}50%{opacity:.9}}
+        .sw-serif{font-family:var(--serif);font-weight:400;letter-spacing:-0.02em;}
+        .sw-headline{font-family:var(--serif);font-weight:400;line-height:1.05;letter-spacing:-0.03em;}
 
         .nav-link{
-          color:var(--muted);font-size:14px;font-weight:700;padding:8px 12px;border-radius:999px;
-          transition:color .15s,background .15s,transform .15s;
+          color:var(--text);font-size:14px;font-weight:600;padding:8px 0;
+          position:relative;transition:opacity .2s;
         }
-        .nav-link:hover{
-          color:#fff;
-          background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 35%,transparent),color-mix(in srgb,var(--accent2) 30%,transparent));
-          transform:translateY(-1px);
+        .nav-link:hover{opacity:.55;}
+        .nav-link::after{
+          content:"";position:absolute;left:0;bottom:4px;width:0;height:1px;
+          background:var(--text);transition:width .25s ease;
         }
-        .ff-btn{
-          display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:999px;
-          font-weight:800;font-size:14px;padding:13px 20px;border:1px solid transparent;cursor:pointer;
-          transition:transform .15s,box-shadow .15s,filter .15s;
-        }
-        .ff-btn:hover{transform:translateY(-2px) scale(1.02);}
-        .ff-btn-primary{
-          background:var(--hero);color:#fff;box-shadow:var(--glow);
-        }
-        .ff-btn-primary:hover{filter:brightness(1.08);box-shadow:var(--glow),var(--glow2);}
-        .ff-btn-soft{
-          background:color-mix(in srgb,var(--surface) 70%,transparent);
-          color:var(--text);border-color:color-mix(in srgb,var(--accent) 40%,var(--border));
-          backdrop-filter:blur(10px);
-        }
-        .ff-btn-soft:hover{border-color:var(--accent2);box-shadow:var(--glow2);}
+        .nav-link:hover::after{width:100%;}
 
-        .glass-panel{
-          background:linear-gradient(145deg,color-mix(in srgb,var(--surface) 88%,#fff),color-mix(in srgb,var(--surface) 92%,var(--accent)));
-          border:1px solid color-mix(in srgb,var(--accent) 28%,var(--border));
-          box-shadow:0 28px 80px rgba(0,0,0,.35),inset 0 1px 0 color-mix(in srgb,#fff 12%,transparent);
-          backdrop-filter:blur(16px);
+        .sw-btn{
+          display:inline-flex;align-items:center;justify-content:center;gap:8px;
+          font-weight:700;font-size:14px;padding:14px 22px;border-radius:999px;
+          border:1.5px solid var(--accent);cursor:pointer;
+          transition:transform .2s,background .2s,color .2s;
         }
-        .card-hover{transition:border-color .2s,transform .2s,box-shadow .2s;}
-        .card-hover:hover{
-          border-color:transparent !important;
-          transform:translateY(-5px) scale(1.01);
-          box-shadow:0 22px 50px rgba(0,0,0,.28),0 0 0 1px color-mix(in srgb,var(--accent) 50%,transparent),var(--glow2);
-        }
-        .play-badge{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;}
-        .play-badge span{
-          width:58px;height:58px;border-radius:999px;
-          background:var(--hero);border:2px solid rgba(255,255,255,.35);
-          display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;
-          box-shadow:var(--glow);transition:transform .2s;
-        }
-        .card-hover:hover .play-badge span{transform:scale(1.1);}
+        .sw-btn:hover{transform:translateY(-2px);}
+        .sw-btn-primary{background:var(--accent);color:var(--bg);border-color:var(--accent);}
+        .sw-btn-primary:hover{background:transparent;color:var(--accent);}
+        .sw-btn-ghost{background:transparent;color:var(--accent);}
+        .sw-btn-ghost:hover{background:var(--accent);color:var(--bg);}
 
-        .ff-logo-mark{
-          background:var(--hero);box-shadow:var(--glow);
-        }
-        .ff-logo-text{
-          background:var(--hero);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
-        }
-        .ff-section-label{
-          display:inline-flex;align-items:center;gap:8px;
-          font-size:12px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;
-          background:var(--hero);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
-        }
-        .ff-orb{
-          position:fixed;border-radius:50%;filter:blur(60px);pointer-events:none;z-index:0;
-          animation:ff-pulse 6s ease-in-out infinite;
-        }
-        .ff-content{position:relative;z-index:1;}
-        .ff-stat{
-          background:linear-gradient(160deg,color-mix(in srgb,var(--accent) 18%,var(--surface)),var(--surface));
-          border:1px solid color-mix(in srgb,var(--accent2) 35%,var(--border));
-          border-radius:18px;padding:14px 16px;text-align:center;
-        }
+        .sw-reveal{opacity:0;transform:translateY(32px);transition:opacity .8s cubic-bezier(.22,1,.36,1),transform .8s cubic-bezier(.22,1,.36,1);}
+        .sw-reveal--in{opacity:1;transform:none;}
 
-        @media(max-width:880px){
-          .hero-split,.feature-split,.svc-grid,.port-grid,.stats-row{grid-template-columns:1fr !important;}
+        .sw-reel-section{overflow:hidden;padding:48px 0 56px;}
+        .sw-reel-track{
+          display:flex;gap:20px;width:max-content;
+          animation:sw-reel-scroll 45s linear infinite;
+        }
+        .sw-reel-section:hover .sw-reel-track{animation-play-state:paused;}
+        @keyframes sw-reel-scroll{
+          0%{transform:translateX(0);}
+          100%{transform:translateX(-50%);}
+        }
+        .sw-reel-link{flex:0 0 320px;text-decoration:none;color:inherit;}
+        .sw-reel-card{cursor:pointer;}
+        .sw-reel-thumb{
+          position:relative;border-radius:6px;overflow:hidden;
+          aspect-ratio:16/10;background:var(--border);
+        }
+        .sw-reel-thumb img{width:100%;height:100%;object-fit:cover;transition:transform .5s ease;}
+        .sw-reel-card:hover .sw-reel-thumb img{transform:scale(1.06);}
+        .sw-reel-play{
+          position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+          font-size:14px;color:#fff;opacity:0;transition:opacity .25s;
+          background:rgba(0,0,0,.35);
+        }
+        .sw-reel-card:hover .sw-reel-play{opacity:1;}
+        .sw-reel-meta{padding:14px 2px 0;}
+        .sw-reel-cat{
+          display:block;font-size:11px;font-weight:700;letter-spacing:.08em;
+          text-transform:uppercase;color:var(--muted);margin-bottom:4px;
+        }
+        .sw-reel-meta strong{font-family:var(--serif);font-size:22px;font-weight:400;}
+
+        .sw-thumb-grid{
+          display:grid;grid-template-columns:repeat(3,1fr);gap:20px;
+        }
+        .sw-thumb-card{display:block;border-radius:6px;overflow:hidden;}
+        .sw-thumb-img{aspect-ratio:16/10;overflow:hidden;background:var(--border);}
+        .sw-thumb-img img{width:100%;height:100%;object-fit:cover;transition:transform .45s;}
+        .sw-thumb-card:hover .sw-thumb-img img{transform:scale(1.05);}
+        .sw-thumb-cap{padding:14px 0;}
+        .sw-thumb-cap span{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);}
+        .sw-thumb-cap strong{display:block;font-family:var(--serif);font-size:20px;margin-top:4px;}
+
+        .sw-team-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;}
+        .sw-team-card{text-align:center;}
+        .sw-team-photo{
+          width:100%;aspect-ratio:1;border-radius:50%;overflow:hidden;
+          margin-bottom:18px;background:var(--border);
+        }
+        .sw-team-photo img{width:100%;height:100%;object-fit:cover;}
+        .sw-team-name{font-family:var(--serif);font-size:26px;margin-bottom:4px;}
+        .sw-team-role{font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--accent2);margin-bottom:10px;}
+        .sw-team-bio{font-size:14px;color:var(--muted);line-height:1.7;max-width:280px;margin:0 auto;}
+
+        .sw-scroll-hint{
+          display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;
+          color:var(--muted);margin-top:32px;
+          animation:sw-bounce 2s ease-in-out infinite;
+        }
+        @keyframes sw-bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(6px)}}
+
+        .card-hover{transition:transform .25s;}
+        .card-hover:hover{transform:translateY(-4px);}
+
+        .ff-btn{display:inline-flex;align-items:center;gap:8px;border-radius:999px;font-weight:700;font-size:14px;padding:13px 20px;border:1.5px solid var(--accent);cursor:pointer;transition:transform .15s,background .15s,color .15s;}
+        .ff-btn:hover{transform:translateY(-2px);}
+        .ff-btn-primary{background:var(--accent);color:var(--bg);border-color:var(--accent);}
+        .ff-btn-soft{background:transparent;color:var(--accent);}
+
+        @media(max-width:900px){
+          .sw-thumb-grid,.sw-team-grid{grid-template-columns:1fr !important;}
+          .sw-reel-link{flex:0 0 260px;}
           .hide-mobile{display:none !important;}
-          .hero-title{font-size:34px !important;}
-          main{padding-inline:18px !important;}
-          .ff-orb{display:none;}
+          .sw-hero-title{font-size:clamp(42px,12vw,72px) !important;}
+          main{padding-inline:20px !important;}
         }
       `}} />
 
-      <div className="ff-orb" style={{ width: 280, height: 280, top: "12%", left: "-4%", background: "#ff4d9a", opacity: 0.22 }} />
-      <div className="ff-orb" style={{ width: 320, height: 320, top: "40%", right: "-6%", background: "#38bdf8", opacity: 0.18, animationDelay: "1.5s" }} />
-      <div className="ff-orb" style={{ width: 240, height: 240, bottom: "8%", left: "30%", background: "#a855f7", opacity: 0.16, animationDelay: "3s" }} />
-
-      <div className="ff-content">
-        <div className="ff-topbar">
-          <div style={{ maxWidth: "var(--max)", margin: "0 auto", padding: "8px 24px", fontSize: 12.5, fontWeight: 800, letterSpacing: "0.02em", textAlign: "center" }}>
-            ✦ {b.eyebrow} ✦
-          </div>
-        </div>
-
-        <header style={{
-          position: "sticky", top: 0, zIndex: 50,
-          borderBottom: "1px solid color-mix(in srgb, var(--accent) 22%, var(--border))",
-          background: "color-mix(in srgb, var(--bg) 78%, transparent)",
-          backdropFilter: "blur(16px)",
+      <header style={{
+        position: "sticky", top: 0, zIndex: 50,
+        borderBottom: `1px solid ${isSandwich ? "rgba(17,17,17,.08)" : t.border}`,
+        background: isSandwich ? "rgba(244,239,230,.92)" : `color-mix(in srgb, ${t.bg} 78%, transparent)`,
+        backdropFilter: "blur(12px)",
+      }}>
+        <div style={{
+          maxWidth: "var(--max)", margin: "0 auto", padding: "0 24px",
+          display: "flex", justifyContent: "space-between", alignItems: "center", height: 72,
         }}>
-          <div style={{ maxWidth: "var(--max)", margin: "0 auto", padding: "0 24px", display: "flex", justifyContent: "space-between", alignItems: "center", height: 70 }}>
-            <Link href="/" style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <span className="ff-logo-mark" style={{ width: 40, height: 40, borderRadius: 14, display: "inline-flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 900, fontSize: 14 }}>
-                FF
-              </span>
-              <span className="ff-logo-text" style={{ fontWeight: 900, fontSize: 22, letterSpacing: "-0.03em" }}>{b.name}</span>
+          <Link href="/" className="sw-serif" style={{ fontSize: 22, fontWeight: 400 }}>
+            {b.name}
+          </Link>
+          <nav className="hide-mobile" style={{ display: "flex", gap: 32, alignItems: "center" }}>
+            {mainNav.map((item) => (
+              <Link key={item.href} href={item.href} className="nav-link">{item.label}</Link>
+            ))}
+            <Link href="/contact" className="sw-btn sw-btn-primary" style={{ padding: "10px 18px", fontSize: 13 }}>
+              Get in touch
             </Link>
-            <nav className="hide-mobile" style={{ display: "flex", gap: 4, alignItems: "center" }}>
-              {mainNav.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={item.primary ? "ff-btn ff-btn-primary" : "nav-link"}
-                  style={item.primary ? { padding: "10px 16px", fontSize: 13 } : undefined}
-                >
-                  {item.label}
-                </Link>
-              ))}
-            </nav>
-          </div>
-        </header>
+          </nav>
+        </div>
+      </header>
 
-        <main style={{ maxWidth: "var(--max)", margin: "0 auto", padding: "36px 24px 72px" }}>
-          {children}
-        </main>
+      <main style={{
+        maxWidth: fullWidth ? "none" : "var(--max)",
+        margin: "0 auto",
+        padding: fullWidth ? "0" : "0 24px 80px",
+      }}>
+        {children}
+      </main>
 
-        <footer style={{
-          borderTop: "1px solid color-mix(in srgb, var(--accent) 25%, var(--border))",
-          background: "linear-gradient(180deg, color-mix(in srgb, var(--surface) 90%, var(--accent)), var(--bg))",
+      <footer style={{
+        borderTop: `1px solid ${isSandwich ? "rgba(17,17,17,.1)" : t.border}`,
+        background: isSandwich ? t.surface : t.bg,
+      }}>
+        <div style={{
+          maxWidth: "var(--max)", margin: "0 auto", padding: "48px 24px 32px",
+          display: "flex", flexWrap: "wrap", gap: 40, justifyContent: "space-between",
         }}>
-          <div style={{ maxWidth: "var(--max)", margin: "0 auto", padding: "40px 24px 28px", display: "flex", flexWrap: "wrap", gap: 24, justifyContent: "space-between" }}>
-            <div style={{ maxWidth: 360 }}>
-              <div className="ff-logo-text" style={{ fontWeight: 900, fontSize: 20, marginBottom: 8 }}>{b.name}</div>
-              <p style={{ color: "var(--muted)", fontSize: 13, lineHeight: 1.7 }}>{b.tagline}</p>
+          <div style={{ maxWidth: 320 }}>
+            <div className="sw-serif" style={{ fontSize: 24, marginBottom: 10 }}>{b.name}</div>
+            <p style={{ color: "var(--muted)", fontSize: 14, lineHeight: 1.7 }}>{b.tagline}</p>
+            {b.location && <p style={{ color: "var(--muted)", fontSize: 13, marginTop: 12 }}>{b.location}</p>}
+            {b.email && <p style={{ fontSize: 14, fontWeight: 600, marginTop: 6 }}>{b.email}</p>}
+          </div>
+          <div style={{ display: "flex", gap: 56, flexWrap: "wrap" }}>
+            <div>
+              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--muted)", marginBottom: 14 }}>Explore</div>
+              <Link href="/portfolio" style={{ display: "block", fontSize: 14, marginBottom: 10 }}>Work</Link>
+              <Link href="/services" style={{ display: "block", fontSize: 14, marginBottom: 10 }}>Services</Link>
+              <Link href="/about" style={{ display: "block", fontSize: 14, marginBottom: 10 }}>About</Link>
+              <Link href="/contact" style={{ display: "block", fontSize: 14, marginBottom: 10 }}>Contact</Link>
             </div>
-            <div style={{ display: "flex", gap: 48, flexWrap: "wrap" }}>
-              <div>
-                <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--accent2)", marginBottom: 12 }}>Explore</div>
-                <Link href="/portfolio" style={{ display: "block", fontSize: 13, marginBottom: 8 }}>Portfolio</Link>
-                <Link href="/services" style={{ display: "block", fontSize: 13, marginBottom: 8 }}>Services</Link>
-                <Link href="/contact" style={{ display: "block", fontSize: 13, marginBottom: 8 }}>Hire me</Link>
-              </div>
-              <div>
-                <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--accent)", marginBottom: 12 }}>Company</div>
-              <Link href="/about" style={{ display: "block", fontSize: 13, marginBottom: 8 }}>About</Link>
-              <Link href="/contact" style={{ display: "block", fontSize: 13, marginBottom: 8 }}>Contact</Link>
-              <Link href="/privacy" style={{ display: "block", fontSize: 13, marginBottom: 8 }}>Privacy</Link>
-              <Link href="/admin" style={{ display: "block", fontSize: 13, marginBottom: 8, color: "var(--accent2)" }}>Admin</Link>
+            <div>
+              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--muted)", marginBottom: 14 }}>Social</div>
+              {b.social?.instagram && <a href={b.social.instagram} target="_blank" rel="noreferrer" style={{ display: "block", fontSize: 14, marginBottom: 10 }}>Instagram</a>}
+              {b.social?.youtube && <a href={b.social.youtube} target="_blank" rel="noreferrer" style={{ display: "block", fontSize: 14, marginBottom: 10 }}>YouTube</a>}
+              <Link href="/admin" style={{ display: "block", fontSize: 14, marginBottom: 10, color: "var(--muted)" }}>Admin</Link>
             </div>
           </div>
         </div>
-        <div style={{ borderTop: "1px solid var(--border)", padding: "16px 24px", maxWidth: "var(--max)", margin: "0 auto" }}>
-          <p style={{ color: "var(--muted)", fontSize: 11.5, lineHeight: 1.7, marginBottom: 8 }}>{b.footerNote}</p>
-          <p style={{ color: "var(--muted)", fontSize: 12.5, textAlign: "center" }}>
-            © {year} {b.name}. All rights reserved. · <Link href="/admin" style={{ color: "var(--accent2)" }}>Admin</Link>
-          </p>
+        <div style={{ borderTop: `1px solid ${isSandwich ? "rgba(17,17,17,.08)" : t.border}`, padding: "18px 24px", maxWidth: "var(--max)", margin: "0 auto" }}>
+          <p style={{ color: "var(--muted)", fontSize: 12, lineHeight: 1.7, marginBottom: 6 }}>{b.footerNote}</p>
+          <p style={{ color: "var(--muted)", fontSize: 12 }}>© {year} {b.name}. All rights reserved.</p>
         </div>
-        </footer>
-      </div>
+      </footer>
     </>
   );
 }

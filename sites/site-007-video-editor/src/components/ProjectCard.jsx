@@ -1,45 +1,30 @@
 import Link from "next/link";
 
-const ACCENTS = [
-  "linear-gradient(90deg,#ff4d9a,#a855f7)",
-  "linear-gradient(90deg,#38bdf8,#34d399)",
-  "linear-gradient(90deg,#fbbf24,#ff4d9a)",
-  "linear-gradient(90deg,#a855f7,#38bdf8)",
-];
-
-export default function ProjectCard({ item, accent = 0 }) {
-  const bar = ACCENTS[accent % ACCENTS.length];
-
+export default function ProjectCard({ item }) {
   return (
     <Link
       href={`/portfolio/${item.slug}`}
-      className="card-hover"
-      style={{
-        display: "block", background: "var(--surface)",
-        border: "1px solid color-mix(in srgb, var(--accent) 22%, var(--border))",
-        borderRadius: 24, overflow: "hidden",
-      }}
+      className="card-hover sw-thumb-card"
+      style={{ display: "block" }}
     >
-      <div style={{ height: 4, background: bar }} />
-      <div style={{ position: "relative", aspectRatio: "16/9", background: "var(--bg)" }}>
+      <div className="sw-thumb-img" style={{ position: "relative" }}>
         {item.thumbnail_url ? (
-          <img src={item.thumbnail_url} alt={item.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          <img src={item.thumbnail_url} alt={item.title} />
         ) : (
-          <div style={{ width: "100%", height: "100%", background: "var(--hero)", opacity: 0.55 }} />
+          <div style={{ width: "100%", height: "100%", background: "var(--border)" }} />
         )}
-        <div className="play-badge"><span>▶</span></div>
-      </div>
-      <div style={{ padding: 18 }}>
         <div style={{
-          fontSize: 12, fontWeight: 800, letterSpacing: ".06em", textTransform: "uppercase", marginBottom: 6,
-          background: bar, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text",
-        }}>
-          {item.category || "Project"}
-        </div>
-        <h3 style={{ fontSize: 18, fontWeight: 900, letterSpacing: "-0.02em", marginBottom: 6 }}>{item.title}</h3>
+          position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center",
+          fontSize: 14, color: "#fff", opacity: 0, transition: "opacity .25s",
+          background: "rgba(0,0,0,.35)",
+        }} className="sw-reel-play">▶</div>
+      </div>
+      <div className="sw-thumb-cap">
+        <span>{item.category || "Project"}</span>
+        <strong>{item.title}</strong>
         {item.description && (
-          <p style={{ color: "var(--muted)", fontSize: 14, lineHeight: 1.6 }}>
-            {item.description.length > 110 ? `${item.description.slice(0, 110)}…` : item.description}
+          <p style={{ color: "var(--muted)", fontSize: 13, marginTop: 8, lineHeight: 1.55 }}>
+            {item.description.length > 90 ? `${item.description.slice(0, 90)}…` : item.description}
           </p>
         )}
       </div>

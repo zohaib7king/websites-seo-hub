@@ -4,6 +4,8 @@ import Link from "next/link";
 
 const TABS = [
   { id: "settings", label: "Site text & name" },
+  { id: "thumbnails", label: "Thumbnails" },
+  { id: "team", label: "Team" },
   { id: "portfolio", label: "Portfolio" },
   { id: "services", label: "Services" },
   { id: "testimonials", label: "Reviews" },
@@ -63,6 +65,8 @@ export default function AdminPage() {
   const [err, setErr] = useState("");
   const [settings, setSettings] = useState(null);
   const [portfolio, setPortfolio] = useState([]);
+  const [thumbnails, setThumbnails] = useState([]);
+  const [team, setTeam] = useState([]);
   const [services, setServices] = useState([]);
   const [testimonials, setTestimonials] = useState([]);
   const [inquiries, setInquiries] = useState([]);
@@ -75,8 +79,10 @@ export default function AdminPage() {
   };
 
   const load = useCallback(async () => {
-    const [s, p, sv, t, i] = await Promise.all([
+    const [s, th, tm, p, sv, t, i] = await Promise.all([
       cms("settings"),
+      cms("thumbnails?all=1"),
+      cms("team?all=1"),
       cms("portfolio?all=1"),
       cms("services?all=1"),
       cms("testimonials?all=1"),
@@ -88,6 +94,8 @@ export default function AdminPage() {
       social_instagram: "", social_youtube: "", social_vimeo: "", social_whatsapp: "", footer_note: "",
     });
     setPortfolio(p);
+    setThumbnails(th);
+    setTeam(tm);
     setServices(sv);
     setTestimonials(t);
     setInquiries(i);
@@ -131,6 +139,30 @@ export default function AdminPage() {
       const saved = await cms("settings", { method: "PUT", body: JSON.stringify(settings) });
       setSettings(saved);
       flash("Saved — website updated");
+    } catch (e) {
+      flash(e.message, true);
+    }
+  }
+
+  async function saveThumbnail(form) {
+    try {
+      if (form.id) await cms(`thumbnails/${form.id}`, { method: "PATCH", body: JSON.stringify(form) });
+      else await cms("thumbnails", { method: "POST", body: JSON.stringify(form) });
+      setEditing(null);
+      await load();
+      flash("Thumbnail saved");
+    } catch (e) {
+      flash(e.message, true);
+    }
+  }
+
+  async function saveTeamMember(form) {
+    try {
+      if (form.id) await cms(`team/${form.id}`, { method: "PATCH", body: JSON.stringify(form) });
+      else await cms("team", { method: "POST", body: JSON.stringify(form) });
+      setEditing(null);
+      await load();
+      flash("Team member saved");
     } catch (e) {
       flash(e.message, true);
     }
@@ -325,6 +357,78 @@ export default function AdminPage() {
         </div>
       )}
 
+      {tab === "thumbnails" && (
+        <CrudBlock
+          items={thumbnails}
+          empty="No thumbnails yet — add images for the homepage reel."
+          onAdd={() => setEditing({
+            title: "", thumbnail_url: "", video_url: "", category: "Featured",
+            sort_order: 0, status: "published",
+          })}
+          onEdit={setEditing}
+          onDelete={async (item) => {
+            if (!confirm("Delete this thumbnail?")) return;
+            await cms(`thumbnails/${item.id}`, { method: "DELETE" });
+            await load();
+            flash("Deleted");
+          }}
+          renderRow={(item) => (
+            <>
+              <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+                {item.thumbnail_url && (
+                  <img src={item.thumbnail_url} alt="" style={{ width: 64, height: 36, objectFit: "cover", borderRadius: 6 }} />
+                )}
+                <div>
+                  <strong>{item.title}</strong>
+                  <div style={{ color: "#c4b0d8", fontSize: 12, marginTop: 4 }}>
+                    {item.category || "—"} · {item.status}
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+          form={editing && tab === "thumbnails" ? (
+            <ThumbnailForm form={editing} setForm={setEditing} onSave={() => saveThumbnail(editing)} onCancel={() => setEditing(null)} />
+          ) : null}
+        />
+      )}
+
+      {tab === "team" && (
+        <CrudBlock
+          items={team}
+          empty="No team members yet — add your team for the About page."
+          onAdd={() => setEditing({
+            name: "", role: "", bio: "", photo_url: "", social_url: "",
+            sort_order: 0, status: "published",
+          })}
+          onEdit={setEditing}
+          onDelete={async (item) => {
+            if (!confirm("Delete this team member?")) return;
+            await cms(`team/${item.id}`, { method: "DELETE" });
+            await load();
+            flash("Deleted");
+          }}
+          renderRow={(item) => (
+            <>
+              <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+                {item.photo_url && (
+                  <img src={item.photo_url} alt="" style={{ width: 40, height: 40, objectFit: "cover", borderRadius: "50%" }} />
+                )}
+                <div>
+                  <strong>{item.name}</strong>
+                  <div style={{ color: "#c4b0d8", fontSize: 12, marginTop: 4 }}>
+                    {item.role || "—"} · {item.status}
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+          form={editing && tab === "team" ? (
+            <TeamForm form={editing} setForm={setEditing} onSave={() => saveTeamMember(editing)} onCancel={() => setEditing(null)} />
+          ) : null}
+        />
+      )}
+
       {tab === "portfolio" && (
         <CrudBlock
           items={portfolio}
@@ -458,6 +562,70 @@ function CrudBlock({ items, empty, onAdd, onEdit, onDelete, renderRow, form }) {
             </div>
           </div>
         ))}
+      </div>
+    </div>
+  );
+}
+
+function ThumbnailForm({ form, setForm, onSave, onCancel }) {
+  return (
+    <div style={card}>
+      <h3 style={{ marginBottom: 12, fontSize: 17 }}>{form.id ? "Edit thumbnail" : "New thumbnail"}</h3>
+      <p style={{ color: "#c4b0d8", fontSize: 13, marginBottom: 14 }}>
+        Homepage reel aur grid mein dikhega. Image URL zaroori hai.
+      </p>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+        {[
+          ["title", "Title"],
+          ["category", "Category (Featured, Wedding, etc.)"],
+          ["thumbnail_url", "Thumbnail image URL"],
+          ["video_url", "Video URL (optional)"],
+          ["sort_order", "Sort order"],
+          ["status", "Status (published / draft)"],
+        ].map(([key, label]) => (
+          <Field key={key} label={label}>
+            <input style={inputStyle} value={form[key] ?? ""} onChange={(e) => setForm((f) => ({ ...f, [key]: e.target.value }))} />
+          </Field>
+        ))}
+      </div>
+      {form.thumbnail_url && (
+        <img src={form.thumbnail_url} alt="Preview" style={{ width: "100%", maxWidth: 320, borderRadius: 10, marginBottom: 14 }} />
+      )}
+      <div style={{ display: "flex", gap: 8 }}>
+        <button type="button" style={btnPrimary} onClick={onSave}>Save</button>
+        <button type="button" style={btnGhost} onClick={onCancel}>Cancel</button>
+      </div>
+    </div>
+  );
+}
+
+function TeamForm({ form, setForm, onSave, onCancel }) {
+  return (
+    <div style={card}>
+      <h3 style={{ marginBottom: 12, fontSize: 17 }}>{form.id ? "Edit team member" : "New team member"}</h3>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+        {[
+          ["name", "Name"],
+          ["role", "Role (e.g. Lead Editor)"],
+          ["photo_url", "Photo URL"],
+          ["social_url", "Social / portfolio URL"],
+          ["sort_order", "Sort order"],
+          ["status", "Status (published / draft)"],
+        ].map(([key, label]) => (
+          <Field key={key} label={label}>
+            <input style={inputStyle} value={form[key] ?? ""} onChange={(e) => setForm((f) => ({ ...f, [key]: e.target.value }))} />
+          </Field>
+        ))}
+      </div>
+      <Field label="Bio">
+        <textarea rows={3} style={{ ...inputStyle, resize: "vertical" }} value={form.bio || ""} onChange={(e) => setForm((f) => ({ ...f, bio: e.target.value }))} />
+      </Field>
+      {form.photo_url && (
+        <img src={form.photo_url} alt="Preview" style={{ width: 80, height: 80, objectFit: "cover", borderRadius: "50%", marginBottom: 14 }} />
+      )}
+      <div style={{ display: "flex", gap: 8 }}>
+        <button type="button" style={btnPrimary} onClick={onSave}>Save</button>
+        <button type="button" style={btnGhost} onClick={onCancel}>Cancel</button>
       </div>
     </div>
   );

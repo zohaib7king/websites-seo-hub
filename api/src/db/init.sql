@@ -143,7 +143,7 @@ INSERT INTO sites (id, name, niche, domain, theme) VALUES
 ON CONFLICT DO NOTHING;
 
 INSERT INTO sites (id, name, niche, domain, theme) VALUES
-  ('site-007-video-editor', 'FrameForge', 'video-editing', 'frameforge.skoolai.cloud', 'cinema')
+  ('site-007-video-editor', 'FrameForge', 'video-editing', 'frameforge.skoolai.cloud', 'sandwich')
 ON CONFLICT DO NOTHING;
 
 -- Video editor portfolio CMS (site-007-video-editor)
@@ -220,4 +220,29 @@ CREATE TABLE IF NOT EXISTS editor_inquiries (
   message       TEXT NOT NULL,
   status        TEXT DEFAULT 'new',
   created_at    TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS editor_thumbnails (
+  id             SERIAL PRIMARY KEY,
+  site_id        TEXT NOT NULL REFERENCES sites(id) ON DELETE CASCADE,
+  title          TEXT NOT NULL,
+  thumbnail_url  TEXT NOT NULL,
+  video_url      TEXT,
+  category       TEXT,
+  sort_order     INT DEFAULT 0,
+  status         TEXT DEFAULT 'published',
+  created_at     TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS editor_team (
+  id             SERIAL PRIMARY KEY,
+  site_id        TEXT NOT NULL REFERENCES sites(id) ON DELETE CASCADE,
+  name           TEXT NOT NULL,
+  role           TEXT,
+  bio            TEXT,
+  photo_url      TEXT,
+  social_url     TEXT,
+  sort_order     INT DEFAULT 0,
+  status         TEXT DEFAULT 'published',
+  created_at     TIMESTAMPTZ DEFAULT NOW()
 );
