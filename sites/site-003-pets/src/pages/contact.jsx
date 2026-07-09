@@ -3,13 +3,13 @@ import { getSite } from "../lib/data";
 
 export async function getServerSideProps() {
   const site = await getSite();
-  return { props: { theme: site?.theme || "midnight", domain: site?.domain || "" } };
+  return { props: { theme: site?.theme || "petportal", domain: site?.domain || "" } };
 }
 
 export default function Contact({ theme, domain }) {
   const email = domain ? `hello@${domain}` : "hello@example.com";
   return (
-    <Layout title="Contact" theme={theme}>
+    <Layout title="Contact Us" description="Get in touch with Pet Lovers Daily." theme={theme}>
       <div style={{ maxWidth: 640, margin: "0 auto" }}>
         <h1 className="hero-title" style={{ fontSize: 34, fontWeight: 800, marginBottom: 10 }}>Get in touch</h1>
         <p style={{ color: "var(--muted)", fontSize: 16, lineHeight: 1.8, marginBottom: 28 }}>

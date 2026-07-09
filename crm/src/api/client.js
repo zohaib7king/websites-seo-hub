@@ -60,4 +60,35 @@ export const api = {
     const qs = new URLSearchParams(params).toString();
     return req(`/api/queue${qs ? "?" + qs : ""}`);
   },
+
+  // Video editor CMS (site-007-video-editor)
+  editorGetSettings: (siteId) => req(`/api/video-editor/${siteId}/settings`),
+  editorSaveSettings: (siteId, data) =>
+    req(`/api/video-editor/${siteId}/settings`, { method: "PUT", body: JSON.stringify(data) }),
+  editorGetPortfolio: (siteId) => req(`/api/video-editor/${siteId}/portfolio?all=1`),
+  editorCreatePortfolio: (siteId, data) =>
+    req(`/api/video-editor/${siteId}/portfolio`, { method: "POST", body: JSON.stringify(data) }),
+  editorUpdatePortfolio: (siteId, id, data) =>
+    req(`/api/video-editor/${siteId}/portfolio/${id}`, { method: "PATCH", body: JSON.stringify(data) }),
+  editorDeletePortfolio: (siteId, id) =>
+    req(`/api/video-editor/${siteId}/portfolio/${id}`, { method: "DELETE" }),
+  editorGetServices: (siteId) => req(`/api/video-editor/${siteId}/services?all=1`),
+  editorCreateService: (siteId, data) =>
+    req(`/api/video-editor/${siteId}/services`, { method: "POST", body: JSON.stringify(data) }),
+  editorUpdateService: (siteId, id, data) =>
+    req(`/api/video-editor/${siteId}/services/${id}`, { method: "PATCH", body: JSON.stringify(data) }),
+  editorDeleteService: (siteId, id) =>
+    req(`/api/video-editor/${siteId}/services/${id}`, { method: "DELETE" }),
+  editorGetTestimonials: (siteId) => req(`/api/video-editor/${siteId}/testimonials?all=1`),
+  editorCreateTestimonial: (siteId, data) =>
+    req(`/api/video-editor/${siteId}/testimonials`, { method: "POST", body: JSON.stringify(data) }),
+  editorUpdateTestimonial: (siteId, id, data) =>
+    req(`/api/video-editor/${siteId}/testimonials/${id}`, { method: "PATCH", body: JSON.stringify(data) }),
+  editorDeleteTestimonial: (siteId, id) =>
+    req(`/api/video-editor/${siteId}/testimonials/${id}`, { method: "DELETE" }),
+  editorGetInquiries: (siteId) => req(`/api/video-editor/${siteId}/inquiries`),
+  editorUpdateInquiry: (siteId, id, data) =>
+    req(`/api/video-editor/${siteId}/inquiries/${id}`, { method: "PATCH", body: JSON.stringify(data) }),
+  editorDeleteInquiry: (siteId, id) =>
+    req(`/api/video-editor/${siteId}/inquiries/${id}`, { method: "DELETE" }),
 };

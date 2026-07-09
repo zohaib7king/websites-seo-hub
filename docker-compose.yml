@@ -29,20 +29,49 @@ services:
     environment:
       DATABASE_URL: postgresql://zoyzoy:zoyzoy_secret@db:5432/zoyzoy_hub
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+      REPLICATE_API_TOKEN: ${REPLICATE_API_TOKEN:-}
+      FACE_SWAP_URL: http://face-swap:8080
+      FACE_SWAP_PROVIDER: local
       JWT_SECRET: ${JWT_SECRET:-supersecretjwt}
       NODE_ENV: production
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_SECURE: ${SMTP_SECURE:-false}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      SMTP_FROM: ${SMTP_FROM:-}
+      INQUIRY_NOTIFY_EMAIL: ${INQUIRY_NOTIFY_EMAIL:-}
       # Repo is bind-mounted below so the site-scaffolder can write sites/<id>/,
       # docker-compose.yml and nginx.conf. The scaffolder reads/writes under here.
       REPO_ROOT: /workspace
+      VIDEO_EDITOR_UPLOAD_DIR: /app/uploads/video-editor
     volumes:
       # Read-write mount of the whole repo for dashboard-triggered site scaffolding
       # ("Provision files" button). The container build still uses /app; this is separate.
       - ./:/workspace
+      - ./api/uploads:/app/uploads
     depends_on:
       - db
+      - face-swap
     ports:
       # Localhost-only; the host Caddy fronts it as api.skoolai.cloud.
       - "127.0.0.1:4000:4000"
+    networks:
+      - zoyzoy_net
+
+  # ── Open-source face swap (InsightFace / inswapper) ──────
+  face-swap:
+    build: ./services/face-swap
+    container_name: zoyzoy_face_swap
+    restart: unless-stopped
+    volumes:
+      - face_swap_models:/root/.insightface
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 180s
     networks:
       - zoyzoy_net
 
@@ -190,6 +219,49 @@ services:
     networks:
       - zoyzoy_net
 
+  # ── Site: site-006-memory-photos (Remake Memory) ─────────
+  site-006-memory-photos:
+    build:
+      context: .
+      dockerfile: sites/site-006-memory-photos/Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: http://api:4000
+        NEXT_PUBLIC_SITE_ID: site-006-memory-photos
+    container_name: zoyzoy_site-006-memory-photos
+    restart: unless-stopped
+    environment:
+      NEXT_PUBLIC_API_URL: http://api:4000
+      NEXT_PUBLIC_SITE_ID: site-006-memory-photos
+    depends_on:
+      - api
+    ports:
+      - "127.0.0.1:3007:3000"
+    networks:
+      - zoyzoy_net
+
+  # ── Site: site-007-video-editor (FrameForge portfolio) ───
+  site-007-video-editor:
+    build:
+      context: .
+      dockerfile: sites/site-007-video-editor/Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: http://api:4000
+        NEXT_PUBLIC_SITE_ID: site-007-video-editor
+    container_name: zoyzoy_site-007-video-editor
+    restart: unless-stopped
+    environment:
+      NEXT_PUBLIC_API_URL: http://api:4000
+      NEXT_PUBLIC_SITE_ID: site-007-video-editor
+      # Same-domain /admin panel password (change in production)
+      ADMIN_PASSWORD: ${FRAMEFORGE_ADMIN_PASSWORD:-admin123}
+      ADMIN_SECRET: ${FRAMEFORGE_ADMIN_SECRET:-frameforge-admin-secret}
+    depends_on:
+      - api
+    ports:
+      - "127.0.0.1:3008:3000"
+    networks:
+      - zoyzoy_net
+
   # ── Reverse proxy ────────────────────────────────────────
   # The in-stack nginx service was removed: the server's host-level Caddy is the
   # single public entrypoint (TLS + routing). Each service above is bound to
@@ -197,6 +269,7 @@ services:
 
 volumes:
   db_data:
+  face_swap_models:
 
 networks:
   zoyzoy_net:

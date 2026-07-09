@@ -6,7 +6,7 @@ const { processQueue } = require("./services/queueWorker");
 
 const app = express();
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: "40mb" }));
 
 // ── Routes ───────────────────────────────────────────────
 app.use("/api/sites",    require("./routes/sites"));
@@ -15,6 +15,10 @@ app.use("/api/auth",     require("./routes/auth"));
 app.use("/api/ai",       require("./routes/ai"));
 app.use("/api/revenue",  require("./routes/revenue"));
 app.use("/api/queue",    require("./routes/queue"));
+app.use("/api/images",   require("./routes/images"));
+app.use("/api/pet-stories",      require("./routes/petStories"));
+app.use("/api/user-pet-stories", require("./routes/userPetStories"));
+app.use("/api/video-editor",     require("./routes/videoEditor"));
 app.use("/api/samples",  require("./routes/samples"));
 
 app.get("/health", (_req, res) => res.json({ status: "ok", service: "zoyzoy-api" }));

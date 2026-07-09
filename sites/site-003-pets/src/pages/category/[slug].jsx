@@ -6,7 +6,7 @@ export async function getServerSideProps({ params }) {
   const [site, articles] = await Promise.all([getSite(), getPublishedArticles()]);
   const filtered = articles.filter(a => catSlug(a.category) === params.slug);
   const label = String(params.slug).replace(/-/g, " ").replace(/\b\w/g, c => c.toUpperCase());
-  return { props: { articles: filtered, label, theme: site?.theme || "midnight" } };
+  return { props: { articles: filtered, label, theme: site?.theme || "petportal" } };
 }
 
 export default function Category({ articles, label, theme }) {
