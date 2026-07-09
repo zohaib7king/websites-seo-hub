@@ -38,6 +38,35 @@ const textareaStyle = {
   fontSize: 13, resize: "vertical", fontFamily: "inherit", lineHeight: 1.6
 };
 
+const selectStyle = {
+  background: "var(--bg)", border: "1px solid var(--border)", borderRadius: "var(--radius)",
+  padding: "9px 14px", color: "var(--text)", fontSize: 13
+};
+
+// Sample-article picker used on both the Single and Bulk tabs: choose one of
+// the site owner's saved samples, then optionally override how it's used
+// (style/voice reference only, vs. source material to rework).
+const SamplePicker = ({ samples, sampleId, setSampleId, sampleMode, setSampleMode, note }) => (
+  <div style={{ marginTop: 12, display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+    <select value={sampleId} onChange={e => setSampleId(e.target.value)} style={selectStyle}>
+      <option value="">No sample — pure AI</option>
+      {samples.map(s => (
+        <option key={s.id} value={s.id}>
+          {s.title} ({s.default_mode === "source_material" ? "source" : "style"})
+        </option>
+      ))}
+    </select>
+    {sampleId && (
+      <select value={sampleMode} onChange={e => setSampleMode(e.target.value)} style={selectStyle}>
+        <option value="">Use sample's default mode</option>
+        <option value="style_reference">Style reference only</option>
+        <option value="source_material">Rework as source material</option>
+      </select>
+    )}
+    {note && <span style={{ color: "var(--muted)", fontSize: 11.5 }}>{note}</span>}
+  </div>
+);
+
 // Build an article-writing prompt that follows Google's prompt-engineering
 // best practices: an explicit Persona, Task, Context, and Format, plus tight
 // constraints, an E-E-A-T quality bar, and a self-check step before answering.
@@ -86,7 +115,7 @@ export default function AIGenerator() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
-  const [tab, setTab] = useState("single"); // single | bulk | manual
+  const [tab, setTab] = useState("single"); // single | bulk | manual | samples
 
   // Manual (bring-your-own-LLM) state
   const [manualTopic, setManualTopic] = useState("");
@@ -95,17 +124,57 @@ export default function AIGenerator() {
   const [manualSaved, setManualSaved] = useState(null);
   const [copied, setCopied] = useState(false);
 
+  // Sample-article library state (writer→critic→editor pipeline can reference
+  // one of these per generation — see api/src/services/generator.js)
+  const [samples, setSamples] = useState([]);
+  const [sampleId, setSampleId] = useState("");
+  const [sampleMode, setSampleMode] = useState("");
+  const [bulkSampleId, setBulkSampleId] = useState("");
+  const [bulkSampleMode, setBulkSampleMode] = useState("");
+  const [newSampleTitle, setNewSampleTitle] = useState("");
+  const [newSampleContent, setNewSampleContent] = useState("");
+  const [newSampleDefaultMode, setNewSampleDefaultMode] = useState("style_reference");
+
   useEffect(() => {
     api.getSites().then(d => { setSites(d); if (d[0]) setSiteId(d[0].id); }).catch(() => {});
   }, []);
 
+  useEffect(() => {
+    if (!siteId) return;
+    api.getSamples(siteId).then(setSamples).catch(() => {});
+    setSampleId(""); setSampleMode(""); setBulkSampleId(""); setBulkSampleMode("");
+  }, [siteId]);
+
   const currentSite = sites.find(s => s.id === siteId);
+
+  async function addSample() {
+    if (!siteId || !newSampleTitle.trim() || !newSampleContent.trim()) return;
+    setLoading(true); setError(null);
+    try {
+      const saved = await api.createSample({
+        site_id: siteId, title: newSampleTitle.trim(),
+        content: newSampleContent.trim(), default_mode: newSampleDefaultMode,
+      });
+      setSamples([saved, ...samples]);
+      setNewSampleTitle(""); setNewSampleContent("");
+    } catch (e) { setError(e.message); }
+    finally { setLoading(false); }
+  }
+
+  async function removeSample(id) {
+    try {
+      await api.deleteSample(id);
+      setSamples(samples.filter(s => s.id !== id));
+    } catch (e) { setError(e.message); }
+  }
 
   async function generate() {
     if (!siteId || !keyword.trim()) return;
     setLoading(true); setError(null); setResult(null);
     try {
-      const data = await api.generateArticle(siteId, keyword.trim());
+      const data = await api.generateArticle(siteId, keyword.trim(), {
+        sampleArticleId: sampleId || null, sampleMode: sampleMode || null,
+      });
       setResult(data.article);
     } catch (e) { setError(e.message); }
     finally { setLoading(false); }
@@ -116,7 +185,9 @@ export default function AIGenerator() {
     if (!keywords.length) return;
     setLoading(true);
     try {
-      await api.bulkQueue(siteId, keywords);
+      await api.bulkQueue(siteId, keywords, {
+        sampleArticleId: bulkSampleId || null, sampleMode: bulkSampleMode || null,
+      });
       alert(`✅ ${keywords.length} keywords added to queue!`);
       setBulkText("");
     } catch (e) { setError(e.message); }
@@ -195,9 +266,10 @@ export default function AIGenerator() {
 
       {/* Tabs */}
       <div style={{ display: "flex", gap: 8, marginBottom: 20, flexWrap: "wrap" }}>
-        <TabBtn name="single" label="✨ Auto (Claude)" tab={tab} setTab={setTab} />
-        <TabBtn name="bulk"   label="📋 Bulk Queue"    tab={tab} setTab={setTab} />
-        <TabBtn name="manual" label="✍️ Manual Prompt" tab={tab} setTab={setTab} />
+        <TabBtn name="single"  label="✨ Auto (Claude)"    tab={tab} setTab={setTab} />
+        <TabBtn name="bulk"    label="📋 Bulk Queue"       tab={tab} setTab={setTab} />
+        <TabBtn name="manual"  label="✍️ Manual Prompt"    tab={tab} setTab={setTab} />
+        <TabBtn name="samples" label="📚 Sample Library"   tab={tab} setTab={setTab} />
       </div>
 
       {tab === "single" && (
@@ -206,9 +278,12 @@ export default function AIGenerator() {
           <div style={{ display: "flex", gap: 10 }}>
             <Input value={keyword} onChange={setKeyword} placeholder='e.g. "Best AI tools for small business 2025"' />
             <Btn onClick={generate} disabled={loading || !keyword.trim()} style={{ whiteSpace: "nowrap" }}>
-              {loading ? "Generating..." : "Generate Article"}
+              {loading ? "Writing → reviewing → editing..." : "Generate Article"}
             </Btn>
           </div>
+          <SamplePicker samples={samples} sampleId={sampleId} setSampleId={setSampleId}
+            sampleMode={sampleMode} setSampleMode={setSampleMode}
+            note="Runs through a writer → critic → editor pipeline every time." />
 
           {error && (
             <div style={{ marginTop: 16, padding: 12, background: "rgba(239,68,68,0.1)", borderRadius: "var(--radius)", color: "var(--danger)", fontSize: 13 }}>
@@ -235,6 +310,27 @@ export default function AIGenerator() {
               <div style={{ color: "var(--muted)", fontSize: 12 }}>
                 Category: {result.category} · Tags: {(result.tags || []).join(", ")}
               </div>
+
+              {result.review_notes && (
+                <div style={{
+                  marginTop: 12, padding: 12, borderRadius: "var(--radius)",
+                  background: result.ai_review_passed ? "rgba(34,197,94,0.08)" : "rgba(245,158,11,0.08)",
+                  border: `1px solid ${result.ai_review_passed ? "var(--success)" : "var(--warning)"}`
+                }}>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: result.ai_review_passed ? "var(--success)" : "var(--warning)" }}>
+                    {result.ai_review_passed ? "✓ Passed writer → critic → editor review" : "⚠ Editor left items unresolved — check before publishing"}
+                  </div>
+                  {result.review_notes.critique?.summary && (
+                    <div style={{ color: "var(--muted)", fontSize: 12, marginTop: 4 }}>{result.review_notes.critique.summary}</div>
+                  )}
+                  {result.review_notes.unresolved_issues?.length > 0 && (
+                    <ul style={{ margin: "6px 0 0 18px", fontSize: 12, color: "var(--muted)" }}>
+                      {result.review_notes.unresolved_issues.map((iss, idx) => <li key={idx}>{iss}</li>)}
+                    </ul>
+                  )}
+                </div>
+              )}
+
               <div style={{
                 marginTop: 16, padding: 16, background: "var(--bg)", borderRadius: "var(--radius)",
                 maxHeight: 300, overflow: "auto", fontSize: 12, color: "var(--muted)",
@@ -255,6 +351,9 @@ export default function AIGenerator() {
           <textarea value={bulkText} onChange={e => setBulkText(e.target.value)}
             rows={10} placeholder={"Best AI writing tools 2025\nChatGPT vs Gemini comparison\nHow to use AI for marketing\nFree AI image generators"}
             style={textareaStyle} />
+          <SamplePicker samples={samples} sampleId={bulkSampleId} setSampleId={setBulkSampleId}
+            sampleMode={bulkSampleMode} setSampleMode={setBulkSampleMode}
+            note="Applies to every keyword in this batch — queue separately for a different sample." />
           <div style={{ marginTop: 12, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <span style={{ color: "var(--muted)", fontSize: 12 }}>
               {bulkText.split("\n").filter(k => k.trim()).length} keywords to queue
@@ -320,6 +419,62 @@ export default function AIGenerator() {
               ✅ Saved draft: <strong>{manualSaved.title}</strong> — find it in the Articles page.
             </div>
           )}
+        </div>
+      )}
+
+      {tab === "samples" && (
+        <div style={{ background: "var(--grad-surface)", border: "1px solid var(--border)", borderRadius: "var(--radius)", padding: 24 }}>
+          <p style={{ color: "var(--muted)", fontSize: 12, marginBottom: 16, lineHeight: 1.7 }}>
+            Paste in articles you've written yourself for <strong style={{ color: "var(--text)" }}>{currentSite?.name || "this site"}</strong>.
+            The writer stage can use them as a <strong style={{ color: "var(--text)" }}>style reference</strong> (matches your voice, writes something new)
+            or as <strong style={{ color: "var(--text)" }}>source material</strong> (reworks/expands your piece). Pick per-generation on the Auto and Bulk tabs.
+          </p>
+
+          <label style={{ display: "block", color: "var(--muted)", fontSize: 12, marginBottom: 6 }}>TITLE</label>
+          <Input value={newSampleTitle} onChange={setNewSampleTitle} placeholder='e.g. "How I picked my first index fund"' />
+
+          <label style={{ display: "block", color: "var(--muted)", fontSize: 12, margin: "14px 0 6px" }}>YOUR ARTICLE TEXT</label>
+          <textarea value={newSampleContent} onChange={e => setNewSampleContent(e.target.value)}
+            rows={8} placeholder="Paste your article here..." style={textareaStyle} />
+
+          <div style={{ marginTop: 12, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
+            <select value={newSampleDefaultMode} onChange={e => setNewSampleDefaultMode(e.target.value)} style={selectStyle}>
+              <option value="style_reference">Default use: style reference only</option>
+              <option value="source_material">Default use: source material to rework</option>
+            </select>
+            <Btn onClick={addSample} disabled={loading || !newSampleTitle.trim() || !newSampleContent.trim()}>
+              {loading ? "Saving..." : "Save Sample"}
+            </Btn>
+          </div>
+
+          {error && (
+            <div style={{ marginTop: 16, padding: 12, background: "rgba(239,68,68,0.1)", borderRadius: "var(--radius)", color: "var(--danger)", fontSize: 13 }}>
+              ❌ {error}
+            </div>
+          )}
+
+          <div style={{ marginTop: 24, borderTop: "1px solid var(--border)", paddingTop: 16 }}>
+            <label style={{ display: "block", color: "var(--muted)", fontSize: 12, marginBottom: 10 }}>
+              SAVED SAMPLES FOR THIS SITE ({samples.length})
+            </label>
+            {samples.length === 0 && (
+              <div style={{ color: "var(--muted)", fontSize: 13 }}>No samples yet — add one above.</div>
+            )}
+            {samples.map(s => (
+              <div key={s.id} style={{
+                display: "flex", justifyContent: "space-between", alignItems: "center",
+                padding: "10px 14px", background: "var(--bg)", borderRadius: "var(--radius)", marginBottom: 8
+              }}>
+                <div>
+                  <div style={{ fontSize: 13, fontWeight: 600 }}>{s.title}</div>
+                  <div style={{ fontSize: 11, color: "var(--muted)" }}>
+                    {s.default_mode === "source_material" ? "Source material" : "Style reference"} · {s.content.length} chars
+                  </div>
+                </div>
+                <Btn onClick={() => removeSample(s.id)} variant="secondary" style={{ padding: "6px 12px", fontSize: 12 }}>Delete</Btn>
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>

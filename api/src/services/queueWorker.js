@@ -28,7 +28,10 @@ async function processQueue(limit = 5) {
 
   for (const item of claimed) {
     try {
-      const { article } = await generateArticle(item.site_id, item.keyword);
+      const { article } = await generateArticle(item.site_id, item.keyword, {
+        sampleArticleId: item.sample_article_id,
+        sampleMode: item.sample_mode,
+      });
       await db.query(
         "UPDATE content_queue SET status='done', article_id=$1 WHERE id=$2",
         [article.id, item.id]

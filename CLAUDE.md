@@ -341,6 +341,33 @@ The queue is drained by the worker in `api/src/services/queueWorker.js` (`proces
 
 ## Changelog
 
+### 2026-07-09 — Writer → critic → editor review pipeline + sample-article library
+
+- **`generateArticle()` in `api/src/services/generator.js` is now a 3-stage pipeline**
+  instead of one Claude call: a WRITER drafts the article, a CRITIC reviews it (critique
+  only — no rewriting) against an explicit checklist (invented statistics, weak E-E-A-T /
+  generic filler, over-templated structure, structural compliance, grammar/clarity, and
+  sample-overlap when a voice reference was used), then an EDITOR applies the critique and
+  produces the publish-ready draft. Three `claude-sonnet-4-6` calls per article instead of
+  one — higher cost/latency, meant to catch the scaled-content-abuse and E-E-A-T issues
+  Google's spam policy flags.
+- **New `articles.review_notes` (JSONB) + `articles.ai_review_passed` (BOOLEAN)** columns
+  store the critic's findings and whether the editor resolved everything, so a human can
+  check flagged drafts in the CRM before publishing. Migration
+  `api/src/db/migrations/004_review_pipeline_and_samples.sql` (also mirrored in `init.sql`).
+- **New `sample_articles` table** + `POST/GET/DELETE /api/samples` route
+  (`api/src/routes/samples.js`) lets the site owner save their own articles for the writer
+  stage to reference, either as a **style reference** (voice/tone only, no verbatim reuse)
+  or **source material** (rework/expand, since it's the owner's own original content).
+  `content_queue` gained `sample_article_id` + `sample_mode` so bulk-queued keywords can
+  reference a sample too; `queueWorker.js` passes them through automatically.
+- **CRM (`AIGenerator.jsx`, v1.3 → v1.4)**: new "Sample Library" tab to add/view/delete
+  samples per site, plus a sample+mode picker on the Single and Bulk tabs and a
+  pass/fail review badge (with the critic's summary and any unresolved issues) shown on
+  generated results.
+- Not yet applied to the dev server — migration 004 still needs to run and the API/CRM
+  containers still need rebuilding there.
+
 ### 2026-06-20 — Sites converted to a news/magazine format + seeded content
 
 - **All 6 sites now use a news layout** (modeled on a top20coins-style news page): a date strip,

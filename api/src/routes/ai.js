@@ -3,14 +3,19 @@ const db = require("../db/pool");
 const { generateArticle } = require("../services/generator");
 const { processQueue } = require("../services/queueWorker");
 
-// POST /api/ai/generate — generate one article synchronously from a keyword
+// POST /api/ai/generate — generate one article synchronously from a keyword.
+// Optional sample_article_id (+ sample_mode override) lets the writer stage
+// reference one of the site owner's saved sample articles — see routes/samples.js.
 router.post("/generate", async (req, res) => {
-  const { site_id, keyword } = req.body;
+  const { site_id, keyword, sample_article_id, sample_mode } = req.body;
   if (!site_id || !keyword) return res.status(400).json({ error: "site_id and keyword required" });
 
   try {
-    const { article, raw } = await generateArticle(site_id, keyword);
-    res.json({ article, raw });
+    const { article, raw, review } = await generateArticle(site_id, keyword, {
+      sampleArticleId: sample_article_id || null,
+      sampleMode: sample_mode || null,
+    });
+    res.json({ article, raw, review });
   } catch (err) {
     if (err.code === "SITE_NOT_FOUND") return res.status(404).json({ error: "Site not found" });
     console.error("AI generation error:", err);
@@ -18,17 +23,19 @@ router.post("/generate", async (req, res) => {
   }
 });
 
-// POST /api/ai/bulk — queue multiple keywords at once (does not generate)
+// POST /api/ai/bulk — queue multiple keywords at once (does not generate).
+// Optional sample_article_id (+ sample_mode) applies to every keyword in this
+// batch; queue separate batches if different keywords need different samples.
 router.post("/bulk", async (req, res) => {
-  const { site_id, keywords } = req.body;
+  const { site_id, keywords, sample_article_id, sample_mode } = req.body;
   if (!Array.isArray(keywords)) return res.status(400).json({ error: "keywords must be array" });
 
   try {
     const inserts = keywords.map((kw) =>
       db.query(
-        `INSERT INTO content_queue (site_id, keyword, scheduled_at)
-         VALUES ($1, $2, NOW()) ON CONFLICT DO NOTHING`,
-        [site_id, kw]
+        `INSERT INTO content_queue (site_id, keyword, scheduled_at, sample_article_id, sample_mode)
+         VALUES ($1, $2, NOW(), $3, $4) ON CONFLICT DO NOTHING`,
+        [site_id, kw, sample_article_id || null, sample_mode || null]
       )
     );
     await Promise.all(inserts);

@@ -12,4 +12,4 @@ db_data/
 ds-bundle/
 .design-sync/.cache/
 .design-sync/learnings/
-.design-sync/node_mo
+.design-sync/node_modules

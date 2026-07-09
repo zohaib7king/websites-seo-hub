@@ -13,22 +13,36 @@ CREATE TABLE IF NOT EXISTS sites (
 );
 
 CREATE TABLE IF NOT EXISTS articles (
+  id                SERIAL PRIMARY KEY,
+  site_id           TEXT REFERENCES sites(id) ON DELETE CASCADE,
+  title             TEXT NOT NULL,
+  slug              TEXT NOT NULL,
+  content           TEXT NOT NULL,
+  meta_desc         TEXT,
+  category          TEXT,
+  tags              TEXT[],
+  image_url         TEXT,                      -- featured image; NULL → gradient placeholder
+  view_count        INT DEFAULT 0,
+  like_count        INT DEFAULT 0,
+  status            TEXT DEFAULT 'draft',      -- draft | scheduled | published
+  ai_generated      BOOLEAN DEFAULT FALSE,
+  review_notes      JSONB,                     -- writer/critic/editor pipeline notes (critique + unresolved issues)
+  ai_review_passed  BOOLEAN DEFAULT FALSE,      -- true when the editor stage resolved every critic issue
+  published_at      TIMESTAMPTZ,
+  created_at        TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(site_id, slug)
+);
+
+-- Reusable samples of the site owner's own writing. The writer agent can use
+-- these either as a voice/style reference or as source material to rework.
+CREATE TABLE IF NOT EXISTS sample_articles (
   id           SERIAL PRIMARY KEY,
   site_id      TEXT REFERENCES sites(id) ON DELETE CASCADE,
   title        TEXT NOT NULL,
-  slug         TEXT NOT NULL,
   content      TEXT NOT NULL,
-  meta_desc    TEXT,
-  category     TEXT,
-  tags         TEXT[],
-  image_url    TEXT,                      -- featured image; NULL → gradient placeholder
-  view_count   INT DEFAULT 0,
-  like_count   INT DEFAULT 0,
-  status       TEXT DEFAULT 'draft',      -- draft | scheduled | published
-  ai_generated BOOLEAN DEFAULT FALSE,
-  published_at TIMESTAMPTZ,
-  created_at   TIMESTAMPTZ DEFAULT NOW(),
-  UNIQUE(site_id, slug)
+  default_mode TEXT NOT NULL DEFAULT 'style_reference'
+               CHECK (default_mode IN ('style_reference','source_material')),
+  created_at   TIMESTAMPTZ DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS site_users (
@@ -58,13 +72,15 @@ CREATE TABLE IF NOT EXISTS article_likes (
 );
 
 CREATE TABLE IF NOT EXISTS content_queue (
-  id           SERIAL PRIMARY KEY,
-  site_id      TEXT REFERENCES sites(id) ON DELETE CASCADE,
-  keyword      TEXT NOT NULL,
-  status       TEXT DEFAULT 'pending',    -- pending | generating | done | failed
-  article_id   INT REFERENCES articles(id),
-  scheduled_at TIMESTAMPTZ,
-  created_at   TIMESTAMPTZ DEFAULT NOW()
+  id                 SERIAL PRIMARY KEY,
+  site_id            TEXT REFERENCES sites(id) ON DELETE CASCADE,
+  keyword            TEXT NOT NULL,
+  status             TEXT DEFAULT 'pending',    -- pending | generating | done | failed
+  article_id         INT REFERENCES articles(id),
+  sample_article_id  INT REFERENCES sample_articles(id) ON DELETE SET NULL,
+  sample_mode        TEXT CHECK (sample_mode IN ('style_reference','source_material')),
+  scheduled_at       TIMESTAMPTZ,
+  created_at         TIMESTAMPTZ DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS revenue (

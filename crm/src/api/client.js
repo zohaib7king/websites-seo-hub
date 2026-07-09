@@ -31,10 +31,23 @@ export const api = {
   deleteArticle: (id)       => req(`/api/articles/${id}`, { method: "DELETE" }),
 
   // AI
-  generateArticle: (site_id, keyword) =>
-    req("/api/ai/generate", { method: "POST", body: JSON.stringify({ site_id, keyword }) }),
-  bulkQueue: (site_id, keywords) =>
-    req("/api/ai/bulk", { method: "POST", body: JSON.stringify({ site_id, keywords }) }),
+  generateArticle: (site_id, keyword, opts = {}) =>
+    req("/api/ai/generate", { method: "POST", body: JSON.stringify({
+      site_id, keyword,
+      sample_article_id: opts.sampleArticleId || null,
+      sample_mode: opts.sampleMode || null,
+    }) }),
+  bulkQueue: (site_id, keywords, opts = {}) =>
+    req("/api/ai/bulk", { method: "POST", body: JSON.stringify({
+      site_id, keywords,
+      sample_article_id: opts.sampleArticleId || null,
+      sample_mode: opts.sampleMode || null,
+    }) }),
+
+  // Sample articles (writer voice/source references — see routes/samples.js)
+  getSamples:   (site_id) => req(`/api/samples${site_id ? "?site_id=" + encodeURIComponent(site_id) : ""}`),
+  createSample: (data)    => req("/api/samples", { method: "POST", body: JSON.stringify(data) }),
+  deleteSample: (id)      => req(`/api/samples/${id}`, { method: "DELETE" }),
 
   // Revenue
   getRevenue: (params = {}) => {

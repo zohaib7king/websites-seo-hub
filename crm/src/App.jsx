@@ -62,7 +62,7 @@ export default function App() {
         </nav>
 
         <div style={{ marginTop: "auto", padding: "18px 20px 0", borderTop: "1px solid var(--border)", marginLeft: 0 }}>
-          <div style={{ color: "var(--muted)", fontSize: 11 }}>v1.3 · zoyzoy-hub</div>
+          <div style={{ color: "var(--muted)", fontSize: 11 }}>v1.4 · zoyzoy-hub</div>
         </div>
       </aside>
 
